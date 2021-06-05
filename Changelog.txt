@@ -1,0 +1,6 @@
+Hunter TBC
+
+Arcane Shot while moving.
+
+
+Important: temporary Kill Command rebinding to Aspect of the Beast until next GGL update. 
