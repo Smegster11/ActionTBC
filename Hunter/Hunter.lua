@@ -184,14 +184,14 @@ local Temp = {
     DisableMag                              = {"TotalImun", "DamageMagicImun", "Freedom", "CCTotalImun"},
 }
 
---[[ API - Spell
-Pet:AddActionsSpells(254, {
+--API - Spell
+Pet:AddActionsSpells(3, {
 
 	-- number accepted
-	17253, -- Bite
-	16827, -- Claw
-	49966, -- Smack 
-}, true)]]
+	17253, 17255, 17256, 17257, 17258, 17259, 17260, 17261, 27050, -- Bite
+	16827, 16828, 16829, 16830, 16831, 16832, 3010, 3009, 27049, -- Claw
+	35290, 35291, 35292, 35293, 35294, 35295, 35296, 35297, 35298 -- Gore 
+}, true)
 
 
 local function AtRange(unit)
@@ -249,6 +249,10 @@ A[3] = function(icon, isMulti)
 		return A.CallPet:Show(icon)
 	end
 	
+	if A.AspectoftheHawk:IsReady(player) and Unit(player):HasBuffs(A.AspectoftheHawk.ID, true) == 0 and inCombat then
+		return A.AspectoftheHawk:Show(icon)
+	end
+	
     ------------------------------------------------------
     ---------------- ENEMY UNIT ROTATION -----------------
     ------------------------------------------------------
@@ -279,7 +283,7 @@ A[3] = function(icon, isMulti)
 		end
 
 		if A.KillCommand:IsReady(unit) then
-			return A.KillCommand:Show(icon)
+			return A.AspectoftheBeast:Show(icon)
 		end
 
 		if AtRange() then
@@ -322,23 +326,28 @@ A[3] = function(icon, isMulti)
 				end					
 			end
  
+			if isMoving and A.ArcaneShot:IsReady(unit) then
+				return A.ArcaneShot:Show(icon)
+			end
+ 
 			local ShootTimer = Player:GetSwingShoot()
 			--print(ShootTimer)
-			if ShootTimer >= Player:Execute_Time(A.SteadyShot.ID) and Player:ManaPercentage() > ManaSave then
-				if A.SteadyShot:IsReady(unit) then
-					return A.SteadyShot:Show(icon)
-				end					
-			end
-			
-			if ShootTimer < Player:Execute_Time(A.SteadyShot.ID) and ShootTimer > Player:Execute_Time(A.MultiShot.ID) and Player:ManaPercentage() > ManaSave then
+			if ShootTimer < Player:Execute_Time(A.SteadyShot.ID) and (ShootTimer > Player:Execute_Time(A.MultiShot.ID) or ShootTimer <= A.GetLatency()) and Player:ManaPercentage() > ManaSave then
 				if A.MultiShot:IsReady(unit) and MultiShotST then
 					return A.MultiShot:Show(icon)
 				end
 				
-				if A.ArcaneShot:IsReady(unit) then
+				if A.ArcaneShot:IsReady(unit) and not A.SteadyShot:IsReady(unit) then
 					return A.ArcaneShot:Show(icon)
 				end
 			end
+
+			if (ShootTimer >= Player:Execute_Time(A.SteadyShot.ID) or ShootTimer <= A.GetLatency()) and Player:ManaPercentage() > ManaSave then
+				if A.SteadyShot:IsReady(unit) then
+					return A.SteadyShot:Show(icon)
+				end					
+			end
+
 		end
 
 		if InMelee() then
