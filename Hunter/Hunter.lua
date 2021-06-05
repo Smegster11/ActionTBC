@@ -301,6 +301,14 @@ A[3] = function(icon, isMulti)
 						return A.RapidFire:Show(icon)
 					end
 
+					if A.BloodFury:IsReady(player) and (Unit(unit):TimeToDie() > 5 or Unit(unit):IsBoss()) then
+						return A.BloodFury:Show(icon)
+					end
+					
+					if A.Berserking:IsReady(player) and (Unit(unit):TimeToDie() > 5 or Unit(unit):IsBoss()) then
+						return A.Berserking:Show(icon)
+					end
+
 					--Trinket 1
 					if A.Trinket1:IsReady(unit) then
 						return A.Trinket1:Show(icon)    
