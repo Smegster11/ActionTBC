@@ -24,7 +24,7 @@ local select, setmetatable							= select, setmetatable
 
 A.Data.ProfileEnabled[Action.CurrentProfile] = true
 A.Data.ProfileUI = {    
-    DateTime = "v1.0.0 (02.06.2021)",
+    DateTime = "v1.0.1 (06.06.2021)",
     -- Class settings
     [2] = {        
             { -- GENERAL HEADER
@@ -83,22 +83,10 @@ A.Data.ProfileUI = {
                 },
             },
 			{
-				{ -- MultiShot
-                    E = "Checkbox", 
-                    DB = "MultiShotST",
-                    DBV = true,
-                    L = { 
-                        ANY = "MultiShot Single Target", 
-                    }, 
-                    TT = { 
-                        ANY = "This is an overall DPS gain but be careful if you need to cc nearby targets.", 
-                    }, 
-                    M = {},
-                },
 				{ -- AutoSyncCDs
                     E = "Checkbox", 
                     DB = "AutoSyncCDs",
-                    DBV = true,
+                    DBV = false,
                     L = { 
                         ANY = "Automatically Sync CDs", 
                     }, 

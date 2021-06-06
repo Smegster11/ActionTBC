@@ -215,7 +215,8 @@ A[3] = function(icon, isMulti)
     local isMoving = A.Player:IsMoving()
     local inCombat = Unit(player):CombatTime() > 0
 	local combatTime = Unit(player):CombatTime()
-	local MultiShotST = A.GetToggle(2, "MultiShotST")
+
+	local UseAoE = A.GetToggle(2, "AoE")
 	local AutoSyncCDs = A.GetToggle(2, "AutoSyncCDs")
 	local ManaSave = A.GetToggle(2, "ManaSave")
 	local MendPet = A.GetToggle(2, "MendPet")
@@ -333,7 +334,7 @@ A[3] = function(icon, isMulti)
 			local ShootTimer = Player:GetSwingShoot()
 			--print(ShootTimer)
 			if ShootTimer < Player:Execute_Time(A.SteadyShot.ID) and (ShootTimer > Player:Execute_Time(A.MultiShot.ID) or ShootTimer <= A.GetLatency()) and Player:ManaPercentage() > ManaSave then
-				if A.MultiShot:IsReady(unit) and MultiShotST then
+				if A.MultiShot:IsReady(unit) and UseAoE then
 					return A.MultiShot:Show(icon)
 				end
 				
