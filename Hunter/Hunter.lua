@@ -250,7 +250,7 @@ A[3] = function(icon, isMulti)
 	end
 	
 	if AspectController[2] then --Cheetah
-		if Unit(player):HasBuffs(A.AspectoftheCheetah.ID, true) == 0 and ((Player:ManaPercentage() > ManaViperEnd and AspectController[3]) or not AspectController[3]) and not inCombat and not Player:IsMounted() then
+		if Unit(player):HasBuffs(A.AspectoftheCheetah.ID, true) == 0 and ((Player:ManaPercentage() > ManaViperEnd and AspectController[3]) or not AspectController[3]) and not inCombat and not Player:IsMounted() and not A.IsUnitEnemy(target) then
 			return A.AspectoftheCheetah:Show(icon)
 		end
 	end
@@ -259,16 +259,16 @@ A[3] = function(icon, isMulti)
 		return A.CallPet:Show(icon)
 	end
 	
-	if AspectController[1] then --Hawk
-		if A.AspectoftheHawk:IsReady(player) and Unit(player):HasBuffs(A.AspectoftheHawk.ID, true) == 0 and inCombat and ((Player:ManaPercentage() > ManaViperEnd and AspectController[3]) or not AspectController[3]) and not Player:IsMounted() then
-			return A.AspectoftheHawk:Show(icon)
-		end
-	end
-	
     ------------------------------------------------------
     ---------------- ENEMY UNIT ROTATION -----------------
     ------------------------------------------------------
     local function EnemyRotation(unit)
+
+		if AspectController[1] then --Hawk
+			if A.AspectoftheHawk:IsReady(player) and Unit(player):HasBuffs(A.AspectoftheHawk.ID, true) == 0 and (inCombat or A.IsUnitEnemy(unit)) and ((Player:ManaPercentage() > ManaViperEnd and AspectController[3]) or not AspectController[3]) and not Player:IsMounted() then
+				return A.AspectoftheHawk:Show(icon)
+			end
+		end
 
 		if ProtectFreeze and Unit(target):HasDeBuffs(A.FreezingTrapDebuff.ID) > 0 and A.MultiUnits:GetActiveEnemies() >= 2 then
 			return A:Show(icon, CONST.AUTOTARGET)
@@ -296,7 +296,7 @@ A[3] = function(icon, isMulti)
 			end	
 
 			if A.Intimidation:IsReady(unit) and IntimidationPvE and UnitIsUnit(targettarget, player) then
-				return A.IntimidationPvE:Show(icon)
+				return A.Intimidation:Show(icon)
 			end
 			
 			if A.ConcussiveShot:IsReady(unit) and ConcussiveShotPvE and UnitIsUnit(targettarget, player) and (not A.Intimidation:IsReady(unit) or not IntimidationPvE) then

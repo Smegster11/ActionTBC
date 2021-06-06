@@ -167,7 +167,7 @@ A.Data.ProfileUI = {
                     }, 
                     M = {},
                 },	
-				{ -- IntimidatePvE
+				{ -- IntimidationPvE
                     E = "Checkbox", 
                     DB = "IntimidationPvE",
                     DBV = true,
