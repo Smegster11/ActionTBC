@@ -221,37 +221,48 @@ A[3] = function(icon, isMulti)
 	local ManaSave = A.GetToggle(2, "ManaSave")
 	local MendPet = A.GetToggle(2, "MendPet")
 	local FreezingTrapPvE = A.GetToggle(2, "FreezingTrapPvE")
-	local ConcussiveShotPvE = A.GetToggle(2, "ConcussiveShotPvE")	
+	local ConcussiveShotPvE = A.GetToggle(2, "ConcussiveShotPvE")
+	local IntimidationPvE = A.GetToggle(2, "IntimidationPvE")
 	local ProtectFreeze = A.GetToggle(2, "ProtectFreeze")
+	local ReadinessController = A.GetToggle(2, "ReadinessController")
+	local AspectController = A.GetToggle(2, "AspectController")
+		--AspectController[1] = Hawk
+		--AspectController[2] = Cheetah
+		--AspectController[3] = Viper
+	local ManaViperStart = A.GetToggle(2, "ManaViperStart")
+	local ManaViperEnd = A.GetToggle(2, "ManaViperEnd")
 	
-	--local AutoAspect = A.GetToggle(2, "AutoAspect")
-		--AutoAspect[1] = Hawk
-		--AutoAspect[2] = Cheetah
-		--AutoAspect[3] = Viper
+	local CDController = A.GetToggle(2, "CDController")
+		--CDController[1] = BestialWrath
+		--CDController[2] = RapidFire
+		--CDController[3] = Readiness
+		--CDController[4] = Racial (troll/orc)
 	
+
 	local BurnPhase = Unit(player):HasBuffs(A.Heroism.ID) > 0 or Unit(player):HasBuffs(A.Bloodlust.ID) > 0 or Unit(player):HasBuffs(A.Drums.ID) > 0
 	local CheetahBuff = Unit(player):HasBuffs(A.AspectoftheCheetah.ID, true) > 0 or Unit(player):HasBuffs(A.AspectofthePack.ID, true) > 0
 
 
-
-	--[[if AutoAspect[3] then 
-		if Unit(player):HasBuffs(A.AspectoftheViper.ID, true) == 0 and Player:ManaPercentage() < 95 and not inCombat then
+	if AspectController[3] then --Viper
+		if Unit(player):HasBuffs(A.AspectoftheViper.ID, true) == 0 and Player:ManaPercentage() < ManaViperStart and not Player:IsMounted() then
 			return A.AspectoftheViper:Show(icon)
 		end
 	end
 	
-	if AutoAspect[2] then
-		if Unit(player):HasBuffs(A.AspectoftheCheetah.ID, true) == 0 and ((Player:ManaPercentage() > 95 and AutoAspect[3]) or not AutoAspect[3]) and not inCombat then
+	if AspectController[2] then --Cheetah
+		if Unit(player):HasBuffs(A.AspectoftheCheetah.ID, true) == 0 and ((Player:ManaPercentage() > ManaViperEnd and AspectController[3]) or not AspectController[3]) and not inCombat and not Player:IsMounted() then
 			return A.AspectoftheCheetah:Show(icon)
 		end
-	end]]
+	end
 
 	if A.CallPet:IsReady(player) and not Pet:IsActive() then
 		return A.CallPet:Show(icon)
 	end
 	
-	if A.AspectoftheHawk:IsReady(player) and Unit(player):HasBuffs(A.AspectoftheHawk.ID, true) == 0 and inCombat then
-		return A.AspectoftheHawk:Show(icon)
+	if AspectController[1] then --Hawk
+		if A.AspectoftheHawk:IsReady(player) and Unit(player):HasBuffs(A.AspectoftheHawk.ID, true) == 0 and inCombat and ((Player:ManaPercentage() > ManaViperEnd and AspectController[3]) or not AspectController[3]) and not Player:IsMounted() then
+			return A.AspectoftheHawk:Show(icon)
+		end
 	end
 	
     ------------------------------------------------------
@@ -262,14 +273,6 @@ A[3] = function(icon, isMulti)
 		if ProtectFreeze and Unit(target):HasDeBuffs(A.FreezingTrapDebuff.ID) > 0 and A.MultiUnits:GetActiveEnemies() >= 2 then
 			return A:Show(icon, CONST.AUTOTARGET)
 		end
-
-		--[[if AutoAspect[1] then
-			if (CheetahBuff and inCombat) or (not C`heetahBuff) then
-				if A.AspectoftheHawk:IsReady(player) and Unit(player):HasBuffs(A.AspectoftheHawk.ID, true) == 0 and ((Player:ManaPercentage() >= 95 and AutoAspect[3]) or inCombat) then
-					return A.AspectoftheHawk:Show(icon)
-				end	
-			end
-		end]]
 
 		if A.FreezingTrap:IsReady(player) and FreezingTrapPvE and A.MultiUnits:GetActiveEnemies() >= 2 and A.MultiUnits:GetByRange(1, 5) then
 			return A.FreezingTrap:Show(icon)
@@ -291,36 +294,53 @@ A[3] = function(icon, isMulti)
 			if not Player:IsShooting() then
 				return A:Show(icon, CONST.AUTOSHOOT)
 			end	
+
+			if A.Intimidation:IsReady(unit) and IntimidationPvE and UnitIsUnit(targettarget, player) then
+				return A.IntimidationPvE:Show(icon)
+			end
 			
-			if A.ConcussiveShot:IsReady(unit) and ConcussiveShotPvE and UnitIsUnit(targettarget, player) then
+			if A.ConcussiveShot:IsReady(unit) and ConcussiveShotPvE and UnitIsUnit(targettarget, player) and (not A.Intimidation:IsReady(unit) or not IntimidationPvE) then
 				return A.ConcussiveShot:Show(icon)
 			end
 			
 			if BurstIsON(unit) or (not BurstIsON(unit) and AutoSyncCDs) then
 				if (AutoSyncCDs and BurnPhase) or not AutoSyncCDs then
-					if A.BestialWrath:IsReady(player) and (Unit(unit):TimeToDie() > 5 or Unit(unit):IsBoss()) then
+					if A.BestialWrath:IsReady(player) and CDController[1] and (Unit(unit):TimeToDie() > 5 or Unit(unit):IsBoss()) then
 						return A.BestialWrath:Show(icon)
 					end
 				
-					if A.RapidFire:IsReady(player) and (Unit(unit):TimeToDie() > 5 or Unit(unit):IsBoss()) then
+					if A.RapidFire:IsReady(player) and CDController[2] and Unit(player):HasBuffs(A.RapidFire.ID, true) == 0 and (Unit(unit):TimeToDie() > 5 or Unit(unit):IsBoss()) then
 						return A.RapidFire:Show(icon)
 					end
 
-					if A.BloodFury:IsReady(player) and (Unit(unit):TimeToDie() > 5 or Unit(unit):IsBoss()) then
+					if A.Readiness:IsReady(player) and CDController[3] then
+						if ReadinessController == "RapidFire" then
+							if A.RapidFire:GetCooldown() >= 60 then
+								return A.Readiness:Show(icon)
+							end
+						end
+						if ReadinessController == "Misdirection" then
+							if A.Misdirection:GetCooldown() > 30 then
+								return A.Readiness:Show(icon)
+							end
+						end
+					end
+
+					if A.BloodFury:IsReady(player) and CDController[4] and (Unit(unit):TimeToDie() > 5 or Unit(unit):IsBoss()) then
 						return A.BloodFury:Show(icon)
 					end
 					
-					if A.Berserking:IsReady(player) and (Unit(unit):TimeToDie() > 5 or Unit(unit):IsBoss()) then
+					if A.Berserking:IsReady(player) and CDController[4] and (Unit(unit):TimeToDie() > 5 or Unit(unit):IsBoss()) then
 						return A.Berserking:Show(icon)
 					end
 
 					--Trinket 1
-					if A.Trinket1:IsReady(unit) then
+					if A.Trinket1:IsReady(player) then
 						return A.Trinket1:Show(icon)    
 					end
 					
 					--Trinket 2
-					if A.Trinket2:IsReady(unit) then
+					if A.Trinket2:IsReady(player) then
 						return A.Trinket2:Show(icon)    
 					end					
 					

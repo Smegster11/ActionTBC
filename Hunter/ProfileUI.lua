@@ -83,6 +83,28 @@ A.Data.ProfileUI = {
                 },
             },
 			{
+				{
+                    E = "Dropdown",                                                         
+                    OT = {
+						{ text = "Bestial Wrath", value = 1 },
+						{ text = "Rapid Fire", value = 2 },
+						{ text = "Racial (Orc/Troll)", value = 3 },
+                    },
+                    MULT = true,
+                    DB = "CDController",
+                    DBV = {
+                        [1] = true, 
+                        [2] = true,
+                        [3] = true,
+                    }, 
+                    L = { 
+                        ANY = "Cooldown Selection",
+                    }, 
+                    TT = { 
+                        ANY = "Choose which cooldowns you want to use during burst!", 
+                    }, 
+                    M = {},
+                },			
 				{ -- AutoSyncCDs
                     E = "Checkbox", 
                     DB = "AutoSyncCDs",
@@ -91,11 +113,16 @@ A.Data.ProfileUI = {
                         ANY = "Automatically Sync CDs", 
                     }, 
                     TT = { 
-                        ANY = "Check this box to automatically use your cooldowns during Bloodlust/Heroism/Drums.", 
+                        ANY = "Check this box to automatically use your cooldowns during Bloodlust/Heroism/Drums (I strongly suggest you only turn this on during raid bosses).", 
                     }, 
                     M = {},
                 },
 			},
+            { -- LAYOUT SPACE   
+                {
+                    E = "LayoutSpace",                                                                         
+                },
+            }, 			
 			{
 				{ -- FreezingTrapPvE
                     E = "Checkbox", 
@@ -120,7 +147,14 @@ A.Data.ProfileUI = {
                         ANY = "Automatically swap targets if accidentally targeting an enemy with Freezing Trap (only when in combat with mulitple enemies, make sure you're facing the other enemy you want to target).", 
                     }, 
                     M = {},
-                },				
+                },
+			},
+            { -- LAYOUT SPACE   
+                {
+                    E = "LayoutSpace",                                                                         
+                },
+            }, 			
+			{
 				{ -- ConcussiveShotPvE
                     E = "Checkbox", 
                     DB = "ConcussiveShotPvE",
@@ -132,33 +166,86 @@ A.Data.ProfileUI = {
                         ANY = "Use Concussive Shot to slow target if aggro swaps to you.", 
                     }, 
                     M = {},
-                },				
-			},
-			--[[{
-				{
-					E = "Dropdown",                                                         
-					OT = {
-						{ text = "Aspect of the Hawk",		value = 1 },
-						{ text = "Aspect of the Cheetah",	value = 2 },
-						{ text = "Aspect of the Viper",		value = 3 },
-					},
-					MULT     = true,    
-					SetPlaceholder = { ANY = "OFF" },
-					DB         = "AutoAspect",
-					DBV     = {
-						[1] = true, 
-						[2] = true,
-						[3] = true,
-					}, 
+                },	
+				{ -- IntimidatePvE
+                    E = "Checkbox", 
+                    DB = "IntimidationPvE",
+                    DBV = true,
                     L = { 
-                        ANY = "Automatic Aspects", 
+                        ANY = "Intimidation Aggro", 
+                    }, 
+                    TT = { 
+                        ANY = "Use Intimidation to stun/taunt target if aggro swaps to you.", 
+                    }, 
+                    M = {},
+                },					
+			},
+            { -- LAYOUT SPACE   
+                {
+                    E = "LayoutSpace",                                                                         
+                },
+            }, 			
+			{
+				{
+                    E = "Dropdown",                                                         
+                    OT = {
+						{ text = "Hawk", value = 1 },
+						{ text = "Cheetah", value = 2 },
+						{ text = "Viper", value = 3 },
+                    },
+                    MULT = true,
+                    DB = "AspectController",
+                    DBV = {
+                        [1] = true, 
+                        [2] = true,
+                        [3] = true,
+                    }, 
+                    L = { 
+                        ANY = "Automatic Aspects",
                     }, 
                     TT = { 
                         ANY = "Automatically use Aspects", 
                     }, 
-					M = {},                                    
-				}, 						
-			},	]]	
+                    M = {},
+                },
+			},			
+			{
+                { -- Mana Viper
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "ManaViperStart",
+                    DBV = 10, -- Set healthpercentage @30% life. 
+                    ONOFF = true,
+                    L = { 
+                        ANY = "Viper Aspect Mana Start(%)",
+                    },
+                    TT = { 
+                        ANY = "Value (%) to turn on Aspect of the Viper. )", 
+                    },                     
+                    M = {},
+                },	
+                { -- Mana Viper
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "ManaViperEnd",
+                    DBV = 30, -- Set healthpercentage @30% life. 
+                    ONOFF = true,
+                    L = { 
+                        ANY = "Viper Aspect Mana End(%)",
+                    },
+                    TT = { 
+                        ANY = "Value (%) to turn off Aspect of the Viper.)", 
+                    },                     
+                    M = {},
+                },					
+			},
+            { -- LAYOUT SPACE   
+                {
+                    E = "LayoutSpace",                                                                         
+                },
+            }, 			
 			{
                 { -- Mana Value
                     E = "Slider",                                                     
@@ -181,6 +268,29 @@ A.Data.ProfileUI = {
                     E = "LayoutSpace",                                                                         
                 },
             },  
+			{
+				{
+                    E = "Dropdown",                                                         
+                    OT = {
+						{ text = "Rapid Fire", value = "RapidFire" },
+						{ text = "Misdirection", value = "Misdirection" },
+                    },
+                    DB = "ReadinessController",
+                    DBV = "RapidFire",
+                    L = { 
+                        ANY = "Readiness Usage",
+                    }, 
+                    TT = { 
+                        ANY = "Pick the ability that you want to use with Readiness (40 points Survival)", 
+                    }, 
+                    M = {},
+                },
+			},
+            { -- LAYOUT SPACE   
+                {
+                    E = "LayoutSpace",                                                                         
+                },
+            },			
 			{ -- PET HEADER
                 {
                     E = "Header",
