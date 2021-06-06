@@ -274,7 +274,7 @@ A[3] = function(icon, isMulti)
 			return A.FreezingTrap:Show(icon)
 		end
 
-		if A.MendPet:IsReady(player) and Unit(pet):HealthPercent() < MendPet and Pet:IsActive() and Pet:HasBuffs(A.MendPet.ID, true) == 0 then
+		if A.MendPet:IsReady(player) and Unit(pet):HealthPercent() < MendPet and Pet:IsActive() and Unit(pet):HasBuffs(A.MendPet.ID, true) == 0 then
 			return A.MendPet:Show(icon)
 		end
 
