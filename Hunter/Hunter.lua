@@ -221,6 +221,7 @@ A[3] = function(icon, isMulti)
 	local ManaSave = A.GetToggle(2, "ManaSave")
 	local MendPet = A.GetToggle(2, "MendPet")
 	local FreezingTrapPvE = A.GetToggle(2, "FreezingTrapPvE")
+	local UseArcane = A.GetToggle(2, "UseArcane")
 	local ConcussiveShotPvE = A.GetToggle(2, "ConcussiveShotPvE")
 	local IntimidationPvE = A.GetToggle(2, "IntimidationPvE")
 	local ProtectFreeze = A.GetToggle(2, "ProtectFreeze")
@@ -244,13 +245,13 @@ A[3] = function(icon, isMulti)
 
 
 	if AspectController[3] then --Viper
-		if Unit(player):HasBuffs(A.AspectoftheViper.ID, true) == 0 and Player:ManaPercentage() < ManaViperStart and not Player:IsMounted() then
+		if A.AspectoftheViper:IsReady(player) and Unit(player):HasBuffs(A.AspectoftheViper.ID, true) == 0 and Player:ManaPercentage() < ManaViperStart and not Player:IsMounted() then
 			return A.AspectoftheViper:Show(icon)
 		end
 	end
 	
 	if AspectController[2] then --Cheetah
-		if Unit(player):HasBuffs(A.AspectoftheCheetah.ID, true) == 0 and ((Player:ManaPercentage() > ManaViperEnd and AspectController[3]) or not AspectController[3]) and not inCombat and not Player:IsMounted() and not A.IsUnitEnemy(target) then
+		if A.AspectoftheCheetah:IsReady(player) and Unit(player):HasBuffs(A.AspectoftheCheetah.ID, true) == 0 and ((Player:ManaPercentage() > ManaViperEnd and AspectController[3]) or not AspectController[3]) and not inCombat and not Player:IsMounted() and not A.IsUnitEnemy(target) then
 			return A.AspectoftheCheetah:Show(icon)
 		end
 	end
@@ -274,7 +275,7 @@ A[3] = function(icon, isMulti)
 			return A:Show(icon, CONST.AUTOTARGET)
 		end
 
-		if A.FreezingTrap:IsReady(player) and FreezingTrapPvE and A.MultiUnits:GetActiveEnemies() >= 2 and A.MultiUnits:GetByRange(1, 5) then
+		if A.FreezingTrap:IsReady(player) and FreezingTrapPvE and A.MultiUnits:GetActiveEnemies() >= 2 and A.MultiUnits:GetByRange(5, 1) then
 			return A.FreezingTrap:Show(icon)
 		end
 
@@ -358,12 +359,12 @@ A[3] = function(icon, isMulti)
 					return A.MultiShot:Show(icon)
 				end
 				
-				if A.ArcaneShot:IsReady(unit) and not A.SteadyShot:IsReady(unit) then
+				if A.ArcaneShot:IsReady(unit) and UseArcane then
 					return A.ArcaneShot:Show(icon)
 				end
 			end
 
-			if (ShootTimer >= Player:Execute_Time(A.SteadyShot.ID) or ShootTimer <= A.GetLatency()) and Player:ManaPercentage() > ManaSave then
+			if (ShootTimer >= Player:Execute_Time(A.SteadyShot.ID) or (ShootTimer <= A.GetLatency() and ShootTimer > 0)) and Player:ManaPercentage() > ManaSave then
 				if A.SteadyShot:IsReady(unit) then
 					return A.SteadyShot:Show(icon)
 				end					

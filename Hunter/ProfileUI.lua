@@ -88,7 +88,8 @@ A.Data.ProfileUI = {
                     OT = {
 						{ text = "Bestial Wrath", value = 1 },
 						{ text = "Rapid Fire", value = 2 },
-						{ text = "Racial (Orc/Troll)", value = 3 },
+						{ text = "Readiness", value = 3 },
+						{ text = "Racial (Orc/Troll)", value = 4 },
                     },
                     MULT = true,
                     DB = "CDController",
@@ -96,6 +97,7 @@ A.Data.ProfileUI = {
                         [1] = true, 
                         [2] = true,
                         [3] = true,
+						[4] = true,
                     }, 
                     L = { 
                         ANY = "Cooldown Selection",
@@ -118,6 +120,20 @@ A.Data.ProfileUI = {
                     M = {},
                 },
 			},
+			{
+				{ -- AutoSyncCDs
+                    E = "Checkbox", 
+                    DB = "UseArcane",
+                    DBV = false,
+                    L = { 
+                        ANY = "Use Arcane Shot in rotation", 
+                    }, 
+                    TT = { 
+                        ANY = "Use Arcane Shot in your rotation when ready.", 
+                    }, 
+                    M = {},
+                },
+			},	
             { -- LAYOUT SPACE   
                 {
                     E = "LayoutSpace",                                                                         
