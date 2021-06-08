@@ -133,6 +133,21 @@ A.Data.ProfileUI = {
                     }, 
                     M = {},
                 },
+                { -- Mana Viper
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "ArcaneShotMana",
+                    DBV = 15, -- Set healthpercentage @30% life. 
+                    ONOFF = true,
+                    L = { 
+                        ANY = "Arcane Shot Mana (%)",
+                    },
+                    TT = { 
+                        ANY = "Value above mana (%) to use Arcane Shot.", 
+                    },                     
+                    M = {},
+                },					
 			},	
             { -- LAYOUT SPACE   
                 {

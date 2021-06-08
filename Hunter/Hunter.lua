@@ -222,17 +222,20 @@ A[3] = function(icon, isMulti)
 	local MendPet = A.GetToggle(2, "MendPet")
 	local FreezingTrapPvE = A.GetToggle(2, "FreezingTrapPvE")
 	local UseArcane = A.GetToggle(2, "UseArcane")
+	local ArcaneShotMana = A.GetToggle(2, "ArcaneShotMana")
 	local ConcussiveShotPvE = A.GetToggle(2, "ConcussiveShotPvE")
 	local IntimidationPvE = A.GetToggle(2, "IntimidationPvE")
 	local ProtectFreeze = A.GetToggle(2, "ProtectFreeze")
 	local ReadinessController = A.GetToggle(2, "ReadinessController")
+	local ManaViperStart = A.GetToggle(2, "ManaViperStart")
+	local ManaViperEnd = A.GetToggle(2, "ManaViperEnd")
+
+
 	local AspectController = A.GetToggle(2, "AspectController")
 		--AspectController[1] = Hawk
 		--AspectController[2] = Cheetah
 		--AspectController[3] = Viper
-	local ManaViperStart = A.GetToggle(2, "ManaViperStart")
-	local ManaViperEnd = A.GetToggle(2, "ManaViperEnd")
-	
+		
 	local CDController = A.GetToggle(2, "CDController")
 		--CDController[1] = BestialWrath
 		--CDController[2] = RapidFire
@@ -275,7 +278,7 @@ A[3] = function(icon, isMulti)
 			return A:Show(icon, CONST.AUTOTARGET)
 		end
 
-		if A.FreezingTrap:IsReady(player) and FreezingTrapPvE and A.MultiUnits:GetActiveEnemies() >= 2 and A.MultiUnits:GetByRange(5, 1) then
+		if A.FreezingTrap:IsReady(player) and FreezingTrapPvE and A.MultiUnits:GetActiveEnemies() >= 2 and A.MultiUnits:GetByRangeInCombat(5, 1, 5) >= 1 then
 			return A.FreezingTrap:Show(icon)
 		end
 
@@ -300,7 +303,7 @@ A[3] = function(icon, isMulti)
 				return A.Intimidation:Show(icon)
 			end
 			
-			if A.ConcussiveShot:IsReady(unit) and ConcussiveShotPvE and UnitIsUnit(targettarget, player) and (not A.Intimidation:IsReady(unit) or not IntimidationPvE) then
+			if A.ConcussiveShot:IsReady(unit) and ConcussiveShotPvE and UnitIsUnit(targettarget, player) and (not A.Intimidation:IsReady(unit) or Unit(pet):HasBuffs(A.Intimidation.ID) == 0 or not IntimidationPvE) then
 				return A.ConcussiveShot:Show(icon)
 			end
 			
@@ -348,7 +351,7 @@ A[3] = function(icon, isMulti)
 				end					
 			end
  
-			if isMoving and A.ArcaneShot:IsReady(unit) then
+			if isMoving and A.ArcaneShot:IsReady(unit) and Player:ManaPercentage() > ArcaneShotMana then
 				return A.ArcaneShot:Show(icon)
 			end
  
@@ -359,7 +362,7 @@ A[3] = function(icon, isMulti)
 					return A.MultiShot:Show(icon)
 				end
 				
-				if A.ArcaneShot:IsReady(unit) and UseArcane then
+				if A.ArcaneShot:IsReady(unit) and UseArcane and Player:ManaPercentage() > ArcaneShotMana then
 					return A.ArcaneShot:Show(icon)
 				end
 			end
@@ -376,6 +379,14 @@ A[3] = function(icon, isMulti)
 			if not Player:IsAttacking() then
 				return A:Show(icon, CONST.AUTOATTACK)
 			end
+			
+			if A.ExplosiveTrap:IsReady(unit) and A.MultiUnits:GetByRange(5, 3) > 2 and UseAoE then
+				return A.ExplosiveTrap:Show(icon)
+			end
+			
+			if A.WingClip:IsReady(unit) and Unit(unit):HasDeBuffs(A.WingClip.ID, true) <= A.GetGCD() and A.WingClip:AbsentImun(unit, Temp.TotalAndPhysAndCC) then
+				return A.WingClip:Show(icon)
+			end			
 			
 			if A.MongooseBite:IsReady(unit) then
 				return A.MongooseBite:Show(icon)
