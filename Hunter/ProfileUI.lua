@@ -24,7 +24,7 @@ local select, setmetatable							= select, setmetatable
 
 A.Data.ProfileEnabled[Action.CurrentProfile] = true
 A.Data.ProfileUI = {    
-    DateTime = "v1.1.0 (08 June 2021)",
+    DateTime = "v1.2.0 (11 June 2021)",
     -- Class settings
     [2] = {        
             { -- GENERAL HEADER
@@ -153,7 +153,32 @@ A.Data.ProfileUI = {
                 {
                     E = "LayoutSpace",                                                                         
                 },
-            }, 			
+            },
+			{
+				{ -- STING CONTROLLER
+                    E = "Dropdown",                                                         
+                    OT = {
+						{ text = "Serpent Sting", value = "SerpentSting" },
+						{ text = "Scorpid Sting", value = "ScorpidSting" },
+						{ text = "Viper Sting", value = "ViperSting" },	
+						{ text = "None", value = "None" },						
+                    },
+                    DB = "StingController",
+                    DBV = "None",
+                    L = { 
+                        ANY = "Sting Usage",
+                    }, 
+                    TT = { 
+                        ANY = "Pick your sting to use in your rotation (recommended none unless you're on Scorpid duty).", 
+                    }, 
+                    M = {},
+                },
+			},
+            { -- LAYOUT SPACE   
+                {
+                    E = "LayoutSpace",                                                                         
+                },
+            },			
 			{
 				{ -- FreezingTrapPvE
                     E = "Checkbox", 

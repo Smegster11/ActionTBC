@@ -67,6 +67,10 @@ local GetItemInfo                            = _G.GetItemInfo
 local      UnitGUID,       UnitIsUnit,      UnitCreatureType,       UnitAttackPower = 
 _G.UnitGUID, _G.UnitIsUnit, _G.UnitCreatureType, _G.UnitAttackPower
 
+--For Toaster
+local Toaster									= _G.Toaster
+local GetSpellTexture 							= _G.TMW.GetSpellTexture
+
 Action[Action.PlayerClass]                     = {
 	--Racial
     Shadowmeld								= Create({ Type = "Spell", ID = 20580		}),  
@@ -143,16 +147,23 @@ Action[Action.PlayerClass]                     = {
     WingClip								= Create({ Type = "Spell", ID = 2974		}),
     WyvernString							= Create({ Type = "Spell", ID = 19386		}),
 
+	--Talents
+	RapidKilling1							= Create({ Type = "Talent", ID = 34948		}),
+	RapidKilling2							= Create({ Type = "Talent", ID = 34949		}),	
+
 	--Misc
     Heroism									= Create({ Type = "Spell", ID = 32182		}),
     Bloodlust								= Create({ Type = "Spell", ID = 2825		}),
-    Drums									= Create({ Type = "Spell", ID = 29529		}),	
+    Drums									= Create({ Type = "Spell", ID = 29529		}),
+	SuperHealingPotion						= Create({ Type = "Potion", ID = 22829, QueueForbidden = true }),
 }
 
 local A                                     = setmetatable(Action[Action.PlayerClass], { __index = Action })
 
-local player                                 = "player"
-local targettarget                            = "targettarget"
+local player = "player"
+local target = "target"
+local pet = "pet"
+local targettarget = "targettarget"
 
 local function num(val)
     if val then return 1 else return 0 end
@@ -161,12 +172,24 @@ end
 local function bool(val)
     return val ~= 0
 end
-local player = "player"
-local target = "target"
-local pet = "pet"
-local targettarget = "targettarget"
 
-local VarCAExecute = false;
+--Register Toaster
+Toaster:Register("TripToast", function(toast, ...)
+	local title, message, spellID = ...
+	toast:SetTitle(title or "nil")
+	toast:SetText(message or "nil")
+	if spellID then 
+		if type(spellID) ~= "number" then 
+			error(tostring(spellID) .. " (spellID) is not a number for TripToast!")
+			toast:SetIconTexture("Interface\FriendsFrame\Battlenet-WoWicon")
+		else 
+			toast:SetIconTexture((GetSpellTexture(spellID)))
+		end 
+	else 
+		toast:SetIconTexture("Interface\FriendsFrame\Battlenet-WoWicon")
+	end 
+	toast:SetUrgencyLevel("normal") 
+end)
 
 ------------------------------------------
 -------------- COMMON PREAPL -------------
@@ -183,6 +206,12 @@ local Temp = {
     DisablePhys                             = {"TotalImun", "DamagePhysImun", "Freedom", "CCTotalImun"},
     DisableMag                              = {"TotalImun", "DamageMagicImun", "Freedom", "CCTotalImun"},
 }
+
+local ImmuneArcane = {
+[18864] = true,
+[18865] = true
+}	
+
 
 --API - Spell
 Pet:AddActionsSpells(3, {
@@ -206,9 +235,16 @@ local function InMelee(unit)
 end 
 InMelee = A.MakeFunctionCachedDynamic(InMelee)
 
+
+local function SelfDefensives()
+
+end 
+SelfDefensives = A.MakeFunctionCachedStatic(SelfDefensives)
+
 --- ======= ACTION LISTS =======
 -- [3] Single Rotation
 A[3] = function(icon, isMulti)
+
     --------------------
     --- ROTATION VAR ---
     --------------------
@@ -227,6 +263,7 @@ A[3] = function(icon, isMulti)
 	local IntimidationPvE = A.GetToggle(2, "IntimidationPvE")
 	local ProtectFreeze = A.GetToggle(2, "ProtectFreeze")
 	local ReadinessController = A.GetToggle(2, "ReadinessController")
+	local StingController = A.GetToggle(2, "StingController")	
 	local ManaViperStart = A.GetToggle(2, "ManaViperStart")
 	local ManaViperEnd = A.GetToggle(2, "ManaViperEnd")
 
@@ -246,6 +283,10 @@ A[3] = function(icon, isMulti)
 	local BurnPhase = Unit(player):HasBuffs(A.Heroism.ID) > 0 or Unit(player):HasBuffs(A.Bloodlust.ID) > 0 or Unit(player):HasBuffs(A.Drums.ID) > 0
 	local CheetahBuff = Unit(player):HasBuffs(A.AspectoftheCheetah.ID, true) > 0 or Unit(player):HasBuffs(A.AspectofthePack.ID, true) > 0
 
+
+	if GetToggle(1, "Potion") and Unit("player"):CombatTime() > 2 and CanUseHealingPotion(icon) then 
+		return true 
+	end 
 
 	if AspectController[3] then --Viper
 		if A.AspectoftheViper:IsReady(player) and Unit(player):HasBuffs(A.AspectoftheViper.ID, true) == 0 and Player:ManaPercentage() < ManaViperStart and not Player:IsMounted() then
@@ -267,10 +308,24 @@ A[3] = function(icon, isMulti)
     ---------------- ENEMY UNIT ROTATION -----------------
     ------------------------------------------------------
     local function EnemyRotation(unit)
-
+	local npcID = select(6, Unit(unit):InfoGUID())
+	
 		if AspectController[1] then --Hawk
 			if A.AspectoftheHawk:IsReady(player) and Unit(player):HasBuffs(A.AspectoftheHawk.ID, true) == 0 and (inCombat or A.IsUnitEnemy(unit)) and ((Player:ManaPercentage() > ManaViperEnd and AspectController[3]) or not AspectController[3]) and not Player:IsMounted() then
 				return A.AspectoftheHawk:Show(icon)
+			end
+		end
+
+		if A.Readiness:IsReady(player) then
+			if ReadinessController == "RapidFire" then
+				if A.RapidFire:GetCooldown() >= 120-(30 * num(A.RapidKilling1:IsTalentLearned()))-(30 * num(A.RapidKilling2:IsTalentLearned())) then
+					return A.Readiness:Show(icon)
+				end
+			end
+			if ReadinessController == "Misdirection" then
+				if A.Misdirection:GetCooldown() >= 10 then
+					return A.Readiness:Show(icon)
+				end
 			end
 		end
 
@@ -286,7 +341,7 @@ A[3] = function(icon, isMulti)
 			return A.MendPet:Show(icon)
 		end
 
-		if A.HuntersMark:IsReady(unit) and Unit(unit):HasDeBuffs(A.HuntersMark.ID, true) == 0 and Unit(unit):TimeToDie() > 2 then
+		if A.HuntersMark:IsReady(unit) and Unit(unit):HasDeBuffs(A.HuntersMark.ID, true) == 0 and Unit(unit):TimeToDie() > 2 and not ImmuneArcane[npcID] then
 			return A.HuntersMark:Show(icon)
 		end
 
@@ -299,11 +354,11 @@ A[3] = function(icon, isMulti)
 				return A:Show(icon, CONST.AUTOSHOOT)
 			end	
 
-			if A.Intimidation:IsReady(unit) and IntimidationPvE and UnitIsUnit(targettarget, player) then
+			if A.Intimidation:IsReady(unit) and IntimidationPvE and UnitIsUnit(targettarget, player) and Unit(target):IsControlAble("stun") then
 				return A.Intimidation:Show(icon)
 			end
 			
-			if A.ConcussiveShot:IsReady(unit) and ConcussiveShotPvE and UnitIsUnit(targettarget, player) and (not A.Intimidation:IsReady(unit) or Unit(pet):HasBuffs(A.Intimidation.ID) == 0 or not IntimidationPvE) then
+			if A.ConcussiveShot:IsReady(unit) and ConcussiveShotPvE and Unit(target):IsMelee() and UnitIsUnit(targettarget, player) and A.LastPlayerCastName ~= A.Intimidation:Info() and (not A.Intimidation:IsReady(unit) or Unit(pet):HasBuffs(A.Intimidation.ID) == 0 or not IntimidationPvE) and Unit(unit):HasDeBuffs(A.WingClip.ID) < A.GetGCD() and not ImmuneArcane[npcID] then
 				return A.ConcussiveShot:Show(icon)
 			end
 			
@@ -351,7 +406,7 @@ A[3] = function(icon, isMulti)
 				end					
 			end
  
-			if isMoving and A.ArcaneShot:IsReady(unit) and Player:ManaPercentage() > ArcaneShotMana then
+			if isMoving and A.ArcaneShot:IsReady(unit) and not ImmuneArcane[npcID] and Player:ManaPercentage() > ArcaneShotMana then
 				return A.ArcaneShot:Show(icon)
 			end
  
@@ -362,7 +417,25 @@ A[3] = function(icon, isMulti)
 					return A.MultiShot:Show(icon)
 				end
 				
-				if A.ArcaneShot:IsReady(unit) and UseArcane and Player:ManaPercentage() > ArcaneShotMana then
+				if StingController == "SerpentSting" then
+					if A.SerpentSting:IsReady(unit) and Unit(unit):HasDeBuffs(A.SerpentSting.ID, true) <= A.GetGCD() and Unit(unit):TimeToDie() >= 4 then
+						return A.SerpentSting:Show(icon)
+					end
+				end
+				
+				if StingController == "ScorpidSting" then
+					if A.ScorpidSting:IsReady(unit) and Unit(unit):HasDeBuffs(A.ScorpidSting.ID, true) <= A.GetGCD() + 0.5 and Unit(unit):IsBoss() then
+						return A.ScorpidSting:Show(icon)
+					end
+				end
+				
+				if StingController == "ViperSting" then
+					if A.ViperSting:IsReady(unit) and Unit(unit):PowerType() == "MANA" and Unit(unit):Power() >= 10 then
+						return A.ViperSting:Show(icon)
+					end
+				end
+				
+				if A.ArcaneShot:IsReady(unit) and UseArcane and not ImmuneArcane[npcID] and Player:ManaPercentage() > ArcaneShotMana then
 					return A.ArcaneShot:Show(icon)
 				end
 			end
@@ -379,6 +452,10 @@ A[3] = function(icon, isMulti)
 			if not Player:IsAttacking() then
 				return A:Show(icon, CONST.AUTOATTACK)
 			end
+
+			if A.Disengage:IsReady(unit) and UnitIsUnit(targettarget, player) and (not A.Intimidation:IsReady(unit) or Unit(pet):HasBuffs(A.Intimidation.ID) == 0 or not IntimidationPvE) then
+                return A.Disengage:Show(icon)
+            end
 			
 			if A.ExplosiveTrap:IsReady(unit) and A.MultiUnits:GetByRange(5, 3) > 2 and UseAoE then
 				return A.ExplosiveTrap:Show(icon)
@@ -403,7 +480,12 @@ A[3] = function(icon, isMulti)
 
     -- End on EnemyRotation()
 
-
+    -- Defensive
+    local SelfDefensive = SelfDefensives()
+    if SelfDefensive then 
+        return SelfDefensive:Show(icon)
+    end 
+	
     -- Mouseover
     if A.IsUnitEnemy("mouseover") then
         unit = "mouseover"
