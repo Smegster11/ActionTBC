@@ -164,6 +164,7 @@ local player = "player"
 local target = "target"
 local pet = "pet"
 local targettarget = "targettarget"
+local focus = "focus"
 
 local function num(val)
     if val then return 1 else return 0 end
@@ -235,12 +236,6 @@ local function InMelee(unit)
 end 
 InMelee = A.MakeFunctionCachedDynamic(InMelee)
 
-
-local function SelfDefensives()
-
-end 
-SelfDefensives = A.MakeFunctionCachedStatic(SelfDefensives)
-
 --- ======= ACTION LISTS =======
 -- [3] Single Rotation
 A[3] = function(icon, isMulti)
@@ -263,10 +258,12 @@ A[3] = function(icon, isMulti)
 	local IntimidationPvE = A.GetToggle(2, "IntimidationPvE")
 	local ProtectFreeze = A.GetToggle(2, "ProtectFreeze")
 	local ReadinessController = A.GetToggle(2, "ReadinessController")
-	local StingController = A.GetToggle(2, "StingController")	
+	local StingController = A.GetToggle(2, "StingController")
+	local Experimental = A.GetToggle(2, "Experimental")
 	local ManaViperStart = A.GetToggle(2, "ManaViperStart")
 	local ManaViperEnd = A.GetToggle(2, "ManaViperEnd")
-
+	local StaticMark = A.GetToggle(2, "StaticMark")
+	local HastePotion = A.GetToggle(2, "HastePotion")
 
 	local AspectController = A.GetToggle(2, "AspectController")
 		--AspectController[1] = Hawk
@@ -283,11 +280,6 @@ A[3] = function(icon, isMulti)
 	local BurnPhase = Unit(player):HasBuffs(A.Heroism.ID) > 0 or Unit(player):HasBuffs(A.Bloodlust.ID) > 0 or Unit(player):HasBuffs(A.Drums.ID) > 0
 	local CheetahBuff = Unit(player):HasBuffs(A.AspectoftheCheetah.ID, true) > 0 or Unit(player):HasBuffs(A.AspectofthePack.ID, true) > 0
 
-
-	if GetToggle(1, "Potion") and Unit("player"):CombatTime() > 2 and CanUseHealingPotion(icon) then 
-		return true 
-	end 
-
 	if AspectController[3] then --Viper
 		if A.AspectoftheViper:IsReady(player) and Unit(player):HasBuffs(A.AspectoftheViper.ID, true) == 0 and Player:ManaPercentage() < ManaViperStart and not Player:IsMounted() then
 			return A.AspectoftheViper:Show(icon)
@@ -303,12 +295,46 @@ A[3] = function(icon, isMulti)
 	if A.CallPet:IsReady(player) and not Pet:IsActive() then
 		return A.CallPet:Show(icon)
 	end
+
+	local function PotionHandler()
+		
+		local UsePotions = A.GetToggle(1, "Potions")		
+		local PotionController = A.GetToggle(2, "PotionController")
+		local PotionHealth = A.GetToggle(2, "PotionHealth")
+		local PotionMana = A.GetToggle(2, "PotionMana")
+		
+		if UsePotions and combatTime > 2 then
+			if PotionController == "HealingPotion" then
+				if Unit(player):HealthPercent() <= PotionHealth then 
+					return A:Show(icon, CONST.POTION) 
+				end 
+			elseif PotionController == "ManaPotion" then
+				if Player:ManaPercentage() <= PotionMana then
+					return A:Show(icon, CONST.POTION)
+				end
+			elseif PotionController == "RejuvenationPotion" then
+				if Unit(player):HealthPercent() <= PotionHealth and Player:ManaPercentage() <= PotionMana then
+					return A:Show(icon, CONST.POTION)
+				end
+			end	
+		end	
+	end 
 	
     ------------------------------------------------------
     ---------------- ENEMY UNIT ROTATION -----------------
     ------------------------------------------------------
     local function EnemyRotation(unit)
 	local npcID = select(6, Unit(unit):InfoGUID())
+	
+		if A.Misdirection:IsReady(player) and Unit(focus):IsExists() then
+			if combatTime < 6 then
+				return A.Misdirection:Show(icon)
+			end
+			
+			if combatTime > 6 and not UnitIsUnit(targettarget, "TANK") then
+				return A.Misdirection:Show(icon)
+			end
+		end
 	
 		if AspectController[1] then --Hawk
 			if A.AspectoftheHawk:IsReady(player) and Unit(player):HasBuffs(A.AspectoftheHawk.ID, true) == 0 and (inCombat or A.IsUnitEnemy(unit)) and ((Player:ManaPercentage() > ManaViperEnd and AspectController[3]) or not AspectController[3]) and not Player:IsMounted() then
@@ -341,8 +367,19 @@ A[3] = function(icon, isMulti)
 			return A.MendPet:Show(icon)
 		end
 
-		if A.HuntersMark:IsReady(unit) and Unit(unit):HasDeBuffs(A.HuntersMark.ID, true) == 0 and Unit(unit):TimeToDie() > 2 and not ImmuneArcane[npcID] then
+		if A.HuntersMark:IsReady(unit) and Unit(unit):HasDeBuffs(A.HuntersMark.ID) == 0 and ((Player:GetDeBuffsUnitCount(A.HuntersMark.ID) == 0 and StaticMark) or not StaticMark) and Unit(unit):TimeToDie() > 2 and not ImmuneArcane[npcID] then
 			return A.HuntersMark:Show(icon)
+		end
+
+		--EXPERIMENTAL PET CONTROLLER
+		if Experimental then
+			if not Pet:IsAttacking() and Unit(pet):HealthPercent() > MendPet then
+				return A:Show(icon, CONST.AUTOATTACK)
+			end
+			
+			if Unit(pet):HealthPercent() < 35 then
+				return A.AspectoftheMonkey:Show(icon)
+			end
 		end
 
 		if A.KillCommand:IsReady(unit) then
@@ -392,6 +429,10 @@ A[3] = function(icon, isMulti)
 					if A.Berserking:IsReady(player) and CDController[4] and (Unit(unit):TimeToDie() > 5 or Unit(unit):IsBoss()) then
 						return A.Berserking:Show(icon)
 					end
+
+					-- if HastePotion then
+						-- return BURSTPOTIONICON
+					-- end
 
 					--Trinket 1
 					if A.Trinket1:IsReady(player) then
@@ -481,9 +522,8 @@ A[3] = function(icon, isMulti)
     -- End on EnemyRotation()
 
     -- Defensive
-    local SelfDefensive = SelfDefensives()
-    if SelfDefensive then 
-        return SelfDefensive:Show(icon)
+    if PotionHandler() then 
+        return true
     end 
 	
     -- Mouseover

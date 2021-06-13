@@ -69,12 +69,75 @@ A.Data.ProfileUI = {
                     M = {},
                 },				
             },
+			{
+				{ -- RECOVERY POTION CONTROLLER
+                    E = "Dropdown",                                                         
+                    OT = {
+						{ text = "Healing Potion", value = "HealingPotion" },
+						{ text = "Mana Potion", value = "ManaPotion" },
+						{ text = "Rejuvenation Potion", value = "RejuvenationPotion" },							
+                    },
+                    DB = "PotionController",
+                    DBV = "HealingPotion",
+                    L = { 
+                        ANY = "Potion Usage",
+                    }, 
+                    TT = { 
+                        ANY = "Pick what potion you would like to use. Sliders for HP/MP.", 
+                    }, 
+                    M = {},
+                },
+				{ -- AOE
+                    E = "Checkbox", 
+                    DB = "HastePotion",
+                    DBV = false,
+                    L = { 
+                        ANY = "Use Haste Potion", 
+                    }, 
+                    TT = { 
+                        ANY = "Use Haste Potion in burst.", 
+                    }, 
+                    M = {},
+                },				
+			},
+			{
+                { -- HP Potion
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "PotionHealth",
+                    DBV = 20,
+                    ONOFF = false,
+                    L = { 
+                        ANY = "HP (%) for Health Potion",
+                    },
+                    TT = { 
+                        ANY = "HP (%) to use Health Potion.", 
+                    },                     
+                    M = {},
+                },	
+                { -- Mana Potion
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "PotionMana",
+                    DBV = 10, -- Set healthpercentage @30% life. 
+                    ONOFF = false,
+                    L = { 
+                        ANY = "Mana (%) for Mana Potion",
+                    },
+                    TT = { 
+                        ANY = "Mana (%) to use Mana Potion.", 
+                    },                     
+                    M = {},
+                },				
+			},
             { -- LAYOUT SPACE   
                 {
                     E = "LayoutSpace",                                                                         
                 },
             }, 
-			{ -- PET HEADER
+			{ -- PVE HEADER
                 {
                     E = "Header",
                     L = {
@@ -133,13 +196,13 @@ A.Data.ProfileUI = {
                     }, 
                     M = {},
                 },
-                { -- Mana Viper
+                { -- Arcane Shot Mana
                     E = "Slider",                                                     
                     MIN = 0, 
                     MAX = 100,                            
                     DB = "ArcaneShotMana",
                     DBV = 15, -- Set healthpercentage @30% life. 
-                    ONOFF = true,
+                    ONOFF = false,
                     L = { 
                         ANY = "Arcane Shot Mana (%)",
                     },
@@ -173,6 +236,18 @@ A.Data.ProfileUI = {
                     }, 
                     M = {},
                 },
+				{ -- AutoSyncCDs
+                    E = "Checkbox", 
+                    DB = "StaticMark",
+                    DBV = true,
+                    L = { 
+                        ANY = "Static Hunter's Mark", 
+                    }, 
+                    TT = { 
+                        ANY = "Check this box to not change your Hunter's Mark target until it expires/dies (useful if you swap targets a lot).", 
+                    }, 
+                    M = {},
+                },				
 			},
             { -- LAYOUT SPACE   
                 {
@@ -272,7 +347,7 @@ A.Data.ProfileUI = {
                     MAX = 100,                            
                     DB = "ManaViperStart",
                     DBV = 10, -- Set healthpercentage @30% life. 
-                    ONOFF = true,
+                    ONOFF = false,
                     L = { 
                         ANY = "Viper Aspect Mana Start(%)",
                     },
@@ -287,7 +362,7 @@ A.Data.ProfileUI = {
                     MAX = 100,                            
                     DB = "ManaViperEnd",
                     DBV = 30, -- Set healthpercentage @30% life. 
-                    ONOFF = true,
+                    ONOFF = false,
                     L = { 
                         ANY = "Viper Aspect Mana End(%)",
                     },
@@ -309,7 +384,7 @@ A.Data.ProfileUI = {
                     MAX = 100,                            
                     DB = "ManaSave",
                     DBV = 30, -- Set healthpercentage @30% life. 
-                    ONOFF = true,
+                    ONOFF = false,
                     L = { 
                         ANY = "Save Mana (%)",
                     },
@@ -362,7 +437,7 @@ A.Data.ProfileUI = {
                     MAX = 100,                            
                     DB = "MendPet",
                     DBV = 30, -- Set healthpercentage @30% life. 
-                    ONOFF = true,
+                    ONOFF = false,
                     L = { 
                         ANY = GetSpellInfo(13543) .. " HP(%)",
                     },
@@ -371,6 +446,18 @@ A.Data.ProfileUI = {
                     },                     
                     M = {},
                 },
+				{ -- EXPERIMENTAL PET HANDLER
+                    E = "Checkbox", 
+                    DB = "Experimental",
+                    DBV = false,
+                    L = { 
+                        ANY = "Experimental Pet Handler", 
+                    }, 
+                    TT = { 
+                        ANY = "VERY EXPERIMENTAL pet handling to attempt to keep your pet fighting when healthy and pulled back when in danger.", 
+                    }, 
+                    M = {},
+                },					
 			},			
 		},
 }
