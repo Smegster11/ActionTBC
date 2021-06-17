@@ -24,7 +24,7 @@ local select, setmetatable							= select, setmetatable
 
 A.Data.ProfileEnabled[Action.CurrentProfile] = true
 A.Data.ProfileUI = {    
-    DateTime = "v1.3.0 (13 June 2021)",
+    DateTime = "v1.4.0 (17 June 2021)",
     -- Class settings
     [2] = {        
             { -- GENERAL HEADER
@@ -75,7 +75,8 @@ A.Data.ProfileUI = {
                     OT = {
 						{ text = "Healing Potion", value = "HealingPotion" },
 						{ text = "Mana Potion", value = "ManaPotion" },
-						{ text = "Rejuvenation Potion", value = "RejuvenationPotion" },							
+						{ text = "Rejuvenation Potion", value = "RejuvenationPotion" },
+						{ text = "Haste Potion", value = "HastePotion" },						
                     },
                     DB = "PotionController",
                     DBV = "HealingPotion",
@@ -86,19 +87,22 @@ A.Data.ProfileUI = {
                         ANY = "Pick what potion you would like to use. Sliders for HP/MP.", 
                     }, 
                     M = {},
-                },
-				{ -- AOE
-                    E = "Checkbox", 
-                    DB = "HastePotion",
-                    DBV = false,
+                },	
+                { -- HP Potion
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "HSHealth",
+                    DBV = 40,
+                    ONOFF = false,
                     L = { 
-                        ANY = "Use Haste Potion", 
-                    }, 
+                        ANY = "HP (%) for HealthStone",
+                    },
                     TT = { 
-                        ANY = "Use Haste Potion in burst.", 
-                    }, 
+                        ANY = "HP (%) to use HealthStone", 
+                    },                     
                     M = {},
-                },				
+                },					
 			},
 			{
                 { -- HP Potion

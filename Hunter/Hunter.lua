@@ -156,6 +156,7 @@ Action[Action.PlayerClass]                     = {
     Bloodlust								= Create({ Type = "Spell", ID = 2825		}),
     Drums									= Create({ Type = "Spell", ID = 29529		}),
 	SuperHealingPotion						= Create({ Type = "Potion", ID = 22829, QueueForbidden = true }),
+	Healthstone								= Create({ Type = "Spell", ID = 19013		}),
 }
 
 local A                                     = setmetatable(Action[Action.PlayerClass], { __index = Action })
@@ -210,7 +211,8 @@ local Temp = {
 
 local ImmuneArcane = {
 [18864] = true,
-[18865] = true
+[18865] = true,
+[15691] = true
 }	
 
 
@@ -235,6 +237,48 @@ local function InMelee(unit)
 	return A.WingClip:IsInRange(unit)
 end 
 InMelee = A.MakeFunctionCachedDynamic(InMelee)
+
+	local function PotionHandler()
+		
+		local UsePotions = A.GetToggle(1, "Potions")		
+		local PotionController = A.GetToggle(2, "PotionController")
+		local PotionHealth = A.GetToggle(2, "PotionHealth")
+		local PotionMana = A.GetToggle(2, "PotionMana")
+		
+		if UsePotions and combatTime > 2 then
+			if PotionController == "HealingPotion" then
+				if Unit(player):HealthPercent() <= PotionHealth then 
+					return A:Show(icon, CONST.POTION) 
+				end 
+			elseif PotionController == "ManaPotion" then
+				if Player:ManaPercentage() <= PotionMana then
+					return A:Show(icon, CONST.POTION)
+				end
+			elseif PotionController == "RejuvenationPotion" then
+				if Unit(player):HealthPercent() <= PotionHealth and Player:ManaPercentage() <= PotionMana then
+					return A:Show(icon, CONST.POTION)
+				end
+			end	
+		end	
+	end
+
+	local function InterruptHandler()
+
+		local unit = mouseover or target
+
+		local castLeft, _, _, _, notKickAble = Unit(unit):IsCastingRemains()
+		if castLeft > A.GetGCD() + A.GetLatency() then 
+			
+			if not notKickAble and A.SilencingShot:IsReadyByPassCastGCD(unit, nil, nil, true) and A.SilencingShot:IsInRange() then 
+				return A.SilencingShot:Show(icon)    
+			end 
+
+			if A.ScatterShot:IsReadyByPassCastGCD(unit, nil, nil, true) and A.ScatterShot:IsInRange() then 
+				return A.ScatterShot:Show(icon)    
+			end 
+		end 
+
+	end	
 
 --- ======= ACTION LISTS =======
 -- [3] Single Rotation
@@ -263,7 +307,8 @@ A[3] = function(icon, isMulti)
 	local ManaViperStart = A.GetToggle(2, "ManaViperStart")
 	local ManaViperEnd = A.GetToggle(2, "ManaViperEnd")
 	local StaticMark = A.GetToggle(2, "StaticMark")
-	local HastePotion = A.GetToggle(2, "HastePotion")
+	local HSHealth = A.GetToggle(2, "HSHealth")
+	
 
 	local AspectController = A.GetToggle(2, "AspectController")
 		--AspectController[1] = Hawk
@@ -280,6 +325,19 @@ A[3] = function(icon, isMulti)
 	local BurnPhase = Unit(player):HasBuffs(A.Heroism.ID) > 0 or Unit(player):HasBuffs(A.Bloodlust.ID) > 0 or Unit(player):HasBuffs(A.Drums.ID) > 0
 	local CheetahBuff = Unit(player):HasBuffs(A.AspectoftheCheetah.ID, true) > 0 or Unit(player):HasBuffs(A.AspectofthePack.ID, true) > 0
 
+	if A.Healthstone:IsReady(player) and Unit(player):HealthPercent() <= HSHealth then
+		return A.Healthstone:Show(icon)
+	end
+
+    -- Defensive
+    if PotionHandler() then 
+        return true
+    end 
+
+	if InterruptHandler() then
+		return true
+	end
+	
 	if AspectController[3] then --Viper
 		if A.AspectoftheViper:IsReady(player) and Unit(player):HasBuffs(A.AspectoftheViper.ID, true) == 0 and Player:ManaPercentage() < ManaViperStart and not Player:IsMounted() then
 			return A.AspectoftheViper:Show(icon)
@@ -292,33 +350,13 @@ A[3] = function(icon, isMulti)
 		end
 	end
 
-	if A.CallPet:IsReady(player) and not Pet:IsActive() then
+	if A.CallPet:IsReady(player) and Pet:CanCall() then
 		return A.CallPet:Show(icon)
 	end
-
-	local function PotionHandler()
-		
-		local UsePotions = A.GetToggle(1, "Potions")		
-		local PotionController = A.GetToggle(2, "PotionController")
-		local PotionHealth = A.GetToggle(2, "PotionHealth")
-		local PotionMana = A.GetToggle(2, "PotionMana")
-		
-		if UsePotions and combatTime > 2 then
-			if PotionController == "HealingPotion" then
-				if Unit(player):HealthPercent() <= PotionHealth then 
-					return A:Show(icon, CONST.POTION) 
-				end 
-			elseif PotionController == "ManaPotion" then
-				if Player:ManaPercentage() <= PotionMana then
-					return A:Show(icon, CONST.POTION)
-				end
-			elseif PotionController == "RejuvenationPotion" then
-				if Unit(player):HealthPercent() <= PotionHealth and Player:ManaPercentage() <= PotionMana then
-					return A:Show(icon, CONST.POTION)
-				end
-			end	
-		end	
-	end 
+	
+	if A.RevivePet:IsReady(player) and Unit(pet):IsDead() then
+		return A.RevivePet:Show(icon)
+	end
 	
     ------------------------------------------------------
     ---------------- ENEMY UNIT ROTATION -----------------
@@ -331,7 +369,7 @@ A[3] = function(icon, isMulti)
 				return A.Misdirection:Show(icon)
 			end
 			
-			if combatTime > 6 and not UnitIsUnit(targettarget, "TANK") then
+			if combatTime > 6 and not Unit(targettarget):IsTank() then
 				return A.Misdirection:Show(icon)
 			end
 		end
@@ -372,12 +410,12 @@ A[3] = function(icon, isMulti)
 		end
 
 		--EXPERIMENTAL PET CONTROLLER
-		if Experimental then
-			if not Pet:IsAttacking() and Unit(pet):HealthPercent() > MendPet then
+		if Experimental and Pet:IsActive() then
+			if not Pet:IsAttacking() and not Unit(pet):InCC() and Unit(pet):HealthPercent() > MendPet then
 				return A:Show(icon, CONST.AUTOATTACK)
 			end
 			
-			if Unit(pet):HealthPercent() < 35 then
+			if Unit(pet):HealthPercent() < 35 and Pet:IsAttacking() then
 				return A.AspectoftheMonkey:Show(icon)
 			end
 		end
@@ -520,11 +558,6 @@ A[3] = function(icon, isMulti)
     end
 
     -- End on EnemyRotation()
-
-    -- Defensive
-    if PotionHandler() then 
-        return true
-    end 
 	
     -- Mouseover
     if A.IsUnitEnemy("mouseover") then
