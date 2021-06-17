@@ -269,6 +269,8 @@ A[3] = function(icon, isMulti)
 	local HealingWaveHP = A.GetToggle(2, "HealingWaveHP")	
 	local ChainHealHP = A.GetToggle(2, "ChainHealHP")
 	local ChainHealTargets = A.GetToggle(2, "ChainHealTargets")	
+	
+	local ShamanisticRageMana = A.GetToggle(2, "ShamanisticRageMana")
 
 	--###############
 	--### POTIONS ###
@@ -302,6 +304,9 @@ A[3] = function(icon, isMulti)
 	--#################
 
 	local function InterruptHandler()
+	
+		unit = mouseover or target
+		
 		local castLeft, _, _, _, notKickAble = Unit(unit):IsCastingRemains()
 		if IsUnitEnemy(unit) and castLeft > A.GetGCD() + A.GetLatency() then 	
 			if not notKickAble and A.EarthShock:IsReadyByPassCastGCD(unit, nil, nil, true) and A.EarthShock:IsInRange() then 
@@ -316,7 +321,7 @@ A[3] = function(icon, isMulti)
 	
 	local function TotemHandler()
 	
-			if FireTotemTimeRemaining <= A.GetGCD() * 4 then
+			if FireTotemTimeRemaining <= A.GetGCD() * 4 and (A.FireNovaTotem:GetSpellTimeSinceLastCast() == 0 or A.FireNovaTotem:GetSpellTimeSinceLastCast() > 4.5) then
 				if FireTotem == "Searing" and A.SearingTotem:IsReady(player) then
 					return A.SearingTotem:Show(icon)
 				elseif FireTotem == "FireNova" and A.FireNovaTotem:IsReady(player) then
@@ -416,6 +421,24 @@ A[3] = function(icon, isMulti)
 			if TotemHandler() then
 				return true
 			end		
+
+			if FireTotem == "AUTO" and FireTotemTimeRemaining <= A.GetGCD() * 4 then
+				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() >= 2 then
+					return A.FireNovaTotem:Show(icon)
+				end
+				if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() >= 2 and A.FireNovaTotem:GetSpellTimeSinceLastCast() >= 4.5 then
+					return A.MagmaTotem:Show(icon)
+				end
+				if A.SearingTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() == 1 then
+					return A.SearingTotem:Show(icon)
+				end
+			end	
+			
+			if WaterTotem == "AUTO" and WaterTotemTimeRemaining <= A.GetGCD() * 4 then
+				if A.ManaSpringTotem:IsReady(player) then
+					return A.ManaSpringTotem:Show(icon)
+				end
+			end
 			
 			-- Mana Tide Totem when group benefits
 			
@@ -459,6 +482,25 @@ A[3] = function(icon, isMulti)
 			if TotemHandler() then
 				return true
 			end
+
+		-- Fire Nova Totem
+			if FireTotem == "AUTO" and FireTotemTimeRemaining <= A.GetGCD() * 4 then
+				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() >= 2 then
+					return A.FireNovaTotem:Show(icon)
+				end
+				if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() >= 2 and A.FireNovaTotem:GetSpellTimeSinceLastCast() >= 4.5 then
+					return A.MagmaTotem:Show(icon)
+				end
+				if A.SearingTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() == 1 then
+					return A.SearingTotem:Show(icon)
+				end
+			end	
+
+			if WaterTotem == "AUTO" and WaterTotemTimeRemaining <= A.GetGCD() * 4 then
+				if A.ManaSpringTotem:IsReady(player) then
+					return A.ManaSpringTotem:Show(icon)
+				end
+			end
 		
 		-- Use Elemental Mastery with Chain Lightning
 			if A.ChainLightning:IsReady(unit) and Unit(player):HasBuffs(A.ElementalMastery.ID, true) > 0 then 
@@ -478,18 +520,11 @@ A[3] = function(icon, isMulti)
 			if A.EarthShock:IsReady(unit) and Unit(unit):GetRange() <= 10 and UnitIsUnit(targettarget, player) then
 				return A.EarthShock:Show(icon)
 			end
+			
 		-- Lightning Bolt
 			if A.LightningBolt:IsReady(unit) and not isMoving then
 				return A.LightningBolt:Show(icon)
 			end
-
-		
-	--AoE
-		-- Fire Nova Totem
-		-- Chain Lightning
-		-- Magma Totem after Fire Nova Totem explodes
-		-- Maintain Flame Shock 2 targets
-		-- Lightning Bolt
 	
 		end
 		
@@ -498,34 +533,88 @@ A[3] = function(icon, isMulti)
 		if SpecOverride == "Enhancement" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 263) then		
 	--Single Target
 		-- Maintain Water Shield
+			if A.WaterShield:IsReady(player) and ShieldType == "Water" and Unit(player):HasBuffs(A.WaterShield.ID) == 0 then
+				return A.WaterShield:Show(icon)
+			end
+			if A.LightningShield:IsReady(player) and ShieldType == "Lightning" and Unit(player):HasBuffs(A.LightningShield.ID) == 0 then
+				return A.LightningShield:Show(icon)
+			end			
 		-- Windfury Weapon on both weapons
+		
+		
 		-- Maintain Strength of Earth Totem, Mana Spring Totem, Searing Totem
+			if TotemHandler() then
+				return true
+			end
+
+			if FireTotem == "AUTO" and FireTotemTimeRemaining <= A.GetGCD() * 4 then
+				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() >= 2 then
+					return A.FireNovaTotem:Show(icon)
+				end
+				if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() >= 2 and A.FireNovaTotem:GetSpellTimeSinceLastCast() >= 4.5 then
+					return A.MagmaTotem:Show(icon)
+				end
+				if A.SearingTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() == 1 then
+					return A.SearingTotem:Show(icon)
+				end
+			end	
+
+			if WaterTotem == "AUTO" and WaterTotemTimeRemaining <= A.GetGCD() * 4 then
+				if A.ManaSpringTotem:IsReady(player) then
+					return A.ManaSpringTotem:Show(icon)
+				end
+			end		
+			
+			if EarthTotem == "AUTO" and EarthTotemTimeRemaining <= A.GetGCD() * 4 then
+				if A.StrengthofEarthTotem:IsReady(player) then
+					return A.StrengthofEarthTotem:Show(icon)
+				end
+			end
+		
 		-- If TotemicFocus talent then Totem Twist with Windfury and Grace of Air, otherwise just Grace of Air totem
+			if AirTotem == "AUTO" and AirTotemTimeRemaining <= A.GetGCD() * 4 then
+				if A.GraceofAirTotem:IsReady(player) then
+					return A.GraceofAirTotem:Show(icon)
+				end
+			end
+			
+		
 		-- Cast Fire Elemental Totem before Bloodlust
 		-- Weapon sync ??? Jesus Christ...
 		-- Shamanistic Rage without capping mana
+			if A.ShamanisticRage:IsReady(player) and Player:ManaPercentage() <= ShamanisticRageMana and Unit(unit):TimeToDie() >= 15 then
+				return A.ShamanisticRage:Show(icon)
+			end
+		
 		-- Stormstrike
+			if A.Stormstrike:IsReady(unit) then
+				return A.Stormstrike:Show(icon)
+			end
+			
 		-- Flame Shock / Earth Shock if target already has Flame Shock dot
+			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 then
+				return A.FlameShock:Show(icon)
+			end
+			if A.EarthShock:IsReady(unit) and Unit(unit):GetRange() <= 10 and UnitIsUnit(targettarget, player) then
+				return A.EarthShock:Show(icon)
+			end		
+		
 		-- If not totem twisting, use Fire Nova Totem, then recast Searing Totem when Fire Nova explodes.
 	
-	--AoE
-		-- Fire Nova Totem
-		-- Magma Totem after Fire Nova Totem explodes.
-		-- Maintain Flame Shock 2 targets
 		end 
 	end
 
     -- End on EnemyRotation()
 
-    --[[ Potions
+    -- Potions
     if PotionHandler() then 
         return true
-    end]] 
+    end 
 	
 	--Interrupt
-	--if InterruptHandler() then
-	--	return true
-	--end
+	if InterruptHandler() then
+		return true
+	end
 	
     -- Heal Target 
     if IsUnitFriendly(target) then 

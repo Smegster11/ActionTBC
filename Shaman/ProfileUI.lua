@@ -200,6 +200,7 @@ A.Data.ProfileUI = {
 				{ -- FIRE TOTEM
                     E = "Dropdown",                                                         
                     OT = {
+						{ text = "AUTO", value = "AUTO" },						
 						{ text = "Searing", value = "Searing" },
 						{ text = "Fire Nova", value = "FireNova" },
 						{ text = "Frost Resistance", value = "FrostResistance" },
@@ -208,7 +209,7 @@ A.Data.ProfileUI = {
 						{ text = "None", value = "None" },						
                     },
                     DB = "FireTotem",
-                    DBV = "None",
+                    DBV = "AUTO",
                     L = { 
                         ANY = "Fire Totem",
                     }, 
@@ -220,6 +221,7 @@ A.Data.ProfileUI = {
 				{ -- EARTH TOTEM
                     E = "Dropdown",                                                         
                     OT = {
+						{ text = "AUTO", value = "AUTO" },						
 						{ text = "Stoneskin", value = "Stoneskin" },
 						{ text = "Earthbind", value = "Earthbind" },
 						{ text = "Stoneclaw", value = "Stoneclaw" },
@@ -228,7 +230,7 @@ A.Data.ProfileUI = {
 						{ text = "None", value = "None" },						
                     },
                     DB = "EarthTotem",
-                    DBV = "None",
+                    DBV = "AUTO",
                     L = { 
                         ANY = "Earth Totem",
                     }, 
@@ -242,6 +244,7 @@ A.Data.ProfileUI = {
 				{ -- AIR TOTEM
                     E = "Dropdown",                                                         
                     OT = {
+						{ text = "AUTO", value = "AUTO" },						
 						{ text = "Grounding", value = "Grounding" },
 						{ text = "Nature Resistance", value = "NatureResistance" },
 						{ text = "Windfury", value = "Windfury" },
@@ -252,7 +255,7 @@ A.Data.ProfileUI = {
 						{ text = "None", value = "None" },							
                     },
                     DB = "AirTotem",
-                    DBV = "None",
+                    DBV = "AUTO",
                     L = { 
                         ANY = "Air Totem",
                     }, 
@@ -264,6 +267,7 @@ A.Data.ProfileUI = {
 				{ -- WATER TOTEM
                     E = "Dropdown",                                                         
                     OT = {
+						{ text = "AUTO", value = "AUTO" },						
 						{ text = "Healing Stream", value = "HealingStream" },
 						{ text = "Poison Cleansing", value = "PoisonCleansing" },
 						{ text = "Mana Spring", value = "ManaSpring" },
@@ -272,7 +276,7 @@ A.Data.ProfileUI = {
 						{ text = "None", value = "None" },						
                     },
                     DB = "WaterTotem",
-                    DBV = "None",
+                    DBV = "AUTO",
                     L = { 
                         ANY = "Water Totem",
                     }, 
@@ -281,6 +285,70 @@ A.Data.ProfileUI = {
                     }, 
                     M = {},
                 },					
+			},
+            { -- LAYOUT SPACE   
+                {
+                    E = "LayoutSpace",                                                                         
+                },
+            },			
+			{ -- PVE HEADER
+                {
+                    E = "Header",
+                    L = {
+                        ANY = " l><><>< ENHANCEMENT SHAMAN ><><><l ",
+                    },
+                },
+            },
+			{
+				{ -- Main Hand Enchant
+                    E = "Dropdown",                                                         
+                    OT = {
+						{ text = "Windfury", value = "Windfury" },						
+						{ text = "Flametongue Weapon", value = "FlametongueWeapon" },						
+                    },
+                    DB = "MainHandEnchant",
+                    DBV = "Windfury",
+                    L = { 
+                        ANY = "Main Hand Enchant (NOT YET WORKING)",
+                    }, 
+                    TT = { 
+                        ANY = "Main Hand Enchant (NOT YET WORKING)", 
+                    }, 
+                    M = {},
+                },
+				{ -- Offhand Enchant
+                    E = "Dropdown",                                                         
+                    OT = {
+						{ text = "Windfury", value = "Windfury" },						
+						{ text = "Flametongue Weapon", value = "FlametongueWeapon" },						
+                    },
+                    DB = "OffhandEnchant",
+                    DBV = "Windfury",
+                    L = { 
+                        ANY = "Offhand Enchant (NOT YET WORKING)",
+                    }, 
+                    TT = { 
+                        ANY = "Offhand Enchant (NOT YET WORKING)", 
+                    }, 
+                    M = {},
+                },				
+			},			
+			{
+                { -- Shamanistic Rage Value
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "ShamanisticRageMana",
+                    DBV = 50, -- Set healthpercentage @30% life. 
+                    ONOFF = true,
+                    L = { 
+                        ANY = "Shamanistic Rage Mana (%)",
+                    },
+                    TT = { 
+                        ANY = "Value mana (%) to use Shamanistic Rage", 
+                    },                     
+                    M = {},
+                },
 			},
             { -- LAYOUT SPACE   
                 {
