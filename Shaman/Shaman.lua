@@ -24,7 +24,9 @@ local Player                                = Action.Player
 local MultiUnits                            = Action.MultiUnits
 local UnitCooldown                            = Action.UnitCooldown
 local Unit                                    = Action.Unit 
-local Pet                                       = LibStub("PetLibrary") 
+local IsUnitEnemy                               = Action.IsUnitEnemy
+local IsUnitFriendly                            = Action.IsUnitFriendly
+local Totem                                    = LibStub("LibTotemInfo-1.0") 
 
 local SetToggle                                = Action.SetToggle
 local GetToggle                                = Action.GetToggle
@@ -101,7 +103,9 @@ Action[Action.PlayerClass]                     = {
 	FrostShock								= Create({ Type = "Spell", ID = 8056	}),
 	MagmaTotem								= Create({ Type = "Spell", ID = 8190	}),	
 	ChainLightning							= Create({ Type = "Spell", ID = 421		}),	
-	TotemofWrath							= Create({ Type = "Spell", ID = 30706	}),	
+	TotemofWrath							= Create({ Type = "Spell", ID = 30706	}),
+	ElementalMastery						= Create({ Type = "Spell", ID = 16166	}),
+	TranquilAirTotem						= Create({ Type = "Spell", ID = 25908	}),	
 
 	--Enhancement
 	RockbiterWeapon							= Create({ Type = "Spell", ID = 8017	}),
@@ -168,6 +172,7 @@ Action[Action.PlayerClass]                     = {
     ManaTideTotem							= Create({ Type = "Spell", ID = 16190	}),
     EarthShield								= Create({ Type = "Spell", ID = 974		}),	
     WaterShield								= Create({ Type = "Spell", ID = 24398	}),	
+    NaturesSwiftness						= Create({ Type = "Spell", ID = 16188	}),	
 	
 	--Misc
     Heroism									= Create({ Type = "Spell", ID = 32182		}),
@@ -182,6 +187,7 @@ local target = "target"
 local pet = "pet"
 local targettarget = "targettarget"
 local focus = "focus"
+local mouseover = "mouseover"
 
 local function num(val)
     if val then return 1 else return 0 end
@@ -225,11 +231,15 @@ local Temp = {
     DisableMag                              = {"TotalImun", "DamageMagicImun", "Freedom", "CCTotalImun"},
 }
 
-local ImmuneArcane = {
-[18864] = true,
-[18865] = true,
-[15691] = true
+-- A.MultiUnits:GetByRangeCasting(totemrange, numberofenemiescap, kickable, spellname)
+-- A.MultiUnits:GetByRangeCasting(40, 5, nil, IncPoison)??
+local IncPoison = {
+
 }	
+
+local IncFear = {
+
+}
 
 --- ======= ACTION LISTS =======
 -- [3] Single Rotation
@@ -242,6 +252,23 @@ A[3] = function(icon, isMulti)
     local inCombat = Unit(player):CombatTime() > 0
 	local combatTime = Unit(player):CombatTime()
 	local UseAoE = A.GetToggle(2, "AoE")
+	local SpecOverride = A.GetToggle(2, "SpecOverride")
+	local ShieldType = A.GetToggle(2, "ShieldType")
+	
+	local FireTotem = A.GetToggle(2, "FireTotem")
+	local EarthTotem = A.GetToggle(2, "EarthTotem")
+	local AirTotem = A.GetToggle(2, "AirTotem")	
+	local WaterTotem = A.GetToggle(2, "WaterTotem")
+
+	local FireTotemTimeRemaining = Player:GetTotemTimeLeft(1)
+	local EarthTotemTimeRemaining = Player:GetTotemTimeLeft(2)
+	local WaterTotemTimeRemaining = Player:GetTotemTimeLeft(3)
+	local AirTotemTimeRemaining = Player:GetTotemTimeLeft(4)
+
+	local LesserHealingWaveHP = A.GetToggle(2, "LesserHealingWaveHP")
+	local HealingWaveHP = A.GetToggle(2, "HealingWaveHP")	
+	local ChainHealHP = A.GetToggle(2, "ChainHealHP")
+	local ChainHealTargets = A.GetToggle(2, "ChainHealTargets")	
 
 	--###############
 	--### POTIONS ###
@@ -283,20 +310,133 @@ A[3] = function(icon, isMulti)
 		end 
 	end	
 	
+	--##############
+	--### TOTEMS ###
+	--##############	
+	
+	local function TotemHandler()
+	
+			if FireTotemTimeRemaining <= A.GetGCD() * 4 then
+				if FireTotem == "Searing" and A.SearingTotem:IsReady(player) then
+					return A.SearingTotem:Show(icon)
+				elseif FireTotem == "FireNova" and A.FireNovaTotem:IsReady(player) then
+					return A.FireNovaTotem:Show(icon)			
+				elseif FireTotem == "FrostResistance" and A.FrostResistanceTotem:IsReady(player) then
+					return A.FrostResistanceTotem:Show(icon)
+				elseif FireTotem == "Magma" and A.MagmaTotem:IsReady(player) then
+					return A.MagmaTotem:Show(icon)			
+				elseif FireTotem == "Flametongue" and A.FlametongueTotem:IsReady(player) then
+					return A.FlametongueTotem:Show(icon)
+				end
+			end
+			
+			if EarthTotemTimeRemaining <= A.GetGCD() * 4 then
+				if EarthTotem == "Stoneskin" and A.StoneskinTotem:IsReady(player) then
+					return A.StoneskinTotem:Show(icon)
+				elseif EarthTotem == "Earthbind" and A.EarthbindTotem:IsReady(player) then
+					return A.EarthbindTotem:Show(icon)
+				elseif EarthTotem == "Stoneclaw" and A.StoneclawTotem:IsReady(player) then
+					return A.StoneclawTotem:Show(icon)					
+				elseif EarthTotem == "StrengthofEarth" and A.StrengthofEarthTotem:IsReady(player) then
+					return A.StrengthofEarthTotem:Show(icon)
+				elseif EarthTotem == "Tremor" and A.TremorTotem:IsReady(player) then
+					return A.TremorTotem:Show(icon)	
+				end
+			end
+
+			if AirTotemTimeRemaining <= A.GetGCD() * 4 then
+				if AirTotem == "Grounding" and A.GroundingTotem:IsReady(player) then
+					return A.GroundingTotem:Show(icon)
+				elseif AirTotem == "NatureResistance" and A.NatureResistanceTotem:IsReady(player) then
+					return A.NatureResistanceTotem:Show(icon)
+				elseif AirTotem == "Windfury" and A.WindfuryTotem:IsReady(player) then
+					return A.WindfuryTotem:Show(icon)					
+				elseif AirTotem == "Windwall" and A.WindwallTotem:IsReady(player) then
+					return A.WindwallTotem:Show(icon)
+				elseif AirTotem == "GraceofAir" and A.GraceofAirTotem:IsReady(player) then
+					return A.GraceofAirTotem:Show(icon)	
+				elseif AirTotem == "TranquilAir" and A.TranquilAirTotem:IsReady(player) then
+					return A.TranquilAirTotem:Show(icon)	
+				elseif AirTotem == "WrathofAir" and A.WrathofAirTotem:IsReady(player) then
+					return A.WrathofAirTotem:Show(icon)						
+				end
+			end		
+
+			if WaterTotemTimeRemaining <= A.GetGCD() * 4 then
+				if WaterTotem == "HealingStream" and A.HealingStreamTotem:IsReady(player) then
+					return A.HealingStreamTotem:Show(icon)
+				elseif WaterTotem == "PoisonCleansing" and A.PoisonCleansingTotem:IsReady(player) then
+					return A.PoisonCleansingTotem:Show(icon)
+				elseif WaterTotem == "ManaSpring" and A.ManaSpringTotem:IsReady(player) then
+					return A.ManaSpringTotem:Show(icon)					
+				elseif WaterTotem == "DiseaseCleansing" and A.DiseaseCleansingTotem:IsReady(player) then
+					return A.DiseaseCleansingTotem:Show(icon)
+				elseif WaterTotem == "FireResistance" and A.FireResistanceTotem:IsReady(player) then
+					return A.FireResistanceTotem:Show(icon)							
+				end
+			end					
+
+	end
+	
 	--########################
 	--### HEALING ROTATION ###
 	--########################
 	
 	local function HealingRotation(unit)
 	
-		-- Maintain Water Shield
-		-- Maintain Earth Shield on tank
-		-- Maintain best totems
-		-- Mana Tide Totem when group benefits
-		-- Chain Heal R4 or Chain Heal R5 spam (even single target?)
-		-- Nature's Swiftness + Healing Wave R12 for burst
-		-- Lesser Healing Wave if healing needs to be faster than Chain Heal
-	
+		if SpecOverride == "Restoration" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 264) then
+			--Emergency
+			-- Nature's Swiftness + Healing Wave R12 for burst
+			if Unit(unit):HealthPercent() <= 30 then
+				if A.NaturesSwiftness:IsReady(player) then
+					return A.NaturesSwiftness:Show(icon)
+				end
+				
+				if A.LesserHealingWave:IsReady(unit) and Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) == 0 then 
+					return A.LesserHealingWave:Show(icon)
+				end
+			end
+			
+			if Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) > 0 and Unit(unit):HealthPercent() <= 60 then
+				return A.HealingWave:Show(icon)
+			end
+		
+			-- Maintain Water Shield
+			if A.WaterShield:IsReady(player) and ShieldType == "Water" and Unit(player):HasBuffs(A.WaterShield.ID) == 0 then
+				return A.WaterShield:Show(icon)
+			end
+			if A.LightningShield:IsReady(player) and ShieldType == "Lightning" and Unit(player):HasBuffs(A.LightningShield.ID) == 0 then
+				return A.LightningShield:Show(icon)
+			end					
+			-- Maintain Earth Shield on tank
+			if A.EarthShield:IsReady(unit) and Unit(unit):HasBuffs(A.EarthShield.ID) == 0 and Unit(unit):IsTank() then
+				return A.EarthShield:Show(icon)
+			end
+			-- Maintain best totems
+			if TotemHandler() then
+				return true
+			end		
+			
+			-- Mana Tide Totem when group benefits
+			
+			
+			-- Chain Heal R4 or Chain Heal R5 spam
+			if A.ChainHeal:IsReady(unit) and not isMoving and Unit(unit):HealthPercent() <= ChainHealHP and A.HealingEngine.GetBelowHealthPercentUnits(ChainHealHP, 40) >= ChainHealTargets then
+				return A.ChainHeal:Show(icon)
+			end
+			
+			-- Healing Wave ST
+			if A.HealingWave:IsReady(unit) and not isMoving and Unit(unit):HealthPercent() <= HealingWaveHP then
+				return A.HealingWave:Show(icon)
+			end
+			
+			-- Lesser Healing Wave
+			if A.LesserHealingWave:IsReady(unit) and not isMoving and Unit(unit):HealthPercent() <= LesserHealingWaveHP then
+				return A.LesserHealingWave:Show(icon)
+			end
+			
+		end
+		
 	end
 	
 	--#######################
@@ -306,14 +446,44 @@ A[3] = function(icon, isMulti)
 	local function DamageRotation(unit)
 	
 	--Elemental
+		if SpecOverride == "Elemental" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 262) then	
 	--Single Target
 		-- Maintain Water Shield
+			if A.WaterShield:IsReady(player) and ShieldType == "Water" and Unit(player):HasBuffs(A.WaterShield.ID) == 0 then
+				return A.WaterShield:Show(icon)
+			end
+			if A.LightningShield:IsReady(player) and ShieldType == "Lightning" and Unit(player):HasBuffs(A.LightningShield.ID) == 0 then
+				return A.LightningShield:Show(icon)
+			end	
 		-- Maintain Totem of Wrath, Mana Spring Totem, and Wrath of Air Totem
+			if TotemHandler() then
+				return true
+			end
+		
 		-- Use Elemental Mastery with Chain Lightning
+			if A.ChainLightning:IsReady(unit) and Unit(player):HasBuffs(A.ElementalMastery.ID, true) > 0 then 
+				return A.ChainLightning:Show(icon)
+			end
+			if A.ElementalMastery:IsReady(player) and A.ChainLightning:GetCooldown() <= A.GetGCD() and BurstIsON(unit) then
+				return A.ElementalMastery:Show(icon)
+			end
 		-- Chain Lightning
-		-- Lightning Bolt
+			if A.ChainLightning:IsReady(unit) and UseAoE and not isMoving then
+				return A.ChainLightning:Show(icon)
+			end
 		-- Flame Shock while moving
-	
+			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 then
+				return A.FlameShock:Show(icon)
+			end
+			if A.EarthShock:IsReady(unit) and Unit(unit):GetRange() <= 10 and UnitIsUnit(targettarget, player) then
+				return A.EarthShock:Show(icon)
+			end
+		-- Lightning Bolt
+			if A.LightningBolt:IsReady(unit) and not isMoving then
+				return A.LightningBolt:Show(icon)
+			end
+
+		
 	--AoE
 		-- Fire Nova Totem
 		-- Chain Lightning
@@ -321,7 +491,11 @@ A[3] = function(icon, isMulti)
 		-- Maintain Flame Shock 2 targets
 		-- Lightning Bolt
 	
+		end
+		
+		
 	--Enhancement
+		if SpecOverride == "Enhancement" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 263) then		
 	--Single Target
 		-- Maintain Water Shield
 		-- Windfury Weapon on both weapons
@@ -338,26 +512,20 @@ A[3] = function(icon, isMulti)
 		-- Fire Nova Totem
 		-- Magma Totem after Fire Nova Totem explodes.
 		-- Maintain Flame Shock 2 targets
-	
+		end 
 	end
-	
-    ------------------------------------------------------
-    ---------------- ENEMY UNIT ROTATION -----------------
-    ------------------------------------------------------
-    local function EnemyRotation(unit)
-	local npcID = select(6, Unit(unit):InfoGUID())
 
     -- End on EnemyRotation()
 
-    -- Potions
+    --[[ Potions
     if PotionHandler() then 
         return true
-    end 
+    end]] 
 	
 	--Interrupt
-	if InterruptHandler() then
-		return true
-	end
+	--if InterruptHandler() then
+	--	return true
+	--end
 	
     -- Heal Target 
     if IsUnitFriendly(target) then 
