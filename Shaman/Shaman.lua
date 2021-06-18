@@ -86,9 +86,6 @@ Action[Action.PlayerClass]                     = {
 	ArcaneTorrent							= Create({ Type = "Spell", ID = 28730		}),
 
 	--General
-    ShootBow								= Create({ Type = "Spell", ID = 2480,     QueueForbidden = true, BlockForbidden = true	}),
-    ShootCrossbow							= Create({ Type = "Spell", ID = 7919,     QueueForbidden = true, BlockForbidden = true	}),
-    ShootGun                                = Create({ Type = "Spell", ID = 7918,     QueueForbidden = true, BlockForbidden = true	}),
     Throw									= Create({ Type = "Spell", ID = 2764,     QueueForbidden = true, BlockForbidden = true	}),	
 
 	--Elemental
@@ -100,17 +97,24 @@ Action[Action.PlayerClass]                     = {
 	SearingTotem							= Create({ Type = "Spell", ID = 3599	}),	
 	Purge									= Create({ Type = "Spell", ID = 370		}),	
 	FireNovaTotem							= Create({ Type = "Spell", ID = 1535	}),
+	FireNovaTotem2							= Create({ Type = "Spell", ID = 8498	}),
+	FireNovaTotem3							= Create({ Type = "Spell", ID = 8499	}),
+	FireNovaTotem4							= Create({ Type = "Spell", ID = 11314	}),
+	FireNovaTotem5							= Create({ Type = "Spell", ID = 11315	}),
+	FireNovaTotem6							= Create({ Type = "Spell", ID = 25546	}),
+	FireNovaTotem7							= Create({ Type = "Spell", ID = 25547	}),
 	FrostShock								= Create({ Type = "Spell", ID = 8056	}),
 	MagmaTotem								= Create({ Type = "Spell", ID = 8190	}),	
 	ChainLightning							= Create({ Type = "Spell", ID = 421		}),	
 	TotemofWrath							= Create({ Type = "Spell", ID = 30706	}),
 	ElementalMastery						= Create({ Type = "Spell", ID = 16166	}),
-	TranquilAirTotem						= Create({ Type = "Spell", ID = 25908	}),	
+	TranquilAirTotem						= Create({ Type = "Spell", ID = 25908	}),		
 
 	--Enhancement
 	RockbiterWeapon							= Create({ Type = "Spell", ID = 8017	}),
 	ShamanisticFocus						= Create({ Type = "Spell", ID = 43338	}),	
-	StoneskinTotem							= Create({ Type = "Spell", ID = 8071	}),	
+	StoneskinTotem							= Create({ Type = "Spell", ID = 8071, isRank = 1	}),
+	StoneskinTotem2							= Create({ Type = "Spell", ID = 8154, isRank = 2	}),	
 	LightningShield							= Create({ Type = "Spell", ID = 324		}),	
 	FlametongueWeapon						= Create({ Type = "Spell", ID = 8024	}),
 	StrengthofEarthTotem					= Create({ Type = "Spell", ID = 8075	}),	
@@ -126,6 +130,10 @@ Action[Action.PlayerClass]                     = {
 	GroundingTotem							= Create({ Type = "Spell", ID = 8177	}),	
 	NatureResistanceTotem					= Create({ Type = "Spell", ID = 10595	}),	
 	WindfuryTotem							= Create({ Type = "Spell", ID = 8512	}),	
+	WindfuryTotem2							= Create({ Type = "Spell", ID = 10613	}),	
+	WindfuryTotem3							= Create({ Type = "Spell", ID = 10614	}),
+	WindfuryTotem4							= Create({ Type = "Spell", ID = 25585	}),
+	WindfuryTotem5							= Create({ Type = "Spell", ID = 25587	}),		
 	SentryTotem								= Create({ Type = "Spell", ID = 6495	}),
 	WindwallTotem							= Create({ Type = "Spell", ID = 15107	}),
 	Stormstrike								= Create({ Type = "Spell", ID = 17364	}),
@@ -134,6 +142,7 @@ Action[Action.PlayerClass]                     = {
 	WrathofAirTotem							= Create({ Type = "Spell", ID = 3738	}),	
 	EarthElementalTotem						= Create({ Type = "Spell", ID = 2062	}),	
     Bloodlust								= Create({ Type = "Spell", ID = 2825	}),
+    Heroism									= Create({ Type = "Spell", ID = 32182	}),	
 
 	--Restoration
     HealingWave1							= Create({ Type = "Spell", ID = 331, isRank = 1		}),	
@@ -175,8 +184,6 @@ Action[Action.PlayerClass]                     = {
     NaturesSwiftness						= Create({ Type = "Spell", ID = 16188	}),	
 	
 	--Misc
-    Heroism									= Create({ Type = "Spell", ID = 32182		}),
-    Drums									= Create({ Type = "Spell", ID = 29529		}),
 	SuperHealingPotion						= Create({ Type = "Potion", ID = 22829, QueueForbidden = true }),
 }
 
@@ -228,18 +235,27 @@ local Temp = {
     TotalAndMag                             = {"TotalImun", "DamageMagicImun"},
 	TotalAndMagKick                         = {"TotalImun", "DamageMagicImun", "KickImun"},
     DisablePhys                             = {"TotalImun", "DamagePhysImun", "Freedom", "CCTotalImun"},
-    DisableMag                              = {"TotalImun", "DamageMagicImun", "Freedom", "CCTotalImun"},
+    DisableMag                              = {"TotalImun", "DamageMagicImun", "Freedom", "CCTotalImun"}
 }
 
--- A.MultiUnits:GetByRangeCasting(totemrange, numberofenemiescap, kickable, spellname)
--- A.MultiUnits:GetByRangeCasting(40, 5, nil, IncPoison)??
-local IncPoison = {
-
-}	
-
-local IncFear = {
-
+local WindfuryActive = {
+["Windfury Totem"] = true,
+["Windfury Totem II"] = true,
+["Windfury Totem III"] = true,
+["Windfury Totem VI"] = true,
+["Windfury Totem V"] = true,
 }
+
+local FireNovaActive = {
+["Fire Nova Totem"] = true,
+["Fire Nova Totem II"] = true,
+["Fire Nova Totem III"] = true,
+["Fire Nova Totem IV"] = true,
+["Fire Nova Totem V"] = true,
+["Fire Nova Totem VI"] = true,
+["Fire Nova Totem VII"] = true,
+} 
+
 
 --- ======= ACTION LISTS =======
 -- [3] Single Rotation
@@ -264,13 +280,21 @@ A[3] = function(icon, isMulti)
 	local EarthTotemTimeRemaining = Player:GetTotemTimeLeft(2)
 	local WaterTotemTimeRemaining = Player:GetTotemTimeLeft(3)
 	local AirTotemTimeRemaining = Player:GetTotemTimeLeft(4)
-
+	
+	local ActiveFireTotem = select(2, Player:GetTotemInfo(1))
+	local ActiveEarthTotem = select(2, Player:GetTotemInfo(2))
+	local ActiveWaterTotem = select(2, Player:GetTotemInfo(3))
+	local ActiveAirTotem = select(2, Player:GetTotemInfo(4))
+	--Usage ActiveFireTotem == A.FireNovaTotem:Info()
+	
+	local WeaveWF = A.GetToggle(2, "WeaveWF")
+	
 	local LesserHealingWaveHP = A.GetToggle(2, "LesserHealingWaveHP")
 	local HealingWaveHP = A.GetToggle(2, "HealingWaveHP")	
 	local ChainHealHP = A.GetToggle(2, "ChainHealHP")
 	local ChainHealTargets = A.GetToggle(2, "ChainHealTargets")	
 	
-	local ShamanisticRageMana = A.GetToggle(2, "ShamanisticRageMana")
+	local ShamanisticRageMana = A.GetToggle(2, "ShamanisticRageMana")  
 
 	--###############
 	--### POTIONS ###
@@ -318,10 +342,17 @@ A[3] = function(icon, isMulti)
 	--##############
 	--### TOTEMS ###
 	--##############	
+
+
+	if A.TotemicCall:IsReady(player) and not inCombat then
+		if (FireTotemTimeRemaining > A.GetGCD() or EarthTotemTimeRemaining > A.GetGCD() or WaterTotemTimeRemaining > A.GetGCD() or AirTotemTimeRemaining > A.GetGCD()) then
+			return A.TotemicCall:Show(icon)
+		end
+	end		
 	
 	local function TotemHandler()
 	
-			if FireTotemTimeRemaining <= A.GetGCD() * 4 and (A.FireNovaTotem:GetSpellTimeSinceLastCast() == 0 or A.FireNovaTotem:GetSpellTimeSinceLastCast() > 4.5) then
+			if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] then
 				if FireTotem == "Searing" and A.SearingTotem:IsReady(player) then
 					return A.SearingTotem:Show(icon)
 				elseif FireTotem == "FireNova" and A.FireNovaTotem:IsReady(player) then
@@ -349,7 +380,11 @@ A[3] = function(icon, isMulti)
 				end
 			end
 
-			if AirTotemTimeRemaining <= A.GetGCD() * 4 then
+			if WeaveWF and A.WindfuryTotem:IsReady(player) and A.WindfuryTotem:GetSpellTimeSinceLastCast() >= 10 and inCombat and AirTotem ~= "Windfury" then
+				return A.WindfuryTotem:Show(icon)
+			end
+
+			if (AirTotemTimeRemaining <= A.GetGCD() * 4 and not WeaveWF) or (WeaveWF and WindfuryActive[ActiveAirTotem]) then
 				if AirTotem == "Grounding" and A.GroundingTotem:IsReady(player) then
 					return A.GroundingTotem:Show(icon)
 				elseif AirTotem == "NatureResistance" and A.NatureResistanceTotem:IsReady(player) then
@@ -380,7 +415,7 @@ A[3] = function(icon, isMulti)
 					return A.FireResistanceTotem:Show(icon)							
 				end
 			end					
-
+			
 	end
 	
 	--########################
@@ -422,17 +457,24 @@ A[3] = function(icon, isMulti)
 				return true
 			end		
 
-			if FireTotem == "AUTO" and FireTotemTimeRemaining <= A.GetGCD() * 4 then
-				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() >= 2 then
+			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) then -- FlameShock same range as SearingTotem
+				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 then
 					return A.FireNovaTotem:Show(icon)
 				end
-				if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() >= 2 and A.FireNovaTotem:GetSpellTimeSinceLastCast() >= 4.5 then
-					return A.MagmaTotem:Show(icon)
+				if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] and not A.FireNovaTotem:IsSpellLastCastOrGCD() then
+					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 then
+						return A.MagmaTotem:Show(icon)
+					end
+					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
+						return A.SearingTotem:Show(icon)
+					end
 				end
-				if A.SearingTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() == 1 then
-					return A.SearingTotem:Show(icon)
+				if ActiveFireTotem == A.MagmaTotem:Info() then
+					if A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE then
+						return A.SearingTotem:Show(icon)
+					end
 				end
-			end	
+			end			
 			
 			if WaterTotem == "AUTO" and WaterTotemTimeRemaining <= A.GetGCD() * 4 then
 				if A.ManaSpringTotem:IsReady(player) then
@@ -468,9 +510,16 @@ A[3] = function(icon, isMulti)
 	
 	local function DamageRotation(unit)
 	
+        if A.Purge:IsReady(unit) and inCombat and AuraIsValid(unit, "UsePurge", "PurgeHigh") then 
+            return A.Purge:Show(icon)
+        end   	
+	
 	--Elemental
-		if SpecOverride == "Elemental" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 262) then	
+		if SpecOverride == "Elemental" or SpecOverride == "Restoration" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 262) then	
 	--Single Target
+			if A.LightningBolt:IsReady(unit) and not inCombat then
+				return A.LightningBolt:Show(icon)
+			end
 		-- Maintain Water Shield
 			if A.WaterShield:IsReady(player) and ShieldType == "Water" and Unit(player):HasBuffs(A.WaterShield.ID) == 0 then
 				return A.WaterShield:Show(icon)
@@ -479,24 +528,30 @@ A[3] = function(icon, isMulti)
 				return A.LightningShield:Show(icon)
 			end	
 		-- Maintain Totem of Wrath, Mana Spring Totem, and Wrath of Air Totem
-			if TotemHandler() then
+			if TotemHandler() and not isMoving then
 				return true
-			end
+			end		
 
-		-- Fire Nova Totem
-			if FireTotem == "AUTO" and FireTotemTimeRemaining <= A.GetGCD() * 4 then
-				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() >= 2 then
+			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) then -- FlameShock same range as SearingTotem
+				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 then
 					return A.FireNovaTotem:Show(icon)
 				end
-				if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() >= 2 and A.FireNovaTotem:GetSpellTimeSinceLastCast() >= 4.5 then
-					return A.MagmaTotem:Show(icon)
+				if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] and not A.FireNovaTotem:IsSpellLastCastOrGCD() then
+					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 then
+						return A.MagmaTotem:Show(icon)
+					end
+					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
+						return A.SearingTotem:Show(icon)
+					end
 				end
-				if A.SearingTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() == 1 then
-					return A.SearingTotem:Show(icon)
+				if ActiveFireTotem == A.MagmaTotem:Info() then
+					if A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE then
+						return A.SearingTotem:Show(icon)
+					end
 				end
-			end	
-
-			if WaterTotem == "AUTO" and WaterTotemTimeRemaining <= A.GetGCD() * 4 then
+			end			
+			
+			if WaterTotem == "AUTO" and WaterTotemTimeRemaining <= A.GetGCD() * 4 and not isMoving then
 				if A.ManaSpringTotem:IsReady(player) then
 					return A.ManaSpringTotem:Show(icon)
 				end
@@ -545,25 +600,32 @@ A[3] = function(icon, isMulti)
 		-- Maintain Strength of Earth Totem, Mana Spring Totem, Searing Totem
 			if TotemHandler() then
 				return true
-			end
+			end		
 
-			if FireTotem == "AUTO" and FireTotemTimeRemaining <= A.GetGCD() * 4 then
-				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() >= 2 then
+			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) then -- FlameShock same range as SearingTotem
+				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 then
 					return A.FireNovaTotem:Show(icon)
 				end
-				if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() >= 2 and A.FireNovaTotem:GetSpellTimeSinceLastCast() >= 4.5 then
-					return A.MagmaTotem:Show(icon)
+				if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] and not A.FireNovaTotem:IsSpellLastCastOrGCD() then
+					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 then
+						return A.MagmaTotem:Show(icon)
+					end
+					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
+						return A.SearingTotem:Show(icon)
+					end
 				end
-				if A.SearingTotem:IsReady(player) and A.MultiUnits:GetActiveUnitPlates() == 1 then
-					return A.SearingTotem:Show(icon)
+				if ActiveFireTotem == A.MagmaTotem:Info() then
+					if A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE then
+						return A.SearingTotem:Show(icon)
+					end
 				end
-			end	
-
+			end			
+			
 			if WaterTotem == "AUTO" and WaterTotemTimeRemaining <= A.GetGCD() * 4 then
 				if A.ManaSpringTotem:IsReady(player) then
 					return A.ManaSpringTotem:Show(icon)
 				end
-			end		
+			end
 			
 			if EarthTotem == "AUTO" and EarthTotemTimeRemaining <= A.GetGCD() * 4 then
 				if A.StrengthofEarthTotem:IsReady(player) then
@@ -595,7 +657,7 @@ A[3] = function(icon, isMulti)
 			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 then
 				return A.FlameShock:Show(icon)
 			end
-			if A.EarthShock:IsReady(unit) and Unit(unit):GetRange() <= 10 and UnitIsUnit(targettarget, player) then
+			if A.EarthShock:IsReady(unit) and (Unit(unit):HasDeBuffs(A.FlameShock.ID, true) >= 6 or Unit(unit):TimeToDie() <= 12) then
 				return A.EarthShock:Show(icon)
 			end		
 		

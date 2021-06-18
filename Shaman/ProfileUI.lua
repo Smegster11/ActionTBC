@@ -24,7 +24,7 @@ local select, setmetatable							= select, setmetatable
 
 A.Data.ProfileEnabled[Action.CurrentProfile] = true
 A.Data.ProfileUI = {    
-    DateTime = "v0.5.0 (16 June 2021)",
+    DateTime = "v0.6.0 (18 June 2021)",
     -- Class settings
     [2] = {        
             { -- GENERAL HEADER
@@ -178,7 +178,7 @@ A.Data.ProfileUI = {
                 },
             },
 			{
-				{ -- AOE
+				{ -- ReactionTotem
                     E = "Checkbox", 
                     DB = "ReactionTotem",
                     DBV = true,
@@ -190,6 +190,18 @@ A.Data.ProfileUI = {
                     }, 
                     M = {},
                 },
+				{ -- Weave WF
+                    E = "Checkbox", 
+                    DB = "WeaveWF",
+                    DBV = false,
+                    L = { 
+                        ANY = "Weave Windfury Totem", 
+                    }, 
+                    TT = { 
+                        ANY = "Weave Windfury Totem with your chosen Air Totem from the dropdown.", 
+                    }, 
+                    M = {},
+                },					
 			},
             { -- LAYOUT SPACE   
                 {
@@ -285,7 +297,7 @@ A.Data.ProfileUI = {
                     }, 
                     M = {},
                 },					
-			},
+			},	
             { -- LAYOUT SPACE   
                 {
                     E = "LayoutSpace",                                                                         
