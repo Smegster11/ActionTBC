@@ -341,14 +341,17 @@ A[3] = function(icon, isMulti)
 	
 	--##############
 	--### TOTEMS ###
-	--##############	
-
+	--##############		
 
 	if A.TotemicCall:IsReady(player) and not inCombat then
 		if (FireTotemTimeRemaining > A.GetGCD() or EarthTotemTimeRemaining > A.GetGCD() or WaterTotemTimeRemaining > A.GetGCD() or AirTotemTimeRemaining > A.GetGCD()) then
 			return A.TotemicCall:Show(icon)
 		end
-	end		
+	end	
+
+	if A.TremorTotem:IsReady(player) and FriendlyTeam():GetDeBuffs("Sleep", 30) > 0 or FriendlyTeam():GetDeBuffs("Fear", 30) > 0 and ActiveEarthTotem ~= A.TremorTotem:Info() then
+		return A.TremorTotem:Show(icon)
+	end   
 	
 	local function TotemHandler()
 	
@@ -572,7 +575,7 @@ A[3] = function(icon, isMulti)
 			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 then
 				return A.FlameShock:Show(icon)
 			end
-			if A.EarthShock:IsReady(unit) and Unit(unit):GetRange() <= 10 and UnitIsUnit(targettarget, player) then
+			if A.EarthShock:IsReady(unit) then
 				return A.EarthShock:Show(icon)
 			end
 			

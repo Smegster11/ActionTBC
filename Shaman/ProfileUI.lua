@@ -238,7 +238,7 @@ A.Data.ProfileUI = {
 						{ text = "Earthbind", value = "Earthbind" },
 						{ text = "Stoneclaw", value = "Stoneclaw" },
 						{ text = "Strength of Earth", value = "StrengthofEarth" },
-						{ text = "Tremor", value = "Stoneclaw" },
+						{ text = "Tremor", value = "Tremor" },
 						{ text = "None", value = "None" },						
                     },
                     DB = "EarthTotem",
