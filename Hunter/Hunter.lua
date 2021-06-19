@@ -128,6 +128,7 @@ Action[Action.PlayerClass]                     = {
     TrueshotAura							= Create({ Type = "Spell", ID = 19506		}),	
     ViperSting								= Create({ Type = "Spell", ID = 3034		}),	
     Volley									= Create({ Type = "Spell", ID = 1510		}),
+	TranquilizingShot						= Create({ Type = "Spell", ID = 19801		}),
 
 	--Survival
     Counterattack							= Create({ Type = "Spell", ID = 19306		}),
@@ -158,6 +159,7 @@ Action[Action.PlayerClass]                     = {
     Drums									= Create({ Type = "Spell", ID = 29529		}),
 	SuperHealingPotion						= Create({ Type = "Potion", ID = 22829, QueueForbidden = true }),
 	Healthstone								= Create({ Type = "Spell", ID = 19013		}),
+	HastePotion								= Create({ Type = "Item", ID = 22838		}),	
 }
 
 local A                                     = setmetatable(Action[Action.PlayerClass], { __index = Action })
@@ -213,7 +215,8 @@ local Temp = {
 local ImmuneArcane = {
 [18864] = true,
 [18865] = true,
-[15691] = true
+[15691] = true,
+[20478] = true, -- Arcane Servant
 }	
 
 
@@ -309,6 +312,9 @@ A[3] = function(icon, isMulti)
 	local ManaViperEnd = A.GetToggle(2, "ManaViperEnd")
 	local StaticMark = A.GetToggle(2, "StaticMark")
 	local HSHealth = A.GetToggle(2, "HSHealth")
+
+	local UsePotions = A.GetToggle(1, "Potions")		
+	local PotionController = A.GetToggle(2, "PotionController")
 	
 	local PetCCd = Unit(pet):HasDeBuffs("Stuned") > 0 and Unit(pet):HasBuffs("Fear") > 0 and Unit(pet):HasBuffs("Sleep") > 0 and Unit(pet):HasBuffs("Disoriented") > 0 and Unit(pet):HasBuffs("Incapacitated") > 0 
 
@@ -365,6 +371,10 @@ A[3] = function(icon, isMulti)
     ------------------------------------------------------
     local function EnemyRotation(unit)
 	local npcID = select(6, Unit(unit):InfoGUID())
+
+        if A.TranquilizingShot:IsReady(unit) and AuraIsValid(unit, "UseExpelEnrage", "Enrage") then 
+            return A.TranquilizingShot:Show(icon)
+        end 
 	
 		if A.Misdirection:IsReady(player) and Unit(focus):IsExists() then
 			if combatTime < 6 then
@@ -470,9 +480,9 @@ A[3] = function(icon, isMulti)
 						return A.Berserking:Show(icon)
 					end
 
-					-- if HastePotion then
-						-- return BURSTPOTIONICON
-					-- end
+					if UsePotions and PotionController == "HastePotion" and A.HastePotion:IsReady(player) then
+						return A:Show(icon, CONST.POTION)
+					end
 
 					--Trinket 1
 					if A.Trinket1:IsReady(player) then
