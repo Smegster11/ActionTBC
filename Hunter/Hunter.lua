@@ -433,7 +433,7 @@ A[3] = function(icon, isMulti)
 		end
 
 		if A.KillCommand:IsReady(unit) then
-			return A.AspectoftheBeast:Show(icon)
+			return A.KillCommand:Show(icon)
 		end
 
 		if AtRange() then
