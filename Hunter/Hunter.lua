@@ -25,6 +25,7 @@ local MultiUnits                            = Action.MultiUnits
 local UnitCooldown                            = Action.UnitCooldown
 local Unit                                    = Action.Unit 
 local Pet                                       = LibStub("PetLibrary") 
+local AuraType									= LibStub("LibAuraTypes")
 
 local SetToggle                                = Action.SetToggle
 local GetToggle                                = Action.GetToggle
@@ -309,6 +310,7 @@ A[3] = function(icon, isMulti)
 	local StaticMark = A.GetToggle(2, "StaticMark")
 	local HSHealth = A.GetToggle(2, "HSHealth")
 	
+	local PetCCd = Unit(pet):HasDeBuffs("Stuned") > 0 and Unit(pet):HasBuffs("Fear") > 0 and Unit(pet):HasBuffs("Sleep") > 0 and Unit(pet):HasBuffs("Disoriented") > 0 and Unit(pet):HasBuffs("Incapacitated") > 0 
 
 	local AspectController = A.GetToggle(2, "AspectController")
 		--AspectController[1] = Hawk
@@ -411,7 +413,7 @@ A[3] = function(icon, isMulti)
 
 		--EXPERIMENTAL PET CONTROLLER
 		if Experimental and Pet:IsActive() then
-			if not Pet:IsAttacking() and not Unit(pet):InCC() and Unit(pet):HealthPercent() > MendPet then
+			if not Pet:IsAttacking() and not PetCCd and Unit(pet):HealthPercent() > MendPet then
 				return A:Show(icon, CONST.AUTOATTACK)
 			end
 			
