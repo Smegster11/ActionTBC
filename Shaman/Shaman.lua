@@ -479,7 +479,7 @@ A[3] = function(icon, isMulti)
 				end
 			end			
 			
-			if WaterTotem == "AUTO" and WaterTotemTimeRemaining <= A.GetGCD() * 4 then
+			if WaterTotem == "AUTO" and inCombat and WaterTotemTimeRemaining <= A.GetGCD() * 4 then
 				if A.ManaSpringTotem:IsReady(player) then
 					return A.ManaSpringTotem:Show(icon)
 				end
@@ -531,7 +531,7 @@ A[3] = function(icon, isMulti)
 				return A.LightningShield:Show(icon)
 			end	
 		-- Maintain Totem of Wrath, Mana Spring Totem, and Wrath of Air Totem
-			if TotemHandler() and not isMoving then
+			if TotemHandler() and not isMoving and A.FlameShock:IsInRange(unit) then
 				return true
 			end		
 
@@ -554,7 +554,7 @@ A[3] = function(icon, isMulti)
 				end
 			end			
 			
-			if WaterTotem == "AUTO" and WaterTotemTimeRemaining <= A.GetGCD() * 4 and not isMoving then
+			if WaterTotem == "AUTO" and WaterTotemTimeRemaining <= A.GetGCD() * 4 and not isMoving and A.FlameShock:IsInRange(unit) then
 				if A.ManaSpringTotem:IsReady(player) then
 					return A.ManaSpringTotem:Show(icon)
 				end
@@ -601,7 +601,7 @@ A[3] = function(icon, isMulti)
 		
 		
 		-- Maintain Strength of Earth Totem, Mana Spring Totem, Searing Totem
-			if TotemHandler() then
+			if TotemHandler() and A.FlameShock:IsInRange(unit) then
 				return true
 			end		
 
@@ -624,20 +624,20 @@ A[3] = function(icon, isMulti)
 				end
 			end			
 			
-			if WaterTotem == "AUTO" and WaterTotemTimeRemaining <= A.GetGCD() * 4 then
+			if WaterTotem == "AUTO" and A.FlameShock:IsInRange(unit) and WaterTotemTimeRemaining <= A.GetGCD() * 4 then
 				if A.ManaSpringTotem:IsReady(player) then
 					return A.ManaSpringTotem:Show(icon)
 				end
 			end
 			
-			if EarthTotem == "AUTO" and EarthTotemTimeRemaining <= A.GetGCD() * 4 then
+			if EarthTotem == "AUTO" and A.FlameShock:IsInRange(unit) and EarthTotemTimeRemaining <= A.GetGCD() * 4 then
 				if A.StrengthofEarthTotem:IsReady(player) then
 					return A.StrengthofEarthTotem:Show(icon)
 				end
 			end
 		
 		-- If TotemicFocus talent then Totem Twist with Windfury and Grace of Air, otherwise just Grace of Air totem
-			if AirTotem == "AUTO" and AirTotemTimeRemaining <= A.GetGCD() * 4 then
+			if AirTotem == "AUTO" and A.FlameShock:IsInRange(unit) and AirTotemTimeRemaining <= A.GetGCD() * 4 then
 				if A.GraceofAirTotem:IsReady(player) then
 					return A.GraceofAirTotem:Show(icon)
 				end
