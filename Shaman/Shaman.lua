@@ -88,6 +88,11 @@ Action[Action.PlayerClass]                     = {
 	--General
     Throw									= Create({ Type = "Spell", ID = 2764,     QueueForbidden = true, BlockForbidden = true	}),	
 
+	--Weapon Enchants
+	FlametongueWeapon						= Create({ Type = "Spell", ID = 8024	}),
+	FrostbrandWeapon						= Create({ Type = "Spell", ID = 8033	}),	
+	WindfuryWeapon							= Create({ Type = "Spell", ID = 8232	}),	
+
 	--Elemental
 	LightningBolt							= Create({ Type = "Spell", ID = 403		}),
 	EarthShock								= Create({ Type = "Spell", ID = 8042	}),
@@ -116,17 +121,14 @@ Action[Action.PlayerClass]                     = {
 	StoneskinTotem							= Create({ Type = "Spell", ID = 8071, isRank = 1	}),
 	StoneskinTotem2							= Create({ Type = "Spell", ID = 8154, isRank = 2	}),	
 	LightningShield							= Create({ Type = "Spell", ID = 324		}),	
-	FlametongueWeapon						= Create({ Type = "Spell", ID = 8024	}),
 	StrengthofEarthTotem					= Create({ Type = "Spell", ID = 8075	}),	
 	GhostWolf								= Create({ Type = "Spell", ID = 2645	}),	
-	FrostbrandWeapon						= Create({ Type = "Spell", ID = 8033	}),	
 	WaterBreathing							= Create({ Type = "Spell", ID = 131		}),	
 	FrostResistanceTotem					= Create({ Type = "Spell", ID = 8181	}),	
 	FarSight								= Create({ Type = "Spell", ID = 6196	}),
 	FlametongueTotem						= Create({ Type = "Spell", ID = 8227	}),	
 	FireResistanceTotem						= Create({ Type = "Spell", ID = 8184	}),
-	WaterWalking							= Create({ Type = "Spell", ID = 546		}),	
-	WindfuryWeapon							= Create({ Type = "Spell", ID = 8232	}),	
+	WaterWalking							= Create({ Type = "Spell", ID = 546		}),		
 	GroundingTotem							= Create({ Type = "Spell", ID = 8177	}),	
 	NatureResistanceTotem					= Create({ Type = "Spell", ID = 10595	}),	
 	WindfuryTotem							= Create({ Type = "Spell", ID = 8512	}),	
@@ -140,7 +142,8 @@ Action[Action.PlayerClass]                     = {
 	GraceofAirTotem							= Create({ Type = "Spell", ID = 8835	}),	
 	ShamanisticRage							= Create({ Type = "Spell", ID = 30823	}),
 	WrathofAirTotem							= Create({ Type = "Spell", ID = 3738	}),	
-	EarthElementalTotem						= Create({ Type = "Spell", ID = 2062	}),	
+	EarthElementalTotem						= Create({ Type = "Spell", ID = 2062	}),
+	FireElementalTotem						= Create({ Type = "Spell", ID = 2894	}),		
     Bloodlust								= Create({ Type = "Spell", ID = 2825	}),
     Heroism									= Create({ Type = "Spell", ID = 32182	}),	
 
@@ -185,6 +188,7 @@ Action[Action.PlayerClass]                     = {
 	
 	--Misc
 	SuperHealingPotion						= Create({ Type = "Potion", ID = 22829, QueueForbidden = true }),
+	DualWield								= Create({ Type = "Potion", ID = 30798, Hidden = true }),
 }
 
 local A                                     = setmetatable(Action[Action.PlayerClass], { __index = Action })
@@ -271,6 +275,9 @@ A[3] = function(icon, isMulti)
 	local SpecOverride = A.GetToggle(2, "SpecOverride")
 	local ShieldType = A.GetToggle(2, "ShieldType")
 	
+	local MainHandEnchant = A.GetToggle(2, "MainHandEnchant")
+	local OffhandEnchant = A.GetToggle(2, "OffhandEnchant")
+	
 	local FireTotem = A.GetToggle(2, "FireTotem")
 	local EarthTotem = A.GetToggle(2, "EarthTotem")
 	local AirTotem = A.GetToggle(2, "AirTotem")	
@@ -295,6 +302,9 @@ A[3] = function(icon, isMulti)
 	local ChainHealTargets = A.GetToggle(2, "ChainHealTargets")	
 	
 	local ShamanisticRageMana = A.GetToggle(2, "ShamanisticRageMana")  
+	local StopTwistingManaEnh = A.GetToggle(2, "StopTwistingManaEnh")
+	local StopShocksManaEnh = A.GetToggle(2, "StopShocksManaEnh")
+	local StopShocksManaEle = A.GetToggle(2, "StopShocksManaEle")	
 
 	--###############
 	--### POTIONS ###
@@ -338,6 +348,57 @@ A[3] = function(icon, isMulti)
 			end 	
 		end 
 	end	
+
+	--################
+	--### ENCHANTS ###
+	--################	
+	
+	local hasMainHandEnchant, mainHandExpiration, mainHandCharges, mainHandEnchantID, hasOffHandEnchant, offHandExpiration, offHandCharges, offHandEnchantID = GetWeaponEnchantInfo()
+	
+	local WindfuryBuff = {[283] = true, [284] = true, [525] = true, [1669] = true, [2636] = true }
+	local RockbiterBuff = {[29] = true, [6] = true, [3029] = true }	
+	local FlametongueBuff = {[5] = true, [4] = true, [3] = true, [523] = true, [1665] = true, [1666] = true, [2634] = true }
+	local FrostbrandBuff = {[2] = true, [12] = true, [524] = true, [1667] = true, [1668] = true, [2635] = true }		
+	
+	if not hasMainHandEnchant then
+		if MainHandEnchant == "Windfury" then
+			if A.WindfuryWeapon:IsReady(player) and ((WindfuryBuff[mainHandEnchantID] and mainHandExpiration <= 3000 and not inCombat) or not WindfuryBuff[mainHandEnchantID]) then
+				return A.WindfuryWeapon:Show(icon)
+			end
+		elseif MainHandEnchant == "Rockbiter" then
+			if A.RockbiterWeapon:IsReady(player) and ((RockbiterBuff[mainHandEnchantID] and mainHandExpiration <= 3000 and not inCombat) or not RockbiterBuff[mainHandEnchantID]) then
+				return A.RockbiterWeapon:Show(icon)
+			end		
+		elseif MainHandEnchant == "Flametongue" then
+			if A.FlametongueWeapon:IsReady(player) and ((FlametongueBuff[mainHandEnchantID] and mainHandExpiration <= 3000 and not inCombat) or not FlametongueBuff[mainHandEnchantID]) then
+				return A.FlametongueWeapon:Show(icon)
+			end		
+		elseif MainHandEnchant == "Frostbrand" then
+			if A.FrostbrandWeapon:IsReady(player) and ((FrostbrandBuff[mainHandEnchantID] and mainHandExpiration <= 3000 and not inCombat) or not FrostbrandBuff[mainHandEnchantID]) then
+				return A.FrostbrandWeapon:Show(icon)
+			end		
+		end
+	end
+	
+	if not hasOffHandEnchant then
+		if OffhandEnchant == "Windfury" then
+			if A.WindfuryWeapon:IsReady(player) and ((WindfuryBuff[offHandEnchantID] and offHandExpiration <= 3000 and not inCombat) or not WindfuryBuff[offHandEnchantID]) then
+				return A.WindfuryWeapon:Show(icon)
+			end
+		elseif OffhandEnchant == "Rockbiter" then
+			if A.RockbiterWeapon:IsReady(player) and ((RockbiterBuff[offHandEnchantID] and offHandExpiration <= 3000 and not inCombat) or not RockbiterBuff[offHandEnchantID]) then
+				return A.RockbiterWeapon:Show(icon)
+			end		
+		elseif OffhandEnchant == "Flametongue" then
+			if A.FlametongueWeapon:IsReady(player) and ((FlametongueBuff[offHandEnchantID] and offHandExpiration <= 3000 and not inCombat) or not FlametongueBuff[offHandEnchantID]) then
+				return A.FlametongueWeapon:Show(icon)
+			end		
+		elseif OffhandEnchant == "Frostbrand" then
+			if A.FrostbrandWeapon:IsReady(player) and ((FrostbrandBuff[offHandEnchantID] and offHandExpiration <= 3000 and not inCombat) or not FrostbrandBuff[offHandEnchantID]) then
+				return A.FrostbrandWeapon:Show(icon)
+			end		
+		end
+	end	
 	
 	--##############
 	--### TOTEMS ###
@@ -355,7 +416,7 @@ A[3] = function(icon, isMulti)
 	
 	local function TotemHandler()
 	
-			if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] then
+			if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] and ActiveFireTotem ~= A.FireElementalTotem:Info() then
 				if FireTotem == "Searing" and A.SearingTotem:IsReady(player) then
 					return A.SearingTotem:Show(icon)
 				elseif FireTotem == "FireNova" and A.FireNovaTotem:IsReady(player) then
@@ -383,11 +444,11 @@ A[3] = function(icon, isMulti)
 				end
 			end
 
-			if WeaveWF and A.WindfuryTotem:IsReady(player) and A.WindfuryTotem:GetSpellTimeSinceLastCast() >= 10 and inCombat and AirTotem ~= "Windfury" then
+			if WeaveWF and (Player:ManaPercentage() >= StopTwistingManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) and A.WindfuryTotem:IsReady(player) and A.WindfuryTotem:GetSpellTimeSinceLastCast() >= 10 and inCombat and AirTotem ~= "Windfury" then
 				return A.WindfuryTotem:Show(icon)
 			end
 
-			if (AirTotemTimeRemaining <= A.GetGCD() * 4 and not WeaveWF) or (WeaveWF and WindfuryActive[ActiveAirTotem]) then
+			if (AirTotemTimeRemaining <= A.GetGCD() * 4 and not WeaveWF) or (WeaveWF and WindfuryActive[ActiveAirTotem] and (Player:ManaPercentage() >= StopTwistingManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD())) then
 				if AirTotem == "Grounding" and A.GroundingTotem:IsReady(player) then
 					return A.GroundingTotem:Show(icon)
 				elseif AirTotem == "NatureResistance" and A.NatureResistanceTotem:IsReady(player) then
@@ -460,7 +521,7 @@ A[3] = function(icon, isMulti)
 				return true
 			end		
 
-			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) then -- FlameShock same range as SearingTotem
+			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() then -- FlameShock same range as SearingTotem
 				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 then
 					return A.FireNovaTotem:Show(icon)
 				end
@@ -517,7 +578,10 @@ A[3] = function(icon, isMulti)
             return A.Purge:Show(icon)
         end   	
 	
-	--Elemental
+		--#####################	
+		--##### ELEMENTAL #####
+		--#####################
+	
 		if SpecOverride == "Elemental" or SpecOverride == "Restoration" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 262) then	
 	--Single Target
 			if A.LightningBolt:IsReady(unit) and not inCombat then
@@ -535,7 +599,7 @@ A[3] = function(icon, isMulti)
 				return true
 			end		
 
-			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) then -- FlameShock same range as SearingTotem
+			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() then -- FlameShock same range as SearingTotem
 				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 then
 					return A.FireNovaTotem:Show(icon)
 				end
@@ -572,10 +636,10 @@ A[3] = function(icon, isMulti)
 				return A.ChainLightning:Show(icon)
 			end
 		-- Flame Shock while moving
-			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 then
+			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 and Player:ManaPercentage() >= StopShocksManaEle then
 				return A.FlameShock:Show(icon)
 			end
-			if A.EarthShock:IsReady(unit) then
+			if A.EarthShock:IsReady(unit) and Player:ManaPercentage() >= StopShocksManaEle then
 				return A.EarthShock:Show(icon)
 			end
 			
@@ -586,10 +650,12 @@ A[3] = function(icon, isMulti)
 	
 		end
 		
-		
-	--Enhancement
+		--#######################	
+		--##### ENHANCEMENT #####
+		--#######################
+	
 		if SpecOverride == "Enhancement" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 263) then		
-	--Single Target
+
 		-- Maintain Water Shield
 			if A.WaterShield:IsReady(player) and ShieldType == "Water" and Unit(player):HasBuffs(A.WaterShield.ID) == 0 then
 				return A.WaterShield:Show(icon)
@@ -605,7 +671,7 @@ A[3] = function(icon, isMulti)
 				return true
 			end		
 
-			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) then -- FlameShock same range as SearingTotem
+			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() then -- FlameShock same range as SearingTotem
 				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 then
 					return A.FireNovaTotem:Show(icon)
 				end
@@ -646,6 +712,8 @@ A[3] = function(icon, isMulti)
 		
 		-- Cast Fire Elemental Totem before Bloodlust
 		-- Weapon sync ??? Jesus Christ...
+			--if A.DualWield:IsTalentLearned() and Player:GetSwing(1) < Player:GetSwing(2)
+		
 		-- Shamanistic Rage without capping mana
 			if A.ShamanisticRage:IsReady(player) and Player:ManaPercentage() <= ShamanisticRageMana and Unit(unit):TimeToDie() >= 15 then
 				return A.ShamanisticRage:Show(icon)
@@ -657,10 +725,10 @@ A[3] = function(icon, isMulti)
 			end
 			
 		-- Flame Shock / Earth Shock if target already has Flame Shock dot
-			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 then
+			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 and (Player:ManaPercentage() >= StopShocksManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) then
 				return A.FlameShock:Show(icon)
 			end
-			if A.EarthShock:IsReady(unit) and (Unit(unit):HasDeBuffs(A.FlameShock.ID, true) >= 6 or Unit(unit):TimeToDie() <= 12) then
+			if A.EarthShock:IsReady(unit) and (Unit(unit):HasDeBuffs(A.FlameShock.ID, true) >= 6 or Unit(unit):TimeToDie() <= 12) and (Player:ManaPercentage() >= StopShocksManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) then
 				return A.EarthShock:Show(icon)
 			end		
 		

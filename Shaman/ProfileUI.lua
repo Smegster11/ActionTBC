@@ -24,14 +24,14 @@ local select, setmetatable							= select, setmetatable
 
 A.Data.ProfileEnabled[Action.CurrentProfile] = true
 A.Data.ProfileUI = {    
-    DateTime = "v0.6.5 (20 June 2021)",
+    DateTime = "v0.7.0 (21 June 2021)",
     -- Class settings
     [2] = {        
             { -- GENERAL HEADER
                 {
                     E = "Header",
                     L = {
-                        ANY = " l><><>< GENERAL ><><><l ",
+                        ANY = " -----[ GENERAL ]----- ",
                     },
                 },
             },
@@ -165,7 +165,7 @@ A.Data.ProfileUI = {
                 {
                     E = "Header",
                     L = {
-                        ANY = " l><><>< TOTEM CONTROLLER ><><><l ",
+                        ANY = " -----[ TOTEM CONTROLLER ]----- ",
                     },
                 },
             },	
@@ -297,7 +297,52 @@ A.Data.ProfileUI = {
                     }, 
                     M = {},
                 },					
-			},	
+			},
+            { -- LAYOUT SPACE   
+                {
+                    E = "LayoutSpace",                                                                         
+                },
+            },				
+			{
+				{ -- Main Hand Enchant
+                    E = "Dropdown",                                                         
+                    OT = {
+						{ text = "Windfury", value = "Windfury" },	
+						{ text = "Rockbiter", value = "Rockbiter" },						
+						{ text = "Flametongue", value = "Flametongue" },
+						{ text = "Frostbrand", value = "Frostbrand" },
+						{ text = "None", value = "None" },						
+                    },
+                    DB = "MainHandEnchant",
+                    DBV = "None",
+                    L = { 
+                        ANY = "Main Hand Enchant",
+                    }, 
+                    TT = { 
+                        ANY = "Main Hand Enchant", 
+                    }, 
+                    M = {},
+                },
+				{ -- Offhand Enchant
+                    E = "Dropdown",                                                         
+                    OT = {
+						{ text = "Windfury", value = "Windfury" },	
+						{ text = "Rockbiter", value = "Rockbiter" },						
+						{ text = "Flametongue", value = "Flametongue" },
+						{ text = "Frostbrand", value = "Frostbrand" },
+						{ text = "None", value = "None" },							
+                    },
+                    DB = "OffhandEnchant",
+                    DBV = "None",
+                    L = { 
+                        ANY = "Offhand Enchant",
+                    }, 
+                    TT = { 
+                        ANY = "Offhand Enchant", 
+                    }, 
+                    M = {},
+                },				
+			},			
             { -- LAYOUT SPACE   
                 {
                     E = "LayoutSpace",                                                                         
@@ -307,44 +352,10 @@ A.Data.ProfileUI = {
                 {
                     E = "Header",
                     L = {
-                        ANY = " l><><>< ENHANCEMENT SHAMAN ><><><l ",
+                        ANY = " -----[ ENHANCEMENT SHAMAN ]----- ",
                     },
                 },
-            },
-			{
-				{ -- Main Hand Enchant
-                    E = "Dropdown",                                                         
-                    OT = {
-						{ text = "Windfury", value = "Windfury" },						
-						{ text = "Flametongue Weapon", value = "FlametongueWeapon" },						
-                    },
-                    DB = "MainHandEnchant",
-                    DBV = "Windfury",
-                    L = { 
-                        ANY = "Main Hand Enchant (NOT YET WORKING)",
-                    }, 
-                    TT = { 
-                        ANY = "Main Hand Enchant (NOT YET WORKING)", 
-                    }, 
-                    M = {},
-                },
-				{ -- Offhand Enchant
-                    E = "Dropdown",                                                         
-                    OT = {
-						{ text = "Windfury", value = "Windfury" },						
-						{ text = "Flametongue Weapon", value = "FlametongueWeapon" },						
-                    },
-                    DB = "OffhandEnchant",
-                    DBV = "Windfury",
-                    L = { 
-                        ANY = "Offhand Enchant (NOT YET WORKING)",
-                    }, 
-                    TT = { 
-                        ANY = "Offhand Enchant (NOT YET WORKING)", 
-                    }, 
-                    M = {},
-                },				
-			},			
+            },			
 			{
                 { -- Shamanistic Rage Value
                     E = "Slider",                                                     
@@ -360,8 +371,70 @@ A.Data.ProfileUI = {
                         ANY = "Value mana (%) to use Shamanistic Rage", 
                     },                     
                     M = {},
-                },
+                },			
 			},
+			{
+                { -- Mana Value
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "StopTwistingManaEnh",
+                    DBV = 30, -- Set healthpercentage @30% life. 
+                    ONOFF = false,
+                    L = { 
+                        ANY = "Stop Twisting at Mana (%)",
+                    },
+                    TT = { 
+                        ANY = "Value (%) to stop totem twisting while Shamanistic Rage is on CD/not active.", 
+                    },                     
+                    M = {},
+                },
+                { -- Mana Value
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "StopShocksManaEnh",
+                    DBV = 30, -- Set healthpercentage @30% life. 
+                    ONOFF = false,
+                    L = { 
+                        ANY = "Stop Shocks at Mana (%)",
+                    },
+                    TT = { 
+                        ANY = "Value (%) to stop using shocks while Shamanistic Rage is on CD/not active.", 
+                    },                     
+                    M = {},
+                },					
+			},
+            { -- LAYOUT SPACE   
+                {
+                    E = "LayoutSpace",                                                                         
+                },
+            },			
+			{ -- PVE HEADER
+                {
+                    E = "Header",
+                    L = {
+                        ANY = " -----[ ELEMENTAL SHAMAN ]----- ",
+                    },
+                },
+            },
+			{
+                { -- Mana Value
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "StopShocksManaEle",
+                    DBV = 30, -- Set healthpercentage @30% life. 
+                    ONOFF = false,
+                    L = { 
+                        ANY = "Stop Shocks at Mana (%)",
+                    },
+                    TT = { 
+                        ANY = "Value (%) to stop using shocks.", 
+                    },                     
+                    M = {},
+                },					
+			},			
             { -- LAYOUT SPACE   
                 {
                     E = "LayoutSpace",                                                                         
@@ -371,7 +444,7 @@ A.Data.ProfileUI = {
                 {
                     E = "Header",
                     L = {
-                        ANY = " l><><>< RESTORATION SHAMAN ><><><l ",
+                        ANY = " -----[ RESTORATION SHAMAN ]----- ",
                     },
                 },
             },
@@ -435,23 +508,6 @@ A.Data.ProfileUI = {
                     },
                     TT = { 
                         ANY = "Number of targets to use Chain Heal.", 
-                    },                     
-                    M = {},
-                },				
-			},
-			{
-                { -- Mana Value
-                    E = "Slider",                                                     
-                    MIN = 0, 
-                    MAX = 100,                            
-                    DB = "ManaSave",
-                    DBV = 30, -- Set healthpercentage @30% life. 
-                    ONOFF = false,
-                    L = { 
-                        ANY = "Save Mana (%)",
-                    },
-                    TT = { 
-                        ANY = "Value (%) to not spend mana (will still use emergency abilities, however.)", 
                     },                     
                     M = {},
                 },				
