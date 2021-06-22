@@ -24,7 +24,7 @@ local select, setmetatable							= select, setmetatable
 
 A.Data.ProfileEnabled[Action.CurrentProfile] = true
 A.Data.ProfileUI = {    
-    DateTime = "v0.7.0 (21 June 2021)",
+    DateTime = "v0.8 (22 June 2021)",
     -- Class settings
     [2] = {        
             { -- GENERAL HEADER
@@ -68,7 +68,7 @@ A.Data.ProfileUI = {
                     }, 
                     M = {},
                 },				
-            },			
+            },
 			{
 				{ -- SPEC CONTROLLER
                     E = "Dropdown",                                                         
@@ -104,14 +104,20 @@ A.Data.ProfileUI = {
                     }, 
                     M = {},
                 },					
-			},            
+			},
+            { -- LAYOUT SPACE   
+                {
+                    E = "LayoutSpace",                                                                         
+                },
+            },            
 			{
 				{ -- RECOVERY POTION CONTROLLER
                     E = "Dropdown",                                                         
                     OT = {
 						{ text = "Healing Potion", value = "HealingPotion" },
 						{ text = "Mana Potion", value = "ManaPotion" },
-						{ text = "Rejuvenation Potion", value = "RejuvenationPotion" },							
+						{ text = "Rejuvenation Potion", value = "RejuvenationPotion" },
+						{ text = "Haste Potion", value = "HastePotion" },						
                     },
                     DB = "PotionController",
                     DBV = "HealingPotion",
@@ -122,7 +128,7 @@ A.Data.ProfileUI = {
                         ANY = "Pick what potion you would like to use. Sliders for HP/MP.", 
                     }, 
                     M = {},
-                },			
+                },						
 			},
 			{
                 { -- HP Potion
@@ -148,11 +154,40 @@ A.Data.ProfileUI = {
                     DBV = 10, -- Set healthpercentage @30% life. 
                     ONOFF = false,
                     L = { 
-                        ANY = "Mana (%) for Mana Potion",
+                        ANY = "Mana (%) for Rejuvenation Potion and Mana Rune",
                     },
                     TT = { 
-                        ANY = "Mana (%) to use Mana Potion.", 
+                        ANY = "Mana (%) to use Rejuvenation Potion (if selected) and Mana Rune.", 
                     },                     
+                    M = {},
+                },				
+			},
+			{
+                { -- HP Potion
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "HSHealth",
+                    DBV = 40,
+                    ONOFF = false,
+                    L = { 
+                        ANY = "HP (%) for HealthStone",
+                    },
+                    TT = { 
+                        ANY = "HP (%) to use HealthStone", 
+                    },                     
+                    M = {},
+                },
+				{ -- ManaRune
+                    E = "Checkbox", 
+                    DB = "ManaRune",
+                    DBV = false,
+                    L = { 
+                        ANY = "Use Mana Rune", 
+                    }, 
+                    TT = { 
+                        ANY = "Use Mana Rune.", 
+                    }, 
                     M = {},
                 },				
 			},
