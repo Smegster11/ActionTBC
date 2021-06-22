@@ -50,6 +50,7 @@ local CanUseLivingActionPotion                = Action.CanUseLivingActionPotion
 local CanUseLimitedInvulnerabilityPotion    = Action.CanUseLimitedInvulnerabilityPotion
 local CanUseRestorativePotion                = Action.CanUseRestorativePotion
 local CanUseSwiftnessPotion                    = Action.CanUseSwiftnessPotion
+local CanUseManaRune                    	= Action.CanUseManaRune
 
 local TeamCacheFriendly                        = TeamCache.Friendly
 local ActiveUnitPlates                        = MultiUnits:GetActiveUnitPlates()
@@ -242,47 +243,6 @@ local function InMelee(unit)
 end 
 InMelee = A.MakeFunctionCachedDynamic(InMelee)
 
-	local function PotionHandler()
-		
-		local UsePotions = A.GetToggle(1, "Potions")		
-		local PotionController = A.GetToggle(2, "PotionController")
-		local PotionHealth = A.GetToggle(2, "PotionHealth")
-		local PotionMana = A.GetToggle(2, "PotionMana")
-		
-		if UsePotions and combatTime > 2 then
-			if PotionController == "HealingPotion" then
-				if Unit(player):HealthPercent() <= PotionHealth then 
-					return A:Show(icon, CONST.POTION) 
-				end 
-			elseif PotionController == "ManaPotion" then
-				if Player:ManaPercentage() <= PotionMana then
-					return A:Show(icon, CONST.POTION)
-				end
-			elseif PotionController == "RejuvenationPotion" then
-				if Unit(player):HealthPercent() <= PotionHealth and Player:ManaPercentage() <= PotionMana then
-					return A:Show(icon, CONST.POTION)
-				end
-			end	
-		end	
-	end
-
-	local function InterruptHandler()
-
-		local unit = mouseover or target
-
-		local castLeft, _, _, _, notKickAble = Unit(unit):IsCastingRemains()
-		if castLeft > A.GetGCD() + A.GetLatency() then 
-			
-			if not notKickAble and A.SilencingShot:IsReadyByPassCastGCD(unit, nil, nil, true) and A.SilencingShot:IsInRange() then 
-				return A.SilencingShot:Show(icon)    
-			end 
-
-			if A.ScatterShot:IsReadyByPassCastGCD(unit, nil, nil, true) and A.ScatterShot:IsInRange() then 
-				return A.ScatterShot:Show(icon)    
-			end 
-		end 
-
-	end	
 
 --- ======= ACTION LISTS =======
 -- [3] Single Rotation
@@ -311,7 +271,9 @@ A[3] = function(icon, isMulti)
 	local ManaViperStart = A.GetToggle(2, "ManaViperStart")
 	local ManaViperEnd = A.GetToggle(2, "ManaViperEnd")
 	local StaticMark = A.GetToggle(2, "StaticMark")
+	local BossMark = A.GetToggle(2, "BossMark")	
 	local HSHealth = A.GetToggle(2, "HSHealth")
+	local ManaRune = A.GetToggle(2, "ManaRune")	
 
 	local UsePotions = A.GetToggle(1, "Potions")		
 	local PotionController = A.GetToggle(2, "PotionController")
@@ -333,18 +295,68 @@ A[3] = function(icon, isMulti)
 	local BurnPhase = Unit(player):HasBuffs(A.Heroism.ID) > 0 or Unit(player):HasBuffs(A.Bloodlust.ID) > 0 or Unit(player):HasBuffs(A.Drums.ID) > 0
 	local CheetahBuff = Unit(player):HasBuffs(A.AspectoftheCheetah.ID, true) > 0 or Unit(player):HasBuffs(A.AspectofthePack.ID, true) > 0
 
-	if A.Healthstone:IsReady(player) and Unit(player):HealthPercent() <= HSHealth then
-		return A.Healthstone:Show(icon)
+    --###############################
+	--##### POTIONS/HEALTHSTONE #####
+	--###############################
+	
+	local UsePotions = A.GetToggle(1, "Potion")		
+	local PotionController = A.GetToggle(2, "PotionController")
+	local PotionHealth = A.GetToggle(2, "PotionHealth")
+	local PotionMana = A.GetToggle(2, "PotionMana")	
+
+	if not Player:IsStealthed() then  
+		local Healthstone = GetToggle(1, "HealthStone") 
+		if Healthstone >= 0 then 
+			local HealthStoneObject = DetermineUsableObject(player, true, nil, true, nil, A.HSGreater3, A.HSGreater2, A.HSGreater1, A.HS3, A.HS2, A.HS1, A.HSLesser3, A.HSLesser2, A.HSLesser1, A.HSMajor3, A.HSMajor2, A.HSMajor1, A.HSMinor3, A.HSMinor2, A.HSMinor1)
+			if HealthStoneObject then 			
+				if Healthstone >= 100 then -- AUTO 
+					if Unit(player):TimeToDie() <= 9 and Unit(player):HealthPercent() <= 40 then 
+						return HealthStoneObject:Show(icon)	
+					end 
+				elseif Unit(player):HealthPercent() <= Healthstone then 
+					return HealthStoneObject:Show(icon)								 
+				end 
+			end 
+		end 		
+	end 
+	
+	if UsePotions and combatTime > 2 then
+		if PotionController == "HealingPotion" then
+			if Unit(player):HealthPercent() <= PotionHealth and CanUseHealingPotion(icon) then 
+				return true
+			end 
+		elseif PotionController == "RejuvenationPotion" then
+			if Unit(player):HealthPercent() <= PotionHealth and Player:ManaPercentage() <= PotionMana and CanUseRestorativePotion(icon) then
+				return true
+			end
+		end	
+	end	
+
+	if ManaRune and combatTime > 2 then
+		if Player:ManaPercentage() <= PotionMana and CanUseManaRune(icon) then
+			return true
+		end
 	end
 
-    -- Defensive
-    if PotionHandler() then 
-        return true
-    end 
+    --#####################
+	--##### INTERRUPT #####
+	--#####################
 
-	if InterruptHandler() then
-		return true
-	end
+	local castLeft, _, _, _, notKickAble = Unit("target" or "mouseover"):IsCastingRemains()
+	if castLeft > A.GetGCD() + A.GetLatency() then 
+		
+		if not notKickAble and A.SilencingShot:IsReadyByPassCastGCD(unit, nil, nil, true) and A.SilencingShot:IsInRange() then 
+			return A.SilencingShot:Show(icon)    
+		end 
+
+		if A.ScatterShot:IsReadyByPassCastGCD(unit, nil, nil, true) and A.ScatterShot:IsInRange() then 
+			return A.ScatterShot:Show(icon)    
+		end 
+	end 
+	
+    --###############
+	--##### OOC #####
+	--###############	
 	
 	if AspectController[3] then --Viper
 		if A.AspectoftheViper:IsReady(player) and Unit(player):HasBuffs(A.AspectoftheViper.ID, true) == 0 and Player:ManaPercentage() < ManaViperStart and not Player:IsMounted() then
@@ -417,7 +429,7 @@ A[3] = function(icon, isMulti)
 			return A.MendPet:Show(icon)
 		end
 
-		if A.HuntersMark:IsReady(unit) and Unit(unit):HasDeBuffs(A.HuntersMark.ID) == 0 and ((Player:GetDeBuffsUnitCount(A.HuntersMark.ID) == 0 and StaticMark) or not StaticMark) and Unit(unit):TimeToDie() > 2 and not ImmuneArcane[npcID] then
+		if A.HuntersMark:IsReady(unit) and Unit(unit):HasDeBuffs(A.HuntersMark.ID) == 0 and ((Player:GetDeBuffsUnitCount(A.HuntersMark.ID) == 0 and StaticMark) or not StaticMark) and Unit(unit):TimeToDie() > 2 and not ImmuneArcane[npcID] and ((Unit(unit):IsBoss() and BossMark) or not BossMark) then
 			return A.HuntersMark:Show(icon)
 		end
 
@@ -451,7 +463,7 @@ A[3] = function(icon, isMulti)
 			
 			if BurstIsON(unit) or (not BurstIsON(unit) and AutoSyncCDs) then
 				if (AutoSyncCDs and BurnPhase) or not AutoSyncCDs then
-					if A.BestialWrath:IsReady(player) and CDController[1] and (Unit(unit):TimeToDie() > 5 or Unit(unit):IsBoss()) then
+					if A.BestialWrath:IsReady(player) and CDController[1] and Pet:IsActive() and (Unit(unit):TimeToDie() > 5 or Unit(unit):IsBoss()) then
 						return A.BestialWrath:Show(icon)
 					end
 				

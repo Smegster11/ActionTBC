@@ -24,7 +24,7 @@ local select, setmetatable							= select, setmetatable
 
 A.Data.ProfileEnabled[Action.CurrentProfile] = true
 A.Data.ProfileUI = {    
-    DateTime = "v1.5.0 (20 June 2021)",
+    DateTime = "v1.6.0 (22 June 2021)",
     -- Class settings
     [2] = {        
             { -- GENERAL HEADER
@@ -74,7 +74,6 @@ A.Data.ProfileUI = {
                     E = "Dropdown",                                                         
                     OT = {
 						{ text = "Healing Potion", value = "HealingPotion" },
-						{ text = "Mana Potion", value = "ManaPotion" },
 						{ text = "Rejuvenation Potion", value = "RejuvenationPotion" },
 						{ text = "Haste Potion", value = "HastePotion" },						
                     },
@@ -87,22 +86,7 @@ A.Data.ProfileUI = {
                         ANY = "Pick what potion you would like to use. Sliders for HP/MP.", 
                     }, 
                     M = {},
-                },	
-                { -- HP Potion
-                    E = "Slider",                                                     
-                    MIN = 0, 
-                    MAX = 100,                            
-                    DB = "HSHealth",
-                    DBV = 40,
-                    ONOFF = false,
-                    L = { 
-                        ANY = "HP (%) for HealthStone",
-                    },
-                    TT = { 
-                        ANY = "HP (%) to use HealthStone", 
-                    },                     
-                    M = {},
-                },					
+                },						
 			},
 			{
                 { -- HP Potion
@@ -128,14 +112,43 @@ A.Data.ProfileUI = {
                     DBV = 10, -- Set healthpercentage @30% life. 
                     ONOFF = false,
                     L = { 
-                        ANY = "Mana (%) for Mana Potion",
+                        ANY = "Mana (%) for Rejuv Potion/Mana Rune",
                     },
                     TT = { 
-                        ANY = "Mana (%) to use Mana Potion.", 
+                        ANY = "Mana (%) to use Rejuvenation Potion (if selected) and Mana Rune.", 
                     },                     
                     M = {},
                 },				
 			},
+			{
+                { -- HP Potion
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "HSHealth",
+                    DBV = 40,
+                    ONOFF = false,
+                    L = { 
+                        ANY = "HP (%) for HealthStone",
+                    },
+                    TT = { 
+                        ANY = "HP (%) to use HealthStone", 
+                    },                     
+                    M = {},
+                },
+				{ -- ManaRune
+                    E = "Checkbox", 
+                    DB = "ManaRune",
+                    DBV = false,
+                    L = { 
+                        ANY = "Use Mana Rune", 
+                    }, 
+                    TT = { 
+                        ANY = "Use Mana Rune.", 
+                    }, 
+                    M = {},
+                },				
+			},			
             { -- LAYOUT SPACE   
                 {
                     E = "LayoutSpace",                                                                         
@@ -240,7 +253,9 @@ A.Data.ProfileUI = {
                     }, 
                     M = {},
                 },
-				{ -- AutoSyncCDs
+			},
+			{
+				{ -- Static Hunter's Mark
                     E = "Checkbox", 
                     DB = "StaticMark",
                     DBV = true,
@@ -249,6 +264,18 @@ A.Data.ProfileUI = {
                     }, 
                     TT = { 
                         ANY = "Check this box to not change your Hunter's Mark target until it expires/dies (useful if you swap targets a lot).", 
+                    }, 
+                    M = {},
+                },
+				{ -- Static Hunter's Mark
+                    E = "Checkbox", 
+                    DB = "BossMark",
+                    DBV = false,
+                    L = { 
+                        ANY = "Hunter's Mark Boss Only", 
+                    }, 
+                    TT = { 
+                        ANY = "Check this box to only use Hunter's Mark on bosses.", 
                     }, 
                     M = {},
                 },				
