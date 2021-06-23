@@ -24,7 +24,7 @@ local select, setmetatable							= select, setmetatable
 
 A.Data.ProfileEnabled[Action.CurrentProfile] = true
 A.Data.ProfileUI = {    
-    DateTime = "v1.6.0 (22 June 2021)",
+    DateTime = "v1.6.5 (23 June 2021)",
     -- Class settings
     [2] = {        
             { -- GENERAL HEADER
@@ -74,7 +74,6 @@ A.Data.ProfileUI = {
                     E = "Dropdown",                                                         
                     OT = {
 						{ text = "Healing Potion", value = "HealingPotion" },
-						{ text = "Rejuvenation Potion", value = "RejuvenationPotion" },
 						{ text = "Haste Potion", value = "HastePotion" },						
                     },
                     DB = "PotionController",
@@ -83,45 +82,13 @@ A.Data.ProfileUI = {
                         ANY = "Potion Usage",
                     }, 
                     TT = { 
-                        ANY = "Pick what potion you would like to use. Sliders for HP/MP.", 
+                        ANY = "Pick what potion you would like to use. Use slider on the first page of /action to set health value.", 
                     }, 
                     M = {},
                 },						
 			},
 			{
-                { -- HP Potion
-                    E = "Slider",                                                     
-                    MIN = 0, 
-                    MAX = 100,                            
-                    DB = "PotionHealth",
-                    DBV = 20,
-                    ONOFF = false,
-                    L = { 
-                        ANY = "HP (%) for Health Potion",
-                    },
-                    TT = { 
-                        ANY = "HP (%) to use Health Potion.", 
-                    },                     
-                    M = {},
-                },	
-                { -- Mana Potion
-                    E = "Slider",                                                     
-                    MIN = 0, 
-                    MAX = 100,                            
-                    DB = "PotionMana",
-                    DBV = 10, -- Set healthpercentage @30% life. 
-                    ONOFF = false,
-                    L = { 
-                        ANY = "Mana (%) for Rejuv Potion/Mana Rune",
-                    },
-                    TT = { 
-                        ANY = "Mana (%) to use Rejuvenation Potion (if selected) and Mana Rune.", 
-                    },                     
-                    M = {},
-                },				
-			},
-			{
-                { -- HP Potion
+                { -- HealthStone
                     E = "Slider",                                                     
                     MIN = 0, 
                     MAX = 100,                            
@@ -135,19 +102,22 @@ A.Data.ProfileUI = {
                         ANY = "HP (%) to use HealthStone", 
                     },                     
                     M = {},
-                },
-				{ -- ManaRune
-                    E = "Checkbox", 
-                    DB = "ManaRune",
-                    DBV = false,
-                    L = { 
-                        ANY = "Use Mana Rune", 
-                    }, 
-                    TT = { 
-                        ANY = "Use Mana Rune.", 
-                    }, 
-                    M = {},
                 },				
+                { -- Demonic Rune
+                    E = "Slider",                                                     
+                    MIN = 100, 
+                    MAX = 100,                            
+                    DB = "Runes",
+                    DBV = 100,
+                    ONOFF = true,
+                    L = { 
+                        ANY = "Mana (%) for Demonic Rune",
+                    },
+                    TT = { 
+                        ANY = "Mana (%) for Demonic Rune (THIS HAS BEEN TEMPORARILY FROZEN TO AUTO DUE TO CODING REASONS. THIS WILL BE USED AT 20% MANA).", 
+                    },                     
+                    M = {},
+                },			
 			},			
             { -- LAYOUT SPACE   
                 {
@@ -162,6 +132,20 @@ A.Data.ProfileUI = {
                     },
                 },
             },
+			{
+				{ -- warces
+                    E = "Checkbox", 
+                    DB = "warces",
+                    DBV = false,
+                    L = { 
+                        ANY = "Warces' haste multiplier version (PLEASE TEST)", 
+                    }, 
+                    TT = { 
+                        ANY = "Check this box to enable warces' haste-check version for Steady Shot. Experimental.", 
+                    }, 
+                    M = {},
+                },
+			},
 			{
 				{
                     E = "Dropdown",                                                         

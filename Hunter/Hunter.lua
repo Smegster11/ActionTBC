@@ -273,12 +273,12 @@ A[3] = function(icon, isMulti)
 	local StaticMark = A.GetToggle(2, "StaticMark")
 	local BossMark = A.GetToggle(2, "BossMark")	
 	local HSHealth = A.GetToggle(2, "HSHealth")
-	local ManaRune = A.GetToggle(2, "ManaRune")	
+	local ManaRune = A.GetToggle(2, "Runes")	
 
 	local UsePotions = A.GetToggle(1, "Potions")		
 	local PotionController = A.GetToggle(2, "PotionController")
 	
-	local PetCCd = Unit(pet):HasDeBuffs("Stuned") > 0 and Unit(pet):HasBuffs("Fear") > 0 and Unit(pet):HasBuffs("Sleep") > 0 and Unit(pet):HasBuffs("Disoriented") > 0 and Unit(pet):HasBuffs("Incapacitated") > 0 
+	local PetCCd = LoC:Get("STUN") > 0 and LoC:Get("FEAR") > 0 and LoC:Get("SLEEP") > 0 and LoC:Get("DISORIENT") > 0 and LoC:Get("INCAPACITATE") > 0 and LoC:Get("ROOT") > 0 and LoC:Get("DISARM") > 0 and LoC:Get("CYCLONE") > 0 and LoC:Get("DAZE") > 0 and LoC:Get("FREEZE") > 0 and LoC:Get("CHARM") > 0 and LoC:Get("HORROR") > 0 and LoC:Get("PACIFY") > 0 and LoC:Get("PACIFYSILENCE") > 0 and LoC:Get("POLYMORPH") > 0 and LoC:Get("POSSESS") > 0 and LoC:Get("SAP") > 0 and LoC:Get("SNARE") > 0 and LoC:Get("CONFUSE") > 0 and LoC:Get("SILENCE") > 0 -- thanks warces for the list
 
 	local AspectController = A.GetToggle(2, "AspectController")
 		--AspectController[1] = Hawk
@@ -300,12 +300,10 @@ A[3] = function(icon, isMulti)
 	--###############################
 	
 	local UsePotions = A.GetToggle(1, "Potion")		
-	local PotionController = A.GetToggle(2, "PotionController")
-	local PotionHealth = A.GetToggle(2, "PotionHealth")
-	local PotionMana = A.GetToggle(2, "PotionMana")	
+	local PotionController = A.GetToggle(2, "PotionController")	
 
 	if not Player:IsStealthed() then  
-		local Healthstone = GetToggle(1, "HealthStone") 
+		local Healthstone = GetToggle(2, "HSHealth") 
 		if Healthstone >= 0 then 
 			local HealthStoneObject = DetermineUsableObject(player, true, nil, true, nil, A.HSGreater3, A.HSGreater2, A.HSGreater1, A.HS3, A.HS2, A.HS1, A.HSLesser3, A.HSLesser2, A.HSLesser1, A.HSMajor3, A.HSMajor2, A.HSMajor1, A.HSMinor3, A.HSMinor2, A.HSMinor1)
 			if HealthStoneObject then 			
@@ -322,20 +320,14 @@ A[3] = function(icon, isMulti)
 	
 	if UsePotions and combatTime > 2 then
 		if PotionController == "HealingPotion" then
-			if Unit(player):HealthPercent() <= PotionHealth and CanUseHealingPotion(icon) then 
+			if CanUseHealingPotion(icon) then 
 				return true
 			end 
-		elseif PotionController == "RejuvenationPotion" then
-			if Unit(player):HealthPercent() <= PotionHealth and Player:ManaPercentage() <= PotionMana and CanUseRestorativePotion(icon) then
-				return true
-			end
 		end	
 	end	
 
-	if ManaRune and combatTime > 2 then
-		if Player:ManaPercentage() <= PotionMana and CanUseManaRune(icon) then
-			return true
-		end
+	if CanUseManaRune(icon) then
+		return true
 	end
 
     --#####################
@@ -439,7 +431,7 @@ A[3] = function(icon, isMulti)
 				return A:Show(icon, CONST.AUTOATTACK)
 			end
 			
-			if Unit(pet):HealthPercent() < 35 and Pet:IsAttacking() then
+			if Unit(pet):HealthPercent() < MendPet - 10 and Pet:IsAttacking() then
 				return A.AspectoftheMonkey:Show(icon)
 			end
 		end
@@ -515,7 +507,22 @@ A[3] = function(icon, isMulti)
  
 			local ShootTimer = Player:GetSwingShoot()
 			--print(ShootTimer)
-			if ShootTimer < Player:Execute_Time(A.SteadyShot.ID) and (ShootTimer > Player:Execute_Time(A.MultiShot.ID) or ShootTimer <= A.GetLatency()) and Player:ManaPercentage() > ManaSave then
+			if warces then
+				if (ShootTimer + GetLatency() - 0.38) >= 0 and (ShootTimer + GetLatency()) < SteadyAfterHaste and A.MultiShot:IsReady(unit) and UseAoE and A.LastPlayerCastName == A.SteadyShot:Info() then
+					return A.MultiShot:Show(icon)
+				end
+				if (ShootTimer + GetLatency() - 0.5) >= 0 and (ShootTimer + GetLatency()) < SteadyAfterHaste and A.ArcaneShot:IsReady(unit) and not ImmuneArcane[npcID] and A.LastPlayerCastName == A.SteadyShot:Info() and UseArcane then
+					return A.ArcaneShot:Show(icon)
+				end
+				if (ShootTimer + GetLatency() - 0.14) >= SteadyAfterHaste and A.SteadyShot:IsReady(unit) and (A.LastPlayerCastName == A.MultiShot:Info() or A.LastPlayerCastName == A.ArcaneShot:Info()) then
+					return A.SteadyShot:Show(icon)
+				end
+				if (ShootTimer + GetLatency() - 0.5) >= SteadyAfterHaste and A.SteadyShot:IsReady(unit) then
+					return A.SteadyShot:Show(icon)
+				end
+			end
+			
+			if not warces and ShootTimer < Player:Execute_Time(A.SteadyShot.ID) and (ShootTimer > Player:Execute_Time(A.MultiShot.ID) or ShootTimer <= A.GetLatency()) and Player:ManaPercentage() > ManaSave then
 				if A.MultiShot:IsReady(unit) and UseAoE then
 					return A.MultiShot:Show(icon)
 				end
