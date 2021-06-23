@@ -24,7 +24,7 @@ local select, setmetatable							= select, setmetatable
 
 A.Data.ProfileEnabled[Action.CurrentProfile] = true
 A.Data.ProfileUI = {    
-    DateTime = "v0.8 (22 June 2021)",
+    DateTime = "v0.8.5 (23 June 2021)",
     -- Class settings
     [2] = {        
             { -- GENERAL HEADER
@@ -116,7 +116,6 @@ A.Data.ProfileUI = {
                     OT = {
 						{ text = "Healing Potion", value = "HealingPotion" },
 						{ text = "Mana Potion", value = "ManaPotion" },
-						{ text = "Rejuvenation Potion", value = "RejuvenationPotion" },
 						{ text = "Haste Potion", value = "HastePotion" },						
                     },
                     DB = "PotionController",
@@ -131,39 +130,13 @@ A.Data.ProfileUI = {
                 },						
 			},
 			{
-                { -- HP Potion
-                    E = "Slider",                                                     
-                    MIN = 0, 
-                    MAX = 100,                            
-                    DB = "PotionHealth",
-                    DBV = 20,
-                    ONOFF = false,
-                    L = { 
-                        ANY = "HP (%) for Health Potion",
+                {
+                    E = "Label",
+                    L = {
+                        ANY = "Use Healthstone|Healing Potion slider on page 1 for Healing Potion.",
                     },
-                    TT = { 
-                        ANY = "HP (%) to use Health Potion.", 
-                    },                     
-                    M = {},
-                },	
-                { -- Mana Potion
-                    E = "Slider",                                                     
-                    MIN = 0, 
-                    MAX = 100,                            
-                    DB = "PotionMana",
-                    DBV = 10, -- Set healthpercentage @30% life. 
-                    ONOFF = false,
-                    L = { 
-                        ANY = "Mana (%) for Rejuvenation Potion and Mana Rune",
-                    },
-                    TT = { 
-                        ANY = "Mana (%) to use Rejuvenation Potion (if selected) and Mana Rune.", 
-                    },                     
-                    M = {},
                 },				
-			},
-			{
-                { -- HP Potion
+                { -- Healthstone
                     E = "Slider",                                                     
                     MIN = 0, 
                     MAX = 100,                            
@@ -177,19 +150,39 @@ A.Data.ProfileUI = {
                         ANY = "HP (%) to use HealthStone", 
                     },                     
                     M = {},
-                },
-				{ -- ManaRune
-                    E = "Checkbox", 
-                    DB = "ManaRune",
-                    DBV = false,
-                    L = { 
-                        ANY = "Use Mana Rune", 
-                    }, 
-                    TT = { 
-                        ANY = "Use Mana Rune.", 
-                    }, 
-                    M = {},
                 },				
+			},
+			{
+                { -- Mana Potion
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "PotionMana",
+                    DBV = 10, -- Set healthpercentage @30% life. 
+                    ONOFF = false,
+                    L = { 
+                        ANY = "Mana (%) for Mana Potion",
+                    },
+                    TT = { 
+                        ANY = "Mana (%) to use Mana Potion", 
+                    },                     
+                    M = {},
+                },			
+                { -- Demonic Rune
+                    E = "Slider",                                                     
+                    MIN = 100, 
+                    MAX = 100,                            
+                    DB = "Runes",
+                    DBV = 100,
+                    ONOFF = true,
+                    L = { 
+                        ANY = "Mana (%) for Demonic Rune",
+                    },
+                    TT = { 
+                        ANY = "Mana (%) for Demonic Rune (THIS HAS BEEN TEMPORARILY FROZEN TO AUTO DUE TO CODING REASONS. THIS WILL BE USED AT 20% MANA).", 
+                    },                     
+                    M = {},
+                },					
 			},
             { -- LAYOUT SPACE   
                 {
@@ -204,14 +197,6 @@ A.Data.ProfileUI = {
                     },
                 },
             },	
-			{ -- TOTEM CONTROLLER LABEL
-                {
-                    E = "Label",
-                    L = {
-                        ANY = "These dropdown boxes will set your default totem for each element. Sometimes other totems will be used automatically in reaction to what's happening. Tick the checkbox to add even more reaction totems such as Poison Cleansing and Disease Cleansing (if you think a reaction is missing, please be sure to let me know in Discord as it's possible I don't have it in the list).",
-                    },
-                },
-            },
 			{
 				{ -- ReactionTotem
                     E = "Checkbox", 
@@ -236,7 +221,19 @@ A.Data.ProfileUI = {
                         ANY = "Weave Windfury Totem with your chosen Air Totem from the dropdown.", 
                     }, 
                     M = {},
-                },					
+                },	
+				{ -- Weave WF
+                    E = "Checkbox", 
+                    DB = "WeaponSync",
+                    DBV = false,
+                    L = { 
+                        ANY = "Weapon Sync", 
+                    }, 
+                    TT = { 
+                        ANY = "Attempt to sync your weapon swing timers to make the most out of flurry procs (might not work correctly with fast weapons)", 
+                    }, 
+                    M = {},
+                },				
 			},
             { -- LAYOUT SPACE   
                 {
@@ -253,6 +250,7 @@ A.Data.ProfileUI = {
 						{ text = "Frost Resistance", value = "FrostResistance" },
 						{ text = "Magma", value = "Magma" },
 						{ text = "Flametongue", value = "Flametongue" },
+						{ text = "Totem of Wrath", value = "TotemofWrath" },						
 						{ text = "None", value = "None" },						
                     },
                     DB = "FireTotem",

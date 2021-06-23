@@ -85,6 +85,7 @@ Action[Action.PlayerClass]                     = {
     WilloftheForsaken						= Create({ Type = "Spell", ID = 7744		}), 
     EscapeArtist							= Create({ Type = "Spell", ID = 20589		}),	
 	ArcaneTorrent							= Create({ Type = "Spell", ID = 28730		}),
+	GiftoftheNaaru							= Create({ Type = "Spell", ID = 28880		}),	
 
 	--General
     Throw									= Create({ Type = "Spell", ID = 2764,     QueueForbidden = true, BlockForbidden = true	}),	
@@ -297,6 +298,7 @@ A[3] = function(icon, isMulti)
 	--Usage ActiveFireTotem == A.FireNovaTotem:Info()
 	
 	local WeaveWF = A.GetToggle(2, "WeaveWF")
+	local WeaponSync = A.GetToggle(2, "WeaponSync")	
 	
 	local LesserHealingWaveHP = A.GetToggle(2, "LesserHealingWaveHP")
 	local HealingWaveHP = A.GetToggle(2, "HealingWaveHP")	
@@ -314,11 +316,9 @@ A[3] = function(icon, isMulti)
 	
 	local UsePotions = A.GetToggle(1, "Potion")		
 	local PotionController = A.GetToggle(2, "PotionController")
-	local PotionHealth = A.GetToggle(2, "PotionHealth")
-	local PotionMana = A.GetToggle(2, "PotionMana")	
 
 	if not Player:IsStealthed() then  
-		local Healthstone = GetToggle(1, "HealthStone") 
+		local Healthstone = GetToggle(2, "HSHealth") 
 		if Healthstone >= 0 then 
 			local HealthStoneObject = DetermineUsableObject(player, true, nil, true, nil, A.HSGreater3, A.HSGreater2, A.HSGreater1, A.HS3, A.HS2, A.HS1, A.HSLesser3, A.HSLesser2, A.HSLesser1, A.HSMajor3, A.HSMajor2, A.HSMajor1, A.HSMinor3, A.HSMinor2, A.HSMinor1)
 			if HealthStoneObject then 			
@@ -335,20 +335,14 @@ A[3] = function(icon, isMulti)
 	
 	if UsePotions and combatTime > 2 then
 		if PotionController == "HealingPotion" then
-			if Unit(player):HealthPercent() <= PotionHealth and CanUseHealingPotion(icon) then 
+			if CanUseHealingPotion(icon) then 
 				return true
 			end 
-		elseif PotionController == "RejuvenationPotion" then
-			if Unit(player):HealthPercent() <= PotionHealth and Player:ManaPercentage() <= PotionMana and CanUseRestorativePotion(icon) then
-				return true
-			end
 		end	
 	end	
-	
-	if ManaRune and combatTime > 2 then
-		if Player:ManaPercentage() <= PotionMana and CanUseManaRune(icon) then
-			return true
-		end
+
+	if CanUseManaRune(icon) then
+		return true
 	end
 
 	--#################
@@ -442,6 +436,8 @@ A[3] = function(icon, isMulti)
 					return A.MagmaTotem:Show(icon)			
 				elseif FireTotem == "Flametongue" and A.FlametongueTotem:IsReady(player) then
 					return A.FlametongueTotem:Show(icon)
+				elseif FireTotem == "TotemofWrath" and A.TotemofWrath:IsReady(player) then
+					return A.TotemofWrath:Show(icon)					
 				end
 			end
 			
@@ -573,6 +569,38 @@ A[3] = function(icon, isMulti)
 			
 			-- Mana Tide Totem when group benefits
 			
+			--Cleanse
+			local getmembersAll = HealingEngine.Data.SortedUnitIDs			
+			if A.CurePoison:IsReady(unit) then
+				for i = 1, #getmembersAll do 
+					if Unit(getmembersAll[i].Unit):GetRange() <= 40 and AuraIsValid(getmembersAll[i].Unit, "UseDispel", "Dispel poisons") then  
+                        if UnitGUID(getmembersAll[i].Unit) ~= currGUID then
+                          HealingEngine.SetTarget(getmembersAll[i].Unit) 
+                          break
+                        end 					                									
+					end				
+				end
+			end
+			
+			if A.CureDisease:IsReady(unit) then
+				for i = 1, #getmembersAll do 
+					if Unit(getmembersAll[i].Unit):GetRange() <= 40 and AuraIsValid(getmembersAll[i].Unit, "UseDispel", "Dispel diseases") then  
+                        if UnitGUID(getmembersAll[i].Unit) ~= currGUID then
+                          HealingEngine.SetTarget(getmembersAll[i].Unit) 
+                          break
+                        end 					                									
+					end				
+				end
+			end			
+
+			if A.CurePoison:IsReady(unit) and AuraIsValid(unit, "UseDispel", "Dispel poisons") then
+				return A.CurePoison:Show(icon)
+			end
+
+			if A.CureDisease:IsReady(unit) and AuraIsValid(unit, "UseDispel", "Dispel diseases") then
+				return A.CureDisease:Show(icon)
+			end
+			
 			
 			-- Chain Heal R4 or Chain Heal R5 spam
 			if A.ChainHeal:IsReady(unit) and not isMoving and Unit(unit):HealthPercent() <= ChainHealHP and A.HealingEngine.GetBelowHealthPercentUnits(ChainHealHP, 40) >= ChainHealTargets then
@@ -632,6 +660,9 @@ A[3] = function(icon, isMulti)
 					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 then
 						return A.MagmaTotem:Show(icon)
 					end
+					if A.TotemofWrath:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
+						return A.TotemofWrath:Show(icon)
+					end					
 					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
 						return A.SearingTotem:Show(icon)
 					end
@@ -658,7 +689,17 @@ A[3] = function(icon, isMulti)
 				if A.Berserking:IsReady(player) and BurstIsON(unit) then
 					return A.Berserking:Show(icon)
 				end
-			end			
+			end	
+
+			--Trinket 1
+			if A.Trinket1:IsReady(player) and BurstIsOn(unit) then
+				return A.Trinket1:Show(icon)    
+			end
+			
+			--Trinket 2
+			if A.Trinket2:IsReady(player) and BurstIsOn(unit) then
+				return A.Trinket2:Show(icon)    
+			end					
 		
 		-- Use Elemental Mastery with Chain Lightning
 			if A.ChainLightning:IsReady(unit) and Unit(player):HasBuffs(A.ElementalMastery.ID, true) > 0 then 
@@ -746,19 +787,39 @@ A[3] = function(icon, isMulti)
 			end
 			
 		
-		-- Cast Fire Elemental Totem before Bloodlust
-		if A.GetToggle(1, "Racial") then
-			if A.BloodFury:IsReady(player) and BurstIsON(unit) then
-				return A.BloodFury:Show(icon)
+			-- Cast Fire Elemental Totem before Bloodlust
+			if A.GetToggle(1, "Racial") then
+				if A.BloodFury:IsReady(player) and BurstIsON(unit) then
+					return A.BloodFury:Show(icon)
+				end
+				
+				if A.Berserking:IsReady(player) and BurstIsON(unit) then
+					return A.Berserking:Show(icon)
+				end
 			end
 			
-			if A.Berserking:IsReady(player) and BurstIsON(unit) then
-				return A.Berserking:Show(icon)
+			--Trinket 1
+			if A.Trinket1:IsReady(player) and BurstIsON(unit) then
+				return A.Trinket1:Show(icon)    
 			end
-		end
+			
+			--Trinket 2
+			if A.Trinket2:IsReady(player) and BurstIsON(unit) then
+				return A.Trinket2:Show(icon)    
+			end				
 		
 		-- Weapon sync ??? Jesus Christ...
-			--if A.DualWield:IsTalentLearned() and Player:GetSwing(1) > Player:GetSwing(2)
+			local MHSwing = Player:GetSwing(1)
+			local OHSwing = Player:GetSwing(2)
+			local MHSwingMax = Player:GetSwingMax(1)
+			
+			if WeaponSync and A.DualWield:IsTalentLearned() then
+				if MHSwing < MHSwingMax - 500 then
+					if OHSwing <= MHSwing then
+						return A.SentryTotem:Show(icon)
+					end
+				end
+			end
 		
 		-- Shamanistic Rage without capping mana
 			if A.ShamanisticRage:IsReady(player) and Player:ManaPercentage() <= ShamanisticRageMana and Unit(unit):TimeToDie() >= 15 then
