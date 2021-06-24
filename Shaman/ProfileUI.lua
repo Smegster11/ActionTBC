@@ -24,7 +24,7 @@ local select, setmetatable							= select, setmetatable
 
 A.Data.ProfileEnabled[Action.CurrentProfile] = true
 A.Data.ProfileUI = {    
-    DateTime = "v0.8.5 (23 June 2021)",
+    DateTime = "v0.8.6 (24 June 2021)",
     -- Class settings
     [2] = {        
             { -- GENERAL HEADER
@@ -188,7 +188,38 @@ A.Data.ProfileUI = {
                 {
                     E = "LayoutSpace",                                                                         
                 },
-            }, 
+            },
+			{
+				{ -- Weave WF
+                    E = "Checkbox", 
+                    DB = "WeaponSync",
+                    DBV = false,
+                    L = { 
+                        ANY = "Weapon Sync", 
+                    }, 
+                    TT = { 
+                        ANY = "Attempt to sync your weapon swing timers to make the most out of flurry procs (might not work correctly with fast weapons)", 
+                    }, 
+                    M = {},
+                },	
+				{ -- Shock Interrupt
+                    E = "Checkbox", 
+                    DB = "ShockInterrupt",
+                    DBV = false,
+                    L = { 
+                        ANY = "Save Shocks for Interrupts", 
+                    }, 
+                    TT = { 
+                        ANY = "Save your shock CD for interrupts only.", 
+                    }, 
+                    M = {},
+                },					
+			},
+            { -- LAYOUT SPACE   
+                {
+                    E = "LayoutSpace",                                                                         
+                },
+            },			
 			{ -- TOTEM CONTROLLER HEADER
                 {
                     E = "Header",
@@ -206,7 +237,7 @@ A.Data.ProfileUI = {
                         ANY = "Use Reaction Totems", 
                     }, 
                     TT = { 
-                        ANY = "Use reaction totems such as Poison Cleansing and Disease Cleansing.", 
+                        ANY = "Use reaction totems such as Poison Cleansing and Disease Cleansing (CURRENTLY IN DEVELOPMENT).", 
                     }, 
                     M = {},
                 },
@@ -219,18 +250,6 @@ A.Data.ProfileUI = {
                     }, 
                     TT = { 
                         ANY = "Weave Windfury Totem with your chosen Air Totem from the dropdown.", 
-                    }, 
-                    M = {},
-                },	
-				{ -- Weave WF
-                    E = "Checkbox", 
-                    DB = "WeaponSync",
-                    DBV = false,
-                    L = { 
-                        ANY = "Weapon Sync", 
-                    }, 
-                    TT = { 
-                        ANY = "Attempt to sync your weapon swing timers to make the most out of flurry procs (might not work correctly with fast weapons)", 
                     }, 
                     M = {},
                 },				

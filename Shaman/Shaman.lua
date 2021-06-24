@@ -262,6 +262,9 @@ local FireNovaActive = {
 ["Fire Nova Totem VII"] = true,
 } 
 
+local ImmuneFire = {
+[6073] = true, -- Searing Infernal
+}	
 
 --- ======= ACTION LISTS =======
 -- [3] Single Rotation
@@ -298,7 +301,8 @@ A[3] = function(icon, isMulti)
 	--Usage ActiveFireTotem == A.FireNovaTotem:Info()
 	
 	local WeaveWF = A.GetToggle(2, "WeaveWF")
-	local WeaponSync = A.GetToggle(2, "WeaponSync")	
+	local WeaponSync = A.GetToggle(2, "WeaponSync")
+	local ShockInterrupt = A.GetToggle(2, "ShockInterrupt")
 	
 	local LesserHealingWaveHP = A.GetToggle(2, "LesserHealingWaveHP")
 	local HealingWaveHP = A.GetToggle(2, "HealingWaveHP")	
@@ -309,6 +313,8 @@ A[3] = function(icon, isMulti)
 	local StopTwistingManaEnh = A.GetToggle(2, "StopTwistingManaEnh")
 	local StopShocksManaEnh = A.GetToggle(2, "StopShocksManaEnh")
 	local StopShocksManaEle = A.GetToggle(2, "StopShocksManaEle")	
+
+	local npcID = select(6, Unit(target):InfoGUID())
 
     --###############################
 	--##### POTIONS/HEALTHSTONE #####
@@ -348,15 +354,13 @@ A[3] = function(icon, isMulti)
 	--#################
 	--### INTERRUPT ###
 	--#################
-
-	local castLeft, _, _, _, notKickAble = Unit("target" or "mouseover"):IsCastingRemains()
-	if castLeft > A.GetGCD() + A.GetLatency() and IsUnitEnemy("target" or "mouseover") then 
-		
-		if not notKickAble and A.EarthShock:IsReadyByPassCastGCD(unit, nil, nil, true) and A.EarthShock:IsInRange() then 
-			return A.EarthShock:Show(icon)    
-		end 
-
+	
+	useKick, useCC, useRacial, notInterruptable, castRemainsTime, castDoneTime = InterruptIsValid(target, "Main", true, nil) 
+	
+	if A.EarthShock:IsReady(unit) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() then 
+		return A.EarthShock:Show(icon)    
 	end 
+
 
 	--################
 	--### ENCHANTS ###
@@ -550,7 +554,7 @@ A[3] = function(icon, isMulti)
 					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 then
 						return A.MagmaTotem:Show(icon)
 					end
-					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
+					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) and not ImmuneFire[npcID] then
 						return A.SearingTotem:Show(icon)
 					end
 				end
@@ -663,7 +667,7 @@ A[3] = function(icon, isMulti)
 					if A.TotemofWrath:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
 						return A.TotemofWrath:Show(icon)
 					end					
-					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
+					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) and not ImmuneFire[npcID] then
 						return A.SearingTotem:Show(icon)
 					end
 				end
@@ -713,10 +717,10 @@ A[3] = function(icon, isMulti)
 				return A.ChainLightning:Show(icon)
 			end
 		-- Flame Shock while moving
-			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 and Player:ManaPercentage() >= StopShocksManaEle then
+			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 and Player:ManaPercentage() >= StopShocksManaEle and not ShockInterrupt and not ImmuneFire[npcID] then
 				return A.FlameShock:Show(icon)
 			end
-			if A.EarthShock:IsReady(unit) and Player:ManaPercentage() >= StopShocksManaEle then
+			if A.EarthShock:IsReady(unit) and Player:ManaPercentage() >= StopShocksManaEle and not ShockInterrupt then
 				return A.EarthShock:Show(icon)
 			end
 			
@@ -756,7 +760,7 @@ A[3] = function(icon, isMulti)
 					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 then
 						return A.MagmaTotem:Show(icon)
 					end
-					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
+					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) and not ImmuneFire[npcID] then
 						return A.SearingTotem:Show(icon)
 					end
 				end
@@ -813,7 +817,7 @@ A[3] = function(icon, isMulti)
 			local OHSwing = Player:GetSwing(2)
 			local MHSwingMax = Player:GetSwingMax(1)
 			
-			if WeaponSync and A.DualWield:IsTalentLearned() then
+			if WeaponSync then --and A.DualWield:IsTalentLearned() then
 				if MHSwing < MHSwingMax - 500 then
 					if OHSwing <= MHSwing then
 						return A.SentryTotem:Show(icon)
@@ -832,10 +836,10 @@ A[3] = function(icon, isMulti)
 			end
 			
 		-- Flame Shock / Earth Shock if target already has Flame Shock dot
-			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 and (Player:ManaPercentage() >= StopShocksManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) then
+			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 and (Player:ManaPercentage() >= StopShocksManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) and not ShockInterrupt and not ImmuneFire[npcID] then
 				return A.FlameShock:Show(icon)
 			end
-			if A.EarthShock:IsReady(unit) and (Unit(unit):HasDeBuffs(A.FlameShock.ID, true) >= 6 or Unit(unit):TimeToDie() <= 12) and (Player:ManaPercentage() >= StopShocksManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) then
+			if A.EarthShock:IsReady(unit) and (Unit(unit):HasDeBuffs(A.FlameShock.ID, true) >= 6 or Unit(unit):TimeToDie() <= 12) and (Player:ManaPercentage() >= StopShocksManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) and not ShockInterrupt then
 				return A.EarthShock:Show(icon)
 			end		
 		
@@ -845,7 +849,6 @@ A[3] = function(icon, isMulti)
 	end
 
     -- End on EnemyRotation()
-	
     -- Heal Target 
     if IsUnitFriendly(target) then 
         unit = target 
@@ -880,7 +883,8 @@ A[3] = function(icon, isMulti)
         if DamageRotation(unit) then 
             return true 
         end 
-    end  
+    end
+
 end
 -- Finished
 
