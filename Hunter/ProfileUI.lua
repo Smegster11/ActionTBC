@@ -24,7 +24,7 @@ local select, setmetatable							= select, setmetatable
 
 A.Data.ProfileEnabled[Action.CurrentProfile] = true
 A.Data.ProfileUI = {    
-    DateTime = "v1.6.5 (23 June 2021)",
+    DateTime = "v1.7 (24 June 2021)",
     -- Class settings
     [2] = {        
             { -- GENERAL HEADER

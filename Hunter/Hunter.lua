@@ -243,6 +243,10 @@ local function InMelee(unit)
 end 
 InMelee = A.MakeFunctionCachedDynamic(InMelee)
 
+function Player:Casting_TimeMult(spellID) 
+    local casti_speedmult = A_Unit(self.UnitID):CastTime(spellID)     
+    return casti_speedmult 
+end 
 
 --- ======= ACTION LISTS =======
 -- [3] Single Rotation
@@ -274,6 +278,14 @@ A[3] = function(icon, isMulti)
 	local BossMark = A.GetToggle(2, "BossMark")	
 	local HSHealth = A.GetToggle(2, "HSHealth")
 	local ManaRune = A.GetToggle(2, "Runes")	
+
+	local speed = UnitRangedDamage("player");
+	local speedofWpn = UnitRangedDamage("player");
+	local WpnBaseSpeed = speedofWpn * 1.38	
+	local haste = speed / WpnBaseSpeed
+	local ShootTimer = Player:GetSwingShoot() - 0.5
+	local SteadyAfterHaste = Player:Casting_TimeMult(A.SteadyShot.ID) * haste
+	local MultiAfterHaste = Player:Casting_TimeMult(A.MultiShot.ID) * haste
 
 	local UsePotions = A.GetToggle(1, "Potions")		
 	local PotionController = A.GetToggle(2, "PotionController")
@@ -508,17 +520,41 @@ A[3] = function(icon, isMulti)
 			local ShootTimer = Player:GetSwingShoot()
 			--print(ShootTimer)
 			if warces then
-				if (ShootTimer + GetLatency() - 0.38) >= 0 and (ShootTimer + GetLatency()) < SteadyAfterHaste and A.MultiShot:IsReady(unit) and UseAoE and A.LastPlayerCastName == A.SteadyShot:Info() then
-					return A.MultiShot:Show(icon)
+				if speed > 1.89 then
+					--5:5:1:1
+					if (ShootTimer + GetLatency() + 0.12) >= MultiAfterHaste and (ShootTimer + GetLatency()) < SteadyAfterHaste and A.MultiShot:IsReady(unit) and UseAoE and A.LastPlayerCastName == A.SteadyShot:Info() then
+						return A.MultiShot:Show(icon)
+					end
+					if (ShootTimer + GetLatency()) > 0 and (ShootTimer + GetLatency()) < SteadyAfterHaste and A.ArcaneShot:IsReady(unit) and not ImmuneArcane[npcID] and A.LastPlayerCastName == A.SteadyShot:Info() and UseArcane then
+						return A.ArcaneShot:Show(icon)
+					end
+					if (ShootTimer + GetLatency() + 0.36) >= SteadyAfterHaste and A.SteadyShot:IsReady(unit) and A.LastPlayerCastName == A.ArcaneShot:Info() then
+						return A.SteadyShot:Show(icon)  
+					end
+					if (ShootTimer + GetLatency()) >= SteadyAfterHaste and A.SteadyShot:IsReady(unit) then
+						return A.SteadyShot:Show(icon)  
+					end
 				end
-				if (ShootTimer + GetLatency() - 0.5) >= 0 and (ShootTimer + GetLatency()) < SteadyAfterHaste and A.ArcaneShot:IsReady(unit) and not ImmuneArcane[npcID] and A.LastPlayerCastName == A.SteadyShot:Info() and UseArcane then
-					return A.ArcaneShot:Show(icon)
+				if speed <= 1.87 and speed > 1.624 then
+					--5:6:1:1
+					if (ShootTimer + GetLatency() + 0.1) > 0 and (ShootTimer + GetLatency()) < SteadyAfterHaste and A.ArcaneShot:IsReady(unit) and not ImmuneArcane[npcID] and A.LastPlayerCastName == A.SteadyShot:Info() and UseArcane then
+						return A.ArcaneShot:Show(icon)
+					end
+					if (ShootTimer + GetLatency()) >= MultiAfterHaste and (ShootTimer + GetLatency()) < SteadyAfterHaste and A.MultiShot:IsReady(unit) and UseAoE and A.LastPlayerCastName == A.ArcaneShot:Info() then
+						return A.MultiShot:Show(icon)
+					end
+					if (ShootTimer + GetLatency() + 0.2) >= SteadyAfterHaste and A.SteadyShot:IsReady(unit) and A.LastPlayerCastName == A.MultiShot:Info() then
+						return A.SteadyShot:Show(icon)  
+					end
+					if (ShootTimer + GetLatency()) >= SteadyAfterHaste and A.SteadyShot:IsReady(unit) then
+						return A.SteadyShot:Show(icon)  
+					end
 				end
-				if (ShootTimer + GetLatency() - 0.14) >= SteadyAfterHaste and A.SteadyShot:IsReady(unit) and (A.LastPlayerCastName == A.MultiShot:Info() or A.LastPlayerCastName == A.ArcaneShot:Info()) then
-					return A.SteadyShot:Show(icon)
-				end
-				if (ShootTimer + GetLatency() - 0.5) >= SteadyAfterHaste and A.SteadyShot:IsReady(unit) then
-					return A.SteadyShot:Show(icon)
+				if speed <= 1.624 then
+					--1:1
+					if (ShootTimer + GetLatency()) >= SteadyAfterHaste and A.SteadyShot:IsReady(unit) then
+						return A.SteadyShot:Show(icon)  
+					end
 				end
 			end
 			
