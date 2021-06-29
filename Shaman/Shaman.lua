@@ -264,7 +264,32 @@ local FireNovaActive = {
 
 local ImmuneFire = {
 [6073] = true, -- Searing Infernal
-}	
+[2760] = true, -- Burning Exile
+}
+
+local ImmuneNature = {
+[2762] = true, -- Thundering Exile
+[2592] = true, -- Rumbling Exile
+[2735] = true, -- Lesser Rock Elemental
+[92] = true, -- Rock Elemental
+[2736] = true, -- Greater Rock Elemental
+[2752] = true, -- Rumbler (Greater Rock Elemental rarespawn)
+[2919] = true, -- Fam'retor Guardian (Badlands quest enemy)
+[9396] = true, -- Ground Pounder
+}		
+
+--[[local function ReactionTotem()
+
+	name, rank, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, shouldConsolidate, spellId 
+	 = UnitDebuff("unit", index or ["name", "rank"][, "filter"])
+	local isPoisoned == false
+	local isDiseased == false	
+
+	if debuffType == "Poison" then
+		isPoisoned == true
+	end
+
+end]]
 
 --- ======= ACTION LISTS =======
 -- [3] Single Rotation
@@ -357,7 +382,7 @@ A[3] = function(icon, isMulti)
 	
 	useKick, useCC, useRacial, notInterruptable, castRemainsTime, castDoneTime = InterruptIsValid(target, "Main", true, nil) 
 	
-	if A.EarthShock:IsReady(unit) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() then 
+	if A.EarthShock:IsReady(unit) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() and not ImmuneNature[npcID] then 
 		return A.EarthShock:Show(icon)    
 	end 
 
@@ -411,6 +436,17 @@ A[3] = function(icon, isMulti)
 				return A.FrostbrandWeapon:Show(icon)
 			end		
 		end
+	end	
+
+	--########################
+	--### ELEMENTAL SHIELD ###
+	--########################
+
+	if A.WaterShield:IsReady(player) and ShieldType == "Water" and Unit(player):HasBuffs(A.WaterShield.ID) == 0 then
+		return A.WaterShield:Show(icon)
+	end
+	if A.LightningShield:IsReady(player) and ShieldType == "Lightning" and Unit(player):HasBuffs(A.LightningShield.ID) == 0 and not ImmuneNature[npcID] then
+		return A.LightningShield:Show(icon)
 	end	
 	
 	--##############
@@ -529,14 +565,7 @@ A[3] = function(icon, isMulti)
 			if Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) > 0 and Unit(unit):HealthPercent() <= 60 then
 				return A.HealingWave:Show(icon)
 			end
-		
-			-- Maintain Water Shield
-			if A.WaterShield:IsReady(player) and ShieldType == "Water" and Unit(player):HasBuffs(A.WaterShield.ID) == 0 then
-				return A.WaterShield:Show(icon)
-			end
-			if A.LightningShield:IsReady(player) and ShieldType == "Lightning" and Unit(player):HasBuffs(A.LightningShield.ID) == 0 then
-				return A.LightningShield:Show(icon)
-			end					
+					
 			-- Maintain Earth Shield on tank
 			if A.EarthShield:IsReady(unit) and Unit(unit):HasBuffs(A.EarthShield.ID) == 0 and Unit(unit):IsTank() then
 				return A.EarthShield:Show(icon)
@@ -641,16 +670,9 @@ A[3] = function(icon, isMulti)
 	
 		if SpecOverride == "Elemental" or SpecOverride == "Restoration" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 262) then	
 	--Single Target
-			if A.LightningBolt:IsReady(unit) and not inCombat then
+			if A.LightningBolt:IsReady(unit) and not inCombat and not ImmuneNature[npcID] then
 				return A.LightningBolt:Show(icon)
 			end
-		-- Maintain Water Shield
-			if A.WaterShield:IsReady(player) and ShieldType == "Water" and Unit(player):HasBuffs(A.WaterShield.ID) == 0 then
-				return A.WaterShield:Show(icon)
-			end
-			if A.LightningShield:IsReady(player) and ShieldType == "Lightning" and Unit(player):HasBuffs(A.LightningShield.ID) == 0 then
-				return A.LightningShield:Show(icon)
-			end	
 		-- Maintain Totem of Wrath, Mana Spring Totem, and Wrath of Air Totem
 			if TotemHandler() and not isMoving and A.FlameShock:IsInRange(unit) then
 				return true
@@ -706,26 +728,26 @@ A[3] = function(icon, isMulti)
 			end					
 		
 		-- Use Elemental Mastery with Chain Lightning
-			if A.ChainLightning:IsReady(unit) and Unit(player):HasBuffs(A.ElementalMastery.ID, true) > 0 then 
+			if A.ChainLightning:IsReady(unit) and Unit(player):HasBuffs(A.ElementalMastery.ID, true) > 0 and not ImmuneNature[npcID] then 
 				return A.ChainLightning:Show(icon)
 			end
-			if A.ElementalMastery:IsReady(player) and A.ChainLightning:GetCooldown() <= A.GetGCD() and BurstIsON(unit) then
+			if A.ElementalMastery:IsReady(player) and A.ChainLightning:GetCooldown() <= A.GetGCD() and BurstIsON(unit) and not ImmuneNature[npcID] then
 				return A.ElementalMastery:Show(icon)
 			end
 		-- Chain Lightning
-			if A.ChainLightning:IsReady(unit) and UseAoE and not isMoving then
+			if A.ChainLightning:IsReady(unit) and UseAoE and not isMoving and not ImmuneNature[npcID] then
 				return A.ChainLightning:Show(icon)
 			end
 		-- Flame Shock while moving
 			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 and Player:ManaPercentage() >= StopShocksManaEle and not ShockInterrupt and not ImmuneFire[npcID] then
 				return A.FlameShock:Show(icon)
 			end
-			if A.EarthShock:IsReady(unit) and Player:ManaPercentage() >= StopShocksManaEle and not ShockInterrupt then
+			if A.EarthShock:IsReady(unit) and Player:ManaPercentage() >= StopShocksManaEle and not ShockInterrupt and not ImmuneNature[npcID] then
 				return A.EarthShock:Show(icon)
 			end
 			
 		-- Lightning Bolt
-			if A.LightningBolt:IsReady(unit) and not isMoving then
+			if A.LightningBolt:IsReady(unit) and not isMoving and not ImmuneNature[npcID] then
 				return A.LightningBolt:Show(icon)
 			end
 	
@@ -736,14 +758,7 @@ A[3] = function(icon, isMulti)
 		--#######################
 	
 		if SpecOverride == "Enhancement" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 263) then		
-
-		-- Maintain Water Shield
-			if A.WaterShield:IsReady(player) and ShieldType == "Water" and Unit(player):HasBuffs(A.WaterShield.ID) == 0 then
-				return A.WaterShield:Show(icon)
-			end
-			if A.LightningShield:IsReady(player) and ShieldType == "Lightning" and Unit(player):HasBuffs(A.LightningShield.ID) == 0 then
-				return A.LightningShield:Show(icon)
-			end			
+		
 		-- Windfury Weapon on both weapons
 		
 		
@@ -818,8 +833,9 @@ A[3] = function(icon, isMulti)
 			local MHSwingMax = Player:GetSwingMax(1)
 			
 			if WeaponSync then --and A.DualWield:IsTalentLearned() then
-				if MHSwing < MHSwingMax - 500 then
+				if MHSwing < MHSwingMax - 0.5 then
 					if OHSwing <= MHSwing then
+						print("Using Macro")
 						return A.SentryTotem:Show(icon)
 					end
 				end
@@ -839,7 +855,7 @@ A[3] = function(icon, isMulti)
 			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 and (Player:ManaPercentage() >= StopShocksManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) and not ShockInterrupt and not ImmuneFire[npcID] then
 				return A.FlameShock:Show(icon)
 			end
-			if A.EarthShock:IsReady(unit) and (Unit(unit):HasDeBuffs(A.FlameShock.ID, true) >= 6 or Unit(unit):TimeToDie() <= 12) and (Player:ManaPercentage() >= StopShocksManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) and not ShockInterrupt then
+			if A.EarthShock:IsReady(unit) and (Unit(unit):HasDeBuffs(A.FlameShock.ID, true) >= 6 or Unit(unit):TimeToDie() <= 12) and (Player:ManaPercentage() >= StopShocksManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) and not ShockInterrupt and not ImmuneNature[npcID] then
 				return A.EarthShock:Show(icon)
 			end		
 		
