@@ -279,6 +279,7 @@ A[3] = function(icon, isMulti)
     local ManaRune = A.GetToggle(2, "Runes")    
     
 	local speed = UnitRangedDamage("player"); 
+	local WpnSpeedSld = A.GetToggle(2, "WpnSpeedSld")
 	local WpnBaseSpeed = WpnSpeedSld / 100
     local haste = WpnBaseSpeed / speed
     local ShootTimer = Player:GetSwingShoot() - (0.5 / haste)

@@ -145,6 +145,22 @@ A.Data.ProfileUI = {
                     }, 
                     M = {},
                 },
+                { -- Arcane Shot Mana
+                    E = "Slider",                                                     
+                    MIN = 1, 
+                    MAX = 4,                            
+                    DB = "WpnSpeedSld",
+                    DBV = 3, -- Set healthpercentage @30% life. 
+					Precision = 1,
+                    ONOFF = false,
+                    L = { 
+                        ANY = "Weapon Speed",
+                    },
+                    TT = { 
+                        ANY = "Set your weapon speed (only for use with Warces' rotation).", 
+                    },                     
+                    M = {},
+                },				
 			},
 			{
 				{
