@@ -24,7 +24,7 @@ local select, setmetatable							= select, setmetatable
 
 A.Data.ProfileEnabled[Action.CurrentProfile] = true
 A.Data.ProfileUI = {    
-    DateTime = "v0.8.7 (29 June 2021)",
+    DateTime = "v0.9 (30 June 2021)",
     -- Class settings
     [2] = {        
             { -- GENERAL HEADER
@@ -500,19 +500,82 @@ A.Data.ProfileUI = {
                     },
                 },
             },
-			{
+            { -- PVE HEADER
+                {
+                    E = "Header",
+                    L = {
+                        ANY = " Lesser Healing Wave ",
+                    },
+                },
+            },            
+            {
+                { -- Lesser Healing Wave R5
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "LesserHealingWave5",
+                    DBV = 30, -- Set healthpercentage @30% life. 
+                    ONOFF = false,
+                    L = { 
+                        ANY = "Rank 5 (%)",
+                    },
+                    TT = { 
+                        ANY = "Value (%) to use Lesser Healing Wave Rank 5", 
+                    },                     
+                    M = {},
+                },
                 { -- Lesser Healing Wave Value
                     E = "Slider",                                                     
                     MIN = 0, 
                     MAX = 100,                            
-                    DB = "LesserHealingWaveHP",
+                    DB = "LesserHealingWaveMax",
                     DBV = 80, -- Set healthpercentage @30% life. 
-                    ONOFF = true,
+                    ONOFF = false,
                     L = { 
-                        ANY = "Lesser Healing Wave (%)",
+                        ANY = "Max Rank (%)",
                     },
                     TT = { 
-                        ANY = "Value (%) to use Lesser Healing Wave.", 
+                        ANY = "Value (%) to use Lesser Healing Wave Max Rank.", 
+                    },                     
+                    M = {},
+                },
+            },
+            { -- PVE HEADER
+                {
+                    E = "Header",
+                    L = {
+                        ANY = " Healing Wave ",
+                    },
+                },
+            },            
+            {
+                { -- Healing Wave Value
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "HealingWave1",
+                    DBV = 60, -- Set healthpercentage @30% life. 
+                    ONOFF = false,
+                    L = { 
+                        ANY = "Rank 1 (%)",
+                    },
+                    TT = { 
+                        ANY = "Value (%) to use Healing Wave Rank 1", 
+                    },                     
+                    M = {},
+                },	
+                { -- Healing Wave Value
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "HealingWave7",
+                    DBV = 60, -- Set healthpercentage @30% life. 
+                    ONOFF = false,
+                    L = { 
+                        ANY = "Rank 7 (%)",
+                    },
+                    TT = { 
+                        ANY = "Value (%) to use Healing Wave Rank 7.", 
                     },                     
                     M = {},
                 },
@@ -520,54 +583,187 @@ A.Data.ProfileUI = {
                     E = "Slider",                                                     
                     MIN = 0, 
                     MAX = 100,                            
-                    DB = "HealingWaveHP",
+                    DB = "HealingWave10",
                     DBV = 60, -- Set healthpercentage @30% life. 
                     ONOFF = false,
                     L = { 
-                        ANY = "Healing Wave (%)",
+                        ANY = "Rank 10 (%)",
                     },
                     TT = { 
-                        ANY = "Value (%) to use Healing Wave.", 
-                    },                     
-                    M = {},
-                },				
-			},			
-			{
-                { -- Chain Heal Value
-                    E = "Slider",                                                     
-                    MIN = 0, 
-                    MAX = 100,                            
-                    DB = "ChainHealHP",
-                    DBV = 60, -- Set healthpercentage @30% life. 
-                    ONOFF = true,
-                    L = { 
-                        ANY = "Chain Heal (%)",
-                    },
-                    TT = { 
-                        ANY = "Value (%) to use Chain Heal.", 
+                        ANY = "Value (%) to use Healing Wave Rank 10.", 
                     },                     
                     M = {},
                 },
-                { -- Chain Heal Targets
+                { -- Healing Wave Value
                     E = "Slider",                                                     
-                    MIN = 1, 
-                    MAX = 3,                            
-                    DB = "ChainHealTargets",
-                    DBV = 2, -- Set healthpercentage @30% life. 
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "HealingWaveMax",
+                    DBV = 60, -- Set healthpercentage @30% life. 
                     ONOFF = false,
                     L = { 
-                        ANY = "Chain Heal Targets",
+                        ANY = "Max Rank (%)",
                     },
                     TT = { 
-                        ANY = "Number of targets to use Chain Heal.", 
+                        ANY = "Value (%) to use Healing Wave Max Rank.", 
                     },                     
                     M = {},
-                },				
+                },                                                                  			
 			},
+            { -- PVE HEADER
+                {
+                    E = "Header",
+                    L = {
+                        ANY = " Chain Heal ",
+                    },
+                },
+            },            			
+			{
+                { -- Chain Heal R1
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "ChainHeal1",
+                    DBV = 90, -- Set healthpercentage @30% life. 
+                    ONOFF = false,
+                    L = { 
+                        ANY = "Rank 1 (%)",
+                    },
+                    TT = { 
+                        ANY = "Value (%) to use Chain Heal Rank 1.", 
+                    },                     
+                    M = {},
+                },		
+                { -- Chain Heal R3
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "ChainHeal3",
+                    DBV = 80, -- Set healthpercentage @30% life. 
+                    ONOFF = false,
+                    L = { 
+                        ANY = "Rank 3 (%)",
+                    },
+                    TT = { 
+                        ANY = "Value (%) to use Chain Heal Rank 3.", 
+                    },                     
+                    M = {},
+                },  
+                { -- Chain Heal Max
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "ChainHealMax",
+                    DBV = 70, -- Set healthpercentage @30% life. 
+                    ONOFF = false,
+                    L = { 
+                        ANY = "Max Rank (%)",
+                    },
+                    TT = { 
+                        ANY = "Value (%) to use Chain Heal Max Rank.", 
+                    },                     
+                    M = {},
+                },
+                { -- Raid Chain Heal Melee Only
+                    E = "Checkbox", 
+                    DB = "RaidChainHealMeleeOnly",
+                    DBV = true,
+                    L = { 
+                        ANY = "Only Chain Heal Melee (Only in Raid)", 
+                    }, 
+                    TT = { 
+                        ANY = "Only use Chain Heal on melee units in raid to maximise chance of bounces.", 
+                    }, 
+                    M = {},
+                },                                  	
+			},
+            {
+                { -- Trinket 1
+                    E = "Dropdown",                                                         
+                    OT = {
+                        { text = "Health", value = "Health" },  
+                        { text = "Mana", value = "Mana" },                                                 
+                    },
+                    DB = "Trinket1Choice",
+                    DBV = "Health",
+                    L = { 
+                        ANY = "Trinket 1 Usage",
+                    }, 
+                    TT = { 
+                        ANY = "Health will trigger on target's HP, Mana will trigger on player mana (%)", 
+                    }, 
+                    M = {},
+                },
+                { -- 
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "Trinket1Value",
+                    DBV = 30, -- Set healthpercentage @30% life. 
+                    ONOFF = false,
+                    L = { 
+                        ANY = "Trinket 1 Value",
+                    },
+                    TT = { 
+                        ANY = "(%) to trigger Trinket 1", 
+                    },                     
+                    M = {},
+                },                 
+            },
+            {
+                { -- Trinket 2
+                    E = "Dropdown",                                                         
+                    OT = {
+                        { text = "Health", value = "Health" },  
+                        { text = "Mana", value = "Mana" },                                                 
+                    },
+                    DB = "Trinket2Choice",
+                    DBV = "Health",
+                    L = { 
+                        ANY = "Trinket 2 Usage",
+                    }, 
+                    TT = { 
+                        ANY = "Health will trigger on target's HP, Mana will trigger on player mana (%)", 
+                    }, 
+                    M = {},
+                },
+                { -- 
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "Trinket2Value",
+                    DBV = 30, -- Set healthpercentage @30% life. 
+                    ONOFF = false,
+                    L = { 
+                        ANY = "Trinket 2 Value",
+                    },
+                    TT = { 
+                        ANY = "(%) to trigger Trinket 2", 
+                    },                     
+                    M = {},
+                },                
+            },
+            {
+                { -- Mana Tide
+                    E = "Slider",                                                     
+                    MIN = 0, 
+                    MAX = 100,                            
+                    DB = "ManaTide",
+                    DBV = 60, -- Set healthpercentage @30% life. 
+                    ONOFF = false,
+                    L = { 
+                        ANY = "Mana Tide On Group's Average Mana (%)",
+                    },
+                    TT = { 
+                        ANY = "Value (%) of Group's Mana to use Mana Tide Totem (only counts units with mana).", 
+                    },                     
+                    M = {},
+                },
+            },                                          
             { -- LAYOUT SPACE   
                 {
                     E = "LayoutSpace",                                                                         
                 },
-            },  
+            },
 		},
 }

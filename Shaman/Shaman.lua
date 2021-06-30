@@ -2,7 +2,7 @@
 --##### TRIP'S TBC SHAMAN #####
 --#############################
 
-local _G, setmetatable, pairs, ipairs, select, error, math = 
+local _G, setmet5atable, pairs, ipairs, select, error, math = 
 _G, setmetatable, pairs, ipairs, select, error, math 
 
 local wipe                                     = _G.wipe     
@@ -26,7 +26,8 @@ local UnitCooldown                            = Action.UnitCooldown
 local Unit                                    = Action.Unit 
 local IsUnitEnemy                               = Action.IsUnitEnemy
 local IsUnitFriendly                            = Action.IsUnitFriendly
-local Totem                                    = LibStub("LibTotemInfo-1.0") 
+local Totem                                    = LibStub("LibTotemInfo-1.0")
+
 
 local SetToggle                                = Action.SetToggle
 local GetToggle                                = Action.GetToggle
@@ -38,7 +39,8 @@ local GetSpellInfo                            = Action.GetSpellInfo
 local BurstIsON                                = Action.BurstIsON
 local InterruptIsValid                        = Action.InterruptIsValid
 local IsUnitEnemy                            = Action.IsUnitEnemy
-local DetermineUsableObject                    = Action.DetermineUsableObject 
+local DetermineUsableObject                    = Action.DetermineUsableObject
+local DetermineHealObject                    = Action.DetermineHealObject 
 local DetermineIsCurrentObject                = Action.DetermineIsCurrentObject 
 local DetermineCountGCDs                    = Action.DetermineCountGCDs 
 local DetermineCooldownAVG                    = Action.DetermineCooldownAVG 
@@ -59,7 +61,8 @@ local ActiveUnitPlates                        = MultiUnits:GetActiveUnitPlates()
 
 local SPELL_FAILED_TARGET_NO_POCKETS        = _G.SPELL_FAILED_TARGET_NO_POCKETS      
 local ERR_INVALID_ITEM_TARGET                = _G.ERR_INVALID_ITEM_TARGET    
-local MAX_BOSS_FRAMES                        = _G.MAX_BOSS_FRAMES  
+local MAX_BOSS_FRAMES                        = _G.MAX_BOSS_FRAMES
+local ACTION_CONST_STOPCAST                    = CONST.STOPCAST  
 
 local CreateFrame                            = _G.CreateFrame
 local UIParent                                = _G.UIParent        
@@ -241,7 +244,8 @@ local Temp = {
     TotalAndMag                             = {"TotalImun", "DamageMagicImun"},
 	TotalAndMagKick                         = {"TotalImun", "DamageMagicImun", "KickImun"},
     DisablePhys                             = {"TotalImun", "DamagePhysImun", "Freedom", "CCTotalImun"},
-    DisableMag                              = {"TotalImun", "DamageMagicImun", "Freedom", "CCTotalImun"}
+    DisableMag                              = {"TotalImun", "DamageMagicImun", "Freedom", "CCTotalImun"},
+    IsSpellIsCast                           = {[A.LesserHealingWave:Info()] = "LesserHealingWave", [A.HealingWave:Info()] = "HealingWave"},    
 }
 
 local WindfuryActive = {
@@ -291,6 +295,105 @@ local ImmuneNature = {
 
 end]]
 
+-- Tracks destination unit of the casting spells to prevent by stopcasting overhealing 
+local function CastStart(event, ...)
+    local unitID, _, spellID = ...
+    if unitID == player and spellID then 
+        local spellName = GetSpellInfo(spellID)
+        if spellName and Temp.IsSpellIsCast[spellName] then 
+            Temp.LastPrimaryUnitGUID     = (IsUnitFriendly("mouseover") and UnitGUID("mouseover")) or (IsUnitFriendly("target") and UnitGUID("target")) or UnitGUID(player)
+            Temp.LastPrimaryUnitID        = TeamCacheFriendlyGUIDs[Temp.LastPrimaryUnitGUID]
+            Temp.LastPrimarySpellName     = spellName 
+            Temp.LastPrimarySpellID        = spellID
+        end 
+    end 
+end 
+
+local function CastStop(event, ...)
+    if Temp.LastPrimaryUnitGUID then     
+        local unitID = ...
+        if unitID == player then 
+            Temp.LastPrimaryUnitGUID     = nil 
+            Temp.LastPrimaryUnitID        = nil 
+            Temp.LastPrimarySpellName     = nil 
+            Temp.LastPrimarySpellID        = nil 
+        end 
+    end 
+end 
+
+local function CanStopCastingOverHeal(unitID, unitGUID)
+    -- @return boolean 
+    if GetToggle(1, "StopCast") and Temp.LastPrimaryUnitGUID then
+        local castLeftSeconds, castDonePercent, _, spellName = Unit(player):IsCastingRemains()
+        if castLeftSeconds > 0 and castLeftSeconds <= 0.35 and spellName == Temp.LastPrimarySpellName and (Temp.LastPrimaryUnitID or (unitID and ((unitGUID or UnitGUID(unitID)) == Temp.LastPrimaryUnitGUID))) then
+            local unit = Temp.LastPrimaryUnitID or unitID
+            if Unit(unit):HealthPercent() >= 100 then 
+                return true 
+            end 
+            
+            local Key = Temp.IsSpellIsCast[spellName]
+            local ObjKey
+            for i = 0, huge do 
+                if i == 0 then 
+                    ObjKey = Key
+                else 
+                    ObjKey = Key .. i
+                end 
+                
+                if A[ObjKey] then 
+                    if A[ObjKey].ID == Temp.LastPrimarySpellID then 
+                        return not A[ObjKey]:PredictHeal(unit, nil, unitGUID)
+                    end 
+                else 
+                    break 
+                end 
+            end 
+        end 
+    end 
+end 
+
+local function ActiveEarthShield()
+    return HealingEngine.GetBuffsCount(A.EarthShield.ID, 0, player, true)
+end
+
+local function ManaTideCheck()
+        
+    local current_party_mana = 0;
+    local total_party_mana = 0;
+    local ManaTide = A.GetToggle(2, "ManaTide")
+    
+    if UnitPowerType("player") == 0 then
+        current_party_mana = current_party_mana + UnitPower("player" , 0);
+        total_party_mana = total_party_mana + UnitPowerMax("player" , 0);
+    end
+    if UnitPowerType("party1") == 0 then
+        current_party_mana = current_party_mana + UnitPower("party1" , 0);
+        total_party_mana = total_party_mana + UnitPowerMax("party1" , 0);
+    end
+    if UnitPowerType("party2") == 0 then
+        current_party_mana = current_party_mana + UnitPower("party2" , 0);
+        total_party_mana = total_party_mana + UnitPowerMax("party2" , 0);
+    end
+    if UnitPowerType("party3") == 0 then
+        current_party_mana = current_party_mana + UnitPower("party3" , 0);
+        total_party_mana = total_party_mana + UnitPowerMax("party3" , 0);
+    end
+    if UnitPowerType("party4") == 0 then
+        current_party_mana = current_party_mana + UnitPower("party4" , 0);
+        total_party_mana = total_party_mana + UnitPowerMax("party4" , 0);
+    end
+    
+    local TotalPercent = math.ceil(current_party_mana/total_party_mana*100)
+    
+    if TotalPercent < ManaTide then
+        ShouldManaTide = true
+    else
+        ShouldManaTide = false
+    end
+    
+    return ShouldManaTide
+end
+
 --- ======= ACTION LISTS =======
 -- [3] Single Rotation
 A[3] = function(icon, isMulti)
@@ -300,11 +403,17 @@ A[3] = function(icon, isMulti)
     --------------------
     local isMoving = A.Player:IsMoving()
     local inCombat = Unit(player):CombatTime() > 0
+    local RacialAllowed = A.GetToggle(1, "Racial")
 	local combatTime = Unit(player):CombatTime()
 	local UseAoE = A.GetToggle(2, "AoE")
 	local SpecOverride = A.GetToggle(2, "SpecOverride")
 	local ShieldType = A.GetToggle(2, "ShieldType")
 	local ManaRune = A.GetToggle(2, "ManaRune")
+
+	local Trinket1Choice = A.GetToggle(2, "Trinket1Choice")
+	local Trinket2Choice = A.GetToggle(2, "Trinket2Choice")
+	local Trinket1Value = A.GetToggle(2, "Trinket1Value")
+	local Trinket2Value = A.GetToggle(2, "Trinket2Value")		
 	
 	local MainHandEnchant = A.GetToggle(2, "MainHandEnchant")
 	local OffhandEnchant = A.GetToggle(2, "OffhandEnchant")
@@ -329,10 +438,15 @@ A[3] = function(icon, isMulti)
 	local WeaponSync = A.GetToggle(2, "WeaponSync")
 	local ShockInterrupt = A.GetToggle(2, "ShockInterrupt")
 	
-	local LesserHealingWaveHP = A.GetToggle(2, "LesserHealingWaveHP")
-	local HealingWaveHP = A.GetToggle(2, "HealingWaveHP")	
-	local ChainHealHP = A.GetToggle(2, "ChainHealHP")
-	local ChainHealTargets = A.GetToggle(2, "ChainHealTargets")	
+	local ChainHeal1 = A.GetToggle(2, "ChainHeal1")
+	local ChainHeal3 = A.GetToggle(2, "ChainHeal3")
+	local ChainHealMax = A.GetToggle(2, "ChainHealMax")
+	local HealingWaveMax = A.GetToggle(2, "HealingWaveMax")
+	local HealingWave10 = A.GetToggle(2, "HealingWave10")
+	local HealingWave7 = A.GetToggle(2, "HealingWave7")
+	local HealingWave1 = A.GetToggle(2, "HealingWave1")
+	local LesserHealingWave5 = A.GetToggle(2, "LesserHealingWave5")
+	local LesserHealingWaveMax = A.GetToggle(2, "LesserHealingWaveMax")					
 	
 	local ShamanisticRageMana = A.GetToggle(2, "ShamanisticRageMana")  
 	local StopTwistingManaEnh = A.GetToggle(2, "StopTwistingManaEnh")
@@ -538,15 +652,101 @@ A[3] = function(icon, isMulti)
 	--########################
 	
 	local function HealingRotation(unit)
-	
+
+		--HEALING SPELLS TO CONSIDER
+			--CHAIN HEAL R5 (BASIC)
+			--CHAIN HEAL R3/4 (BASIC)
+			--CHAIN HEAL R1 (BASIC)
+
+			--HEALING WAVE R12 (BASIC)
+			--HEALING WAVE R10 (BASIC)
+			--HEALING WAVE R7/8 (BASIC)
+			--HEALING WAVE R1 (BASIC)
+
+			--LESSER HEALING WAVE R7 (BASIC)
+			--LESSER HEALING WAVE R5 (BASIC)
+
+			--WATER SHIELD (DONE)
+			--EARTH SHIELD (DONE)
+
+			--MANA POTION (DONE)
+			--DARK/DEMONIC RUNE (DONE)
+
+			--NATURE'S SWIFTNESS (DONE)
+			--REMOVE POISON/DISEASE (DONE)
+			--PURGE (BASIC)
+			--EARTH SHOCK R1 (DONE)
+			--TRINKET1 (DONE)
+			--TRINKET2 (DONE)
+			--RACIAL (DONE)
+
+			--MANA SPRING TOTEM (DONE)
+			--MANA TIDE TOTEM (DONE)
+			--POISON CLEANSING TOTEM
+			--FIRE RESISTANCE TOTEM
+			--HEALING STREAM TOTEM
+			--DISEASE CLEANSING TOTEM
+
+			--FROST RESISTANCE TOTEM
+			--SEARING TOTEM (DONE)
+			--FIRE NOVA TOTEM (DONE)
+			--MAGMA TOTEM (DONE)
+			--FIRE ELEMENTAL TOTEM (WILL NOT DO)
+
+			--STRENGTH OF EARTH TOTEM (DONE)
+			--TREMOR TOTEM (BASIC)
+			--EARTHBIND TOTEM 
+			--STONECLAW TOTEM 
+			--EARTH ELEMENTAL TOTEM (WILL NOT DO)
+
+			--WINDFURY TOTEM (BASIC)
+			--WRATH OF AIR TOTEM (BASIC)
+			--TRANQUIL AIR TOTEM (BASIC)
+			--NATURE RESISTANCE TOTEM
+			--GRACE OF AIR TOTEM
+			--GROUNDING TOTEM
+
+			--LIGHTNING SHIELD (DONE)
+			--FROST SHOCK (R1)
+			--TOTEMIC RECALL (DONE)
+
+        local ObjLHealingWave, ObjHealingWave, ObjChainHeal
+        local unitGUID = UnitGUID(unit)
+        local isManaSave = HealingEngine.IsManaSave(unit)
+        local isEmergency = Unit(unit):HealthPercent() > 0 and Unit(unit):HealthPercent() <= 30
+
 		if SpecOverride == "Restoration" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 264) then
+
+	        if not Temp.LastPrimaryUnitID and CanStopCastingOverHeal(unit) then 
+	            return A:Show(icon, ACTION_CONST_STOPCAST)
+	        end 
+
 			--Emergency
 			-- Nature's Swiftness + Healing Wave R12 for burst
-			if Unit(unit):HealthPercent() <= 30 and Unit(unit):HealthPercent() > 0 and inCombat then
-				if A.NaturesSwiftness:IsReady(player) then
-					return A.NaturesSwiftness:Show(icon)
+
+			if A.Trinket1:IsReady(player) then 
+				if Trinket1Choice == "Health" and Unit(unit):HealthPercent() <= Trinket1Value then 
+					return A.Trinket1:Show(icon)
+				elseif Trinket1Choice == "Mana" and Player:ManaPercentage() <= Trinket1Value then 
+					return A.Trinket1:Show(icon)
 				end
-				
+			end
+
+			if A.Trinket2:IsReady(player) then 
+				if Trinket2Choice == "Health" and Unit(unit):HealthPercent() <= Trinket2Value then 
+					return A.Trinket2:Show(icon)
+				elseif Trinket2Choice == "Mana" and Player:ManaPercentage() <= Trinket2Value then 
+					return A.Trinket2:Show(icon)
+				end
+			end			
+
+			if isEmergency and inCombat then
+
+                -- Nature's Swiftness 
+                if A.NaturesSwiftness:IsReady(player) then 
+                    return A.NaturesSwiftness:Show(icon)
+                end 
+
 				if A.NaturesSwiftness:GetCooldown() > A.GetGCD() and Unit(player):HasBuffs(A.NaturesSwiftness.ID) == 0 and A.GetToggle(1, "Racial") then
 					if A.BloodFury:IsReady(player) then
 						return A.BloodFury:Show(icon)
@@ -556,20 +756,37 @@ A[3] = function(icon, isMulti)
 						return A.Berserking:Show(icon)
 					end
 				end
-				
+
 				if A.LesserHealingWave:IsReady(unit) and Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) == 0 then 
-					return A.LesserHealingWave:Show(icon)
+					return LesserHealingWave:Show(icon)
 				end
-			end
-			
+
+	        end  
+
+			--Just consume Nature's Swiftness buff if someone else snipes heal first.
 			if Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) > 0 and Unit(unit):HealthPercent() <= 60 then
 				return A.HealingWave:Show(icon)
 			end
 					
 			-- Maintain Earth Shield on tank
-			if A.EarthShield:IsReady(unit) and Unit(unit):HasBuffs(A.EarthShield.ID) == 0 and Unit(unit):IsTank() then
+			--[[local CurrentTanks = A.HealingEngine.GetMembersByMode("TANK")
+	        if A.EarthShield:IsReady() and A.LastPlayerCastID ~= A.EarthShield.ID and ActiveEarthShield() == 0 then
+	            for i = 1, #CurrentTanks do 
+	                if Unit(CurrentTanks[i].Unit):GetRange() <= 40 then 
+                      	if Unit(CurrentTanks[i].Unit):IsPlayer() and Unit(CurrentTanks[i].Unit):HasBuffs(A.EarthShield.ID, true) == 0 then 
+							if UnitGUID(getmembersAll[i].Unit) ~= currGUID then
+								HealingEngine.SetTarget(CurrentTanks[i].Unit)  
+								break
+							end 	                                                                    
+	                    end                    
+	                end                
+	            end    
+	        end]]
+
+			if A.EarthShield:IsReady(unit) and ActiveEarthShield() == 0 and Unit(unit):IsTank() then
 				return A.EarthShield:Show(icon)
 			end
+
 			-- Maintain best totems
 			if TotemHandler() then
 				return true
@@ -601,7 +818,11 @@ A[3] = function(icon, isMulti)
 			end
 			
 			-- Mana Tide Totem when group benefits
-			
+			local ManaTideCheck = ManaTideCheck()
+			if ManaTideCheck then
+				return A.ManaTideTotem:Show(icon)
+			end
+
 			--Cleanse
 			local getmembersAll = HealingEngine.Data.SortedUnitIDs			
 			if A.CurePoison:IsReady(unit) then
@@ -634,20 +855,54 @@ A[3] = function(icon, isMulti)
 				return A.CureDisease:Show(icon)
 			end
 			
-			
-			-- Chain Heal R4 or Chain Heal R5 spam
-			if A.ChainHeal:IsReady(unit) and not isMoving and Unit(unit):HealthPercent() <= ChainHealHP and A.HealingEngine.GetBelowHealthPercentUnits(ChainHealHP, 40) >= ChainHealTargets then
-				return A.ChainHeal:Show(icon)
+			if A.GiftoftheNaaru:IsReady(unit) and RacialAllowed and Unit(unit):HealthPercent() <= 50 then 
+				return A.GiftoftheNaaru:Show(icon)
 			end
 			
+			--Chain Heal
+			local numGroupMembers = GetNumGroupMembers()
+			local RaidChainHealMeleeOnly = A.GetToggle(2, "RaidChainHealMeleeOnly")
+			if A.ChainHeal:IsReady(unit) and not isMoving then 
+				if (numGroupMembers > 1 and numGroupMembers <= 5) or (numGroupMembers >= 6 and not RaidChainHealMeleeOnly) then	
+					if Unit(unit):HealthPercent() <= ChainHealMax and A.HealingEngine.GetBelowHealthPercentUnits(ChainHealMax, 40) >= 2 and not isManaSave then
+						return A.ChainHeal:Show(icon)
+					elseif Unit(unit):HealthPercent() <= ChainHeal3 and A.HealingEngine.GetBelowHealthPercentUnits(ChainHeal3, 40) >= 2 and not isManaSave then
+						return A.ChainHeal3:Show(icon)
+					elseif Unit(unit):HealthPercent() <= ChainHeal1 and A.HealingEngine.GetBelowHealthPercentUnits(ChainHeal1, 40) >= 2 then
+						return A.ChainHeal1:Show(icon)
+					end	
+				elseif numGroupMembers >= 6 and RaidChainHealMeleeOnly then
+					if Unit(unit):HealthPercent() <= ChainHealMax and A.HealingEngine.HealingByRange(40, nil, nil, true) and not isManaSave then
+						return A.ChainHeal:Show(icon)
+					elseif Unit(unit):HealthPercent() <= ChainHeal3 and A.HealingEngine.HealingByRange(40, nil, nil, true) >= 2 and not isManaSave then
+						return A.ChainHeal3:Show(icon)
+					elseif Unit(unit):HealthPercent() <= ChainHeal1 and A.HealingEngine.HealingByRange(40, nil, nil, true) >= 2 then
+						return A.ChainHeal1:Show(icon)
+					end	
+				end											
+			end 
+
+
 			-- Healing Wave ST
-			if A.HealingWave:IsReady(unit) and not isMoving and Unit(unit):HealthPercent() <= HealingWaveHP then
-				return A.HealingWave:Show(icon)
+			if A.HealingWave:IsReady(unit) and not isMoving then 
+				if Unit(unit):HealthPercent() <= HealingWaveMax and not isManaSave then
+					return A.HealingWave:Show(icon)
+				elseif Unit(unit):HealthPercent() <= HealingWave10 and not isManaSave then 
+					return A.HealingWave10:Show(icon)
+				elseif Unit(unit):HealthPercent() <= HealingWave7 then 
+					return A.HealingWave7:Show(icon)
+				elseif Unit(unit):HealthPercent() <= HealingWave1 then 
+					return A.HealingWave1:Show(icon)
+				end
 			end
-			
+
 			-- Lesser Healing Wave
-			if A.LesserHealingWave:IsReady(unit) and not isMoving and Unit(unit):HealthPercent() <= LesserHealingWaveHP then
-				return A.LesserHealingWave:Show(icon)
+			if A.LesserHealingWave:IsReady(unit) and not isMoving then 
+				if Unit(unit):HealthPercent() <= LesserHealingWaveMax and not isManaSave then 
+					return A.LesserHealingWave:Show(icon)
+				elseif Unit(unit):HealthPercent() <= LesserHealingWave5 then 
+					return A.LesserHealingWave5:Show(icon)
+				end
 			end
 			
 		end
@@ -707,7 +962,7 @@ A[3] = function(icon, isMulti)
 			end
 			
 			-- Cast Fire Elemental Totem before Bloodlust
-			if A.GetToggle(1, "Racial") then
+			if RacialAllowed then
 				if A.BloodFury:IsReady(player) and BurstIsON(unit) then
 					return A.BloodFury:Show(icon)
 				end
@@ -715,15 +970,15 @@ A[3] = function(icon, isMulti)
 				if A.Berserking:IsReady(player) and BurstIsON(unit) then
 					return A.Berserking:Show(icon)
 				end
-			end	
+			end
 
 			--Trinket 1
-			if A.Trinket1:IsReady(player) and BurstIsOn(unit) then
+			if A.Trinket1:IsReady(player) and BurstIsON(unit) and SpecOverride ~= "Restoration" then
 				return A.Trinket1:Show(icon)    
 			end
 			
 			--Trinket 2
-			if A.Trinket2:IsReady(player) and BurstIsOn(unit) then
+			if A.Trinket2:IsReady(player) and BurstIsON(unit) and SpecOverride ~= "Restoration" then
 				return A.Trinket2:Show(icon)    
 			end					
 		
@@ -807,7 +1062,7 @@ A[3] = function(icon, isMulti)
 			
 		
 			-- Cast Fire Elemental Totem before Bloodlust
-			if A.GetToggle(1, "Racial") then
+			if RacialAllowed then
 				if A.BloodFury:IsReady(player) and BurstIsON(unit) then
 					return A.BloodFury:Show(icon)
 				end
