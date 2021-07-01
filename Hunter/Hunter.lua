@@ -280,7 +280,7 @@ A[3] = function(icon, isMulti)
     
 	local speed = UnitRangedDamage("player"); 
 	local WpnSpeedSld = A.GetToggle(2, "WpnSpeedSld")
-	local WpnBaseSpeed = WpnSpeedSld / 100
+	local WpnBaseSpeed = WpnSpeedSld
     local haste = WpnBaseSpeed / speed
     local ShootTimer = Player:GetSwingShoot() - (0.5 / haste)
     local SteadyAfterHaste = 1.5 / haste
@@ -573,12 +573,13 @@ A[3] = function(icon, isMulti)
                 if A.ArcaneShot:IsReady(unit) and UseArcane and not ImmuneArcane[npcID] and Player:ManaPercentage() > ArcaneShotMana then
                     return A.ArcaneShot:Show(icon)
                 end
-            end
-            
-            if (ShootTimer >= Player:Execute_Time(A.SteadyShot.ID) or (ShootTimer <= A.GetLatency() and ShootTimer > 0)) and Player:ManaPercentage() > ManaSave then
-                if A.SteadyShot:IsReady(unit) then
-                    return A.SteadyShot:Show(icon)
-                end                    
+
+				if (ShootTimer >= Player:Execute_Time(A.SteadyShot.ID) or (ShootTimer <= A.GetLatency() and ShootTimer > 0)) and Player:ManaPercentage() > ManaSave then
+					if A.SteadyShot:IsReady(unit) then
+						return A.SteadyShot:Show(icon)
+					end                    
+				end
+				
             end
             
         end
