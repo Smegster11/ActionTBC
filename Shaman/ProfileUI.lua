@@ -52,6 +52,18 @@ A.Data.ProfileUI = {
                     }, 
                     M = {},
                 },
+                { -- TARGETTARGET
+                    E = "Checkbox", 
+                    DB = "InterruptTargetTarget",
+                    DBV = true,
+                    L = { 
+                        ANY = "Use @TargetTarget", 
+                    }, 
+                    TT = { 
+                        ANY = "Will check your target's target for interrupts and purges (useful for Restoration).", 
+                    }, 
+                    M = {},
+                },                
 				{ -- AOE
                     E = "Checkbox", 
                     DB = "AoE",
