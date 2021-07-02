@@ -193,7 +193,8 @@ Action[Action.PlayerClass]                     = {
 	
 	--Misc
 	SuperHealingPotion						= Create({ Type = "Potion", ID = 22829, QueueForbidden = true }),
-	DualWield								= Create({ Type = "Potion", ID = 30798, Hidden = true }),
+	DualWield								= Create({ Type = "Spell", ID = 30798, Hidden = true }),
+	HealingWay								= Create({ Type = "Spell", ID = 29206, Hidden = true }),
 }
 
 local A                                     = setmetatable(Action[Action.PlayerClass], { __index = Action })
@@ -250,7 +251,8 @@ local Temp = {
     LastPrimaryUnitID        				= nil, 
     LastPrimarySpellName     				= nil, 
     LastPrimarySpellID        				= nil,
-    SyncUsed								= false,        
+    SyncUsed								= false, 
+	TotemsRecalled							= true,
 }
 
 local WindfuryActive = {
@@ -290,18 +292,151 @@ local ImmuneNature = {
 [8278] = true, -- Smoulder (Rarespawn)
 }		
 
---[[local function ReactionTotem()
+local EarthbindRecommendation = {
 
-	name, rank, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, shouldConsolidate, spellId 
-	 = UnitDebuff("unit", index or ["name", "rank"][, "filter"])
-	local isPoisoned == false
-	local isDiseased == false	
+}
 
-	if debuffType == "Poison" then
-		isPoisoned == true
-	end
+local StoneclawRecommendation = {
 
-end]]
+}
+
+local FireResistanceRecommendation = {
+
+}
+
+local FrostResistanceRecommendation = {
+
+}
+
+local GraceofAirRecommendation = {
+
+}
+
+local GroundingRecommendation = {
+[18835] = true -- Kiggler the Crazed in High King fight, block Lightning Bolt (spellID 36152)
+}
+
+local NatureResistanceRecommendation = {
+
+}
+
+local StoneskinRecommendation = {
+
+}
+
+local WindwallRecommendation = {
+
+}
+
+local DiseaseCleansingRecommendation = {
+
+}
+
+local HealingStreamRecommendation = {
+
+}
+
+local PoisonCleansingRecommendation = {
+
+}
+
+local TremorRecommendation = {
+[18831] = true -- High King Maulgar when below 50% HP.
+}
+
+local FireElementalRecommendation = {
+
+}
+
+local EarthElementalRecommendation = {
+
+}
+
+local function TotemBuffInRange()
+	
+	return Unit(player):HasBuffs({
+	8184,		--Fire Resistance Rank 1
+	10534, 		--Fire Resistance Rank 2
+	10535, 		--Fire Resistance Rank 3
+	25562, 		--Fire Resistance Rank 4
+	
+	124,		--Flametongue Rank 1
+	285,		--Flametongue Rank 2
+	543, 		--Flametongue Rank 3
+	1683,  		--Flametongue Rank 4
+	2637,   	--Flametongue Rank 5
+	
+	8182, 		--Frost Resistance Rank 1
+	10476,   	--Frost Resistance Rank 2
+	10477,  	--Frost Resistance Rank 3
+	25559,  	--Frost Resistance Rank 4
+	
+	8836,   	--Grace of Air Rank 1
+	10626,   	--Grace of Air Rank 2
+	25360,   	--Grace of Air Rank 3
+	
+	8178,  		--Grounding
+	
+	10596,   	--Nature Resistance Rank 1
+	10598,   	--Nature Resistance Rank 2
+	10599,   	--Nature Resistance Rank 3
+	25573,  	--Nature Resistance Rank 4
+	
+	8072, 	--Stoneskin Rank 1
+	8156,  	--Stoneskin Rank 2
+	8157,  	--Stoneskin Rank 3
+	10403, 	--Stoneskin Rank 4
+	10404,  --Stoneskin Rank 5
+	10405,  --Stoneskin Rank 6
+	25506,  --Stoneskin Rank 7
+	25507, 	--Stoneskin Rank 8
+	
+	8076, 	--Strenth of Earth Rank 1
+	8162, 	--Strenth of Earth Rank 2
+	8163,  	--Strenth of Earth Rank 3
+	10441,	--Strenth of Earth Rank 4
+	25362, 	--Strenth of Earth Rank 5
+	25527, 	--Strenth of Earth Rank 6
+
+	1783,		--Windfury Rank 1
+	563,		--Windfury Rank 2
+	564,		--Windfury Rank 3
+	2638,		--Windfury Rank 4
+	2639, 		--Windfury Rank 5
+	
+	15108,  	--Windwall Rank 1
+	15109,  	--Windwall Rank 2
+	15110,  	--Windwall Rank 3
+	25576, 		--Windwall Rank 4
+	
+	5672, 	--Healing Stream Rank 1
+	6371, 	--Healing Stream Rank 2
+	6372, 	--Healing Stream Rank 3
+	10460, 	--Healing Stream Rank 4
+	10461, 	--Healing Stream Rank 5
+	25566, 	--Healing Stream Rank 6
+	
+	5677,   	--Mana Spring Rank 1
+	10491,   	--Mana Spring Rank 2
+	10493,   	--Mana Spring Rank 3
+	10494,  	--Mana Spring Rank 4
+	25569,  	--Mana Spring Rank 5
+
+	16191, 		--Mana Tide Rank 1
+	17355,  	--Mana Tide Rank 2
+	17360,   	--Mana Tide Rank 3
+	
+
+	25909,  	--Tranquil Air
+	
+	24853,	--Enamored Water Spirit (Trinket)
+	
+	30708,	--Totem of Wrath
+	
+	2895,		--Wrath of Air Totem
+	}) > 0 
+	
+end
 
 -- Tracks destination unit of the casting spells to prevent by stopcasting overhealing 
 local function CastStart(event, ...)
@@ -329,12 +464,12 @@ local function CastStop(event, ...)
     end 
 end 
 
-local function CanStopCastingOverHeal(unitID, unitGUID)
+local function CanStopCastingOverHeal(unit, unitGUID)
     -- @return boolean 
     if GetToggle(1, "StopCast") and Temp.LastPrimaryUnitGUID then
         local castLeftSeconds, castDonePercent, _, spellName = Unit(player):IsCastingRemains()
-        if castLeftSeconds > 0 and castLeftSeconds <= 0.35 and spellName == Temp.LastPrimarySpellName and (Temp.LastPrimaryUnitID or (unitID and ((unitGUID or UnitGUID(unitID)) == Temp.LastPrimaryUnitGUID))) then
-            local unit = Temp.LastPrimaryUnitID or unitID
+        if castLeftSeconds > 0 and castLeftSeconds <= 0.35 and spellName == Temp.LastPrimarySpellName and (Temp.LastPrimaryUnitID or (unit and ((unitGUID or UnitGUID(unit)) == Temp.LastPrimaryUnitGUID))) then
+            local unit = Temp.LastPrimaryUnitID or unit
             if Unit(unit):HealthPercent() >= 100 then 
                 return true 
             end 
@@ -421,6 +556,7 @@ local function DoWeaponSync()
 	end
 end
 
+	
 
 --- ======= ACTION LISTS =======
 -- [3] Single Rotation
@@ -468,13 +604,13 @@ A[3] = function(icon, isMulti)
 	
 	local ChainHeal1 = A.GetToggle(2, "ChainHeal1")
 	local ChainHeal3 = A.GetToggle(2, "ChainHeal3")
-	local ChainHealMax = A.GetToggle(2, "ChainHealMax")
-	local HealingWaveMax = A.GetToggle(2, "HealingWaveMax")
+	local ChainHealMax = A.GetToggle(2, "ChainHeal5")
+	local HealingWaveMax = A.GetToggle(2, "HealingWave12")
 	local HealingWave10 = A.GetToggle(2, "HealingWave10")
 	local HealingWave7 = A.GetToggle(2, "HealingWave7")
 	local HealingWave1 = A.GetToggle(2, "HealingWave1")
 	local LesserHealingWave5 = A.GetToggle(2, "LesserHealingWave5")
-	local LesserHealingWaveMax = A.GetToggle(2, "LesserHealingWaveMax")					
+	local LesserHealingWaveMax = A.GetToggle(2, "LesserHealingWave7")					
 	
 	local ShamanisticRageMana = A.GetToggle(2, "ShamanisticRageMana")  
 	local StopTwistingManaEnh = A.GetToggle(2, "StopTwistingManaEnh")
@@ -526,7 +662,7 @@ A[3] = function(icon, isMulti)
 	local function Interrupt()
 		useKick, useCC, useRacial, notInterruptable, castRemainsTime, castDoneTime = InterruptIsValid(target, "Main", true, nil) 
 		
-		local isEmergency = Unit(unit):HealthPercent() > 0 and Unit(unit):HealthPercent() <= 30	
+		local isEmergency = Unit(target):HealthPercent() > 0 and Unit(target):HealthPercent() <= 30	
 		
 		if A.EarthShock:IsReady(unit) and (IsUnitEnemy(unit) or (IsUnitEnemy(targettarget) and InterruptTargetTarget)) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() and not ImmuneNature[npcID] then 
 			if SpecOverride == "Enhancement" or SpecOverride == "Elemental" or (SpecOverride == "Restoration" and not isEmergency) then
@@ -613,7 +749,7 @@ A[3] = function(icon, isMulti)
 	--### TOTEMS ###
 	--##############		
 
-	if A.TotemicCall:IsReady(player) and not inCombat then
+	if A.TotemicCall:IsReady(player) and not inCombat and not TotemBuffInRange() then
 		if (FireTotemTimeRemaining > A.GetGCD() or EarthTotemTimeRemaining > A.GetGCD() or WaterTotemTimeRemaining > A.GetGCD() or AirTotemTimeRemaining > A.GetGCD()) then
 			return A.TotemicCall:Show(icon)
 		end
@@ -622,74 +758,77 @@ A[3] = function(icon, isMulti)
 	if A.TremorTotem:IsReady(player) and FriendlyTeam():GetDeBuffs("Sleep", 30) > 0 or FriendlyTeam():GetDeBuffs("Fear", 30) > 0 and ActiveEarthTotem ~= A.TremorTotem:Info() then
 		return A.TremorTotem:Show(icon)
 	end   
+
 	
 	local function TotemHandler()
+		
+		local RecommendationTotem = A.GetToggle(2, "RecommendationTotem")
 	
-			if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] and ActiveFireTotem ~= A.FireElementalTotem:Info() then
-				if FireTotem == "Searing" and A.SearingTotem:IsReady(player) then
-					return A.SearingTotem:Show(icon)
-				elseif FireTotem == "FireNova" and A.FireNovaTotem:IsReady(player) then
-					return A.FireNovaTotem:Show(icon)			
-				elseif FireTotem == "FrostResistance" and A.FrostResistanceTotem:IsReady(player) then
-					return A.FrostResistanceTotem:Show(icon)
-				elseif FireTotem == "Magma" and A.MagmaTotem:IsReady(player) then
-					return A.MagmaTotem:Show(icon)			
-				elseif FireTotem == "Flametongue" and A.FlametongueTotem:IsReady(player) then
-					return A.FlametongueTotem:Show(icon)
-				elseif FireTotem == "TotemofWrath" and A.TotemofWrath:IsReady(player) then
-					return A.TotemofWrath:Show(icon)					
-				end
+		if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] and ActiveFireTotem ~= A.FireElementalTotem:Info() then
+			if FireTotem == "Searing" and A.SearingTotem:IsReady(player) then
+				return A.SearingTotem:Show(icon)
+			elseif FireTotem == "FireNova" and A.FireNovaTotem:IsReady(player) then
+				return A.FireNovaTotem:Show(icon)			
+			elseif FireTotem == "FrostResistance" and A.FrostResistanceTotem:IsReady(player) then
+				return A.FrostResistanceTotem:Show(icon)
+			elseif FireTotem == "Magma" and A.MagmaTotem:IsReady(player) then
+				return A.MagmaTotem:Show(icon)			
+			elseif FireTotem == "Flametongue" and A.FlametongueTotem:IsReady(player) then
+				return A.FlametongueTotem:Show(icon)
+			elseif FireTotem == "TotemofWrath" and A.TotemofWrath:IsReady(player) then
+				return A.TotemofWrath:Show(icon)					
 			end
-			
-			if EarthTotemTimeRemaining <= A.GetGCD() * 4 then
-				if EarthTotem == "Stoneskin" and A.StoneskinTotem:IsReady(player) then
-					return A.StoneskinTotem:Show(icon)
-				elseif EarthTotem == "Earthbind" and A.EarthbindTotem:IsReady(player) then
-					return A.EarthbindTotem:Show(icon)
-				elseif EarthTotem == "Stoneclaw" and A.StoneclawTotem:IsReady(player) then
-					return A.StoneclawTotem:Show(icon)					
-				elseif EarthTotem == "StrengthofEarth" and A.StrengthofEarthTotem:IsReady(player) then
-					return A.StrengthofEarthTotem:Show(icon)
-				elseif EarthTotem == "Tremor" and A.TremorTotem:IsReady(player) then
-					return A.TremorTotem:Show(icon)	
-				end
+		end
+		
+		if EarthTotemTimeRemaining <= A.GetGCD() * 4 then
+			if EarthTotem == "Stoneskin" and A.StoneskinTotem:IsReady(player) then
+				return A.StoneskinTotem:Show(icon)
+			elseif EarthTotem == "Earthbind" and A.EarthbindTotem:IsReady(player) then
+				return A.EarthbindTotem:Show(icon)
+			elseif EarthTotem == "Stoneclaw" and A.StoneclawTotem:IsReady(player) then
+				return A.StoneclawTotem:Show(icon)					
+			elseif EarthTotem == "StrengthofEarth" and A.StrengthofEarthTotem:IsReady(player) then
+				return A.StrengthofEarthTotem:Show(icon)
+			elseif EarthTotem == "Tremor" and A.TremorTotem:IsReady(player) then
+				return A.TremorTotem:Show(icon)	
 			end
+		end
 
-			if WeaveWF and (Player:ManaPercentage() >= StopTwistingManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) and A.WindfuryTotem:IsReady(player) and A.WindfuryTotem:GetSpellTimeSinceLastCast() >= 10 and inCombat and AirTotem ~= "Windfury" then
-				return A.WindfuryTotem:Show(icon)
+		if WeaveWF and (Player:ManaPercentage() >= StopTwistingManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) and A.WindfuryTotem:IsReady(player) and A.WindfuryTotem:GetSpellTimeSinceLastCast() >= 10 and inCombat and AirTotem ~= "Windfury" then
+			return A.WindfuryTotem:Show(icon)
+		end
+
+		if (AirTotemTimeRemaining <= A.GetGCD() * 4 and not WeaveWF) or (WeaveWF and WindfuryActive[ActiveAirTotem] and (Player:ManaPercentage() >= StopTwistingManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD())) then
+			if AirTotem == "Grounding" and A.GroundingTotem:IsReady(player) then
+				return A.GroundingTotem:Show(icon)
+			elseif AirTotem == "NatureResistance" and A.NatureResistanceTotem:IsReady(player) then
+				return A.NatureResistanceTotem:Show(icon)
+			elseif AirTotem == "Windfury" and A.WindfuryTotem:IsReady(player) then
+				return A.WindfuryTotem:Show(icon)					
+			elseif AirTotem == "Windwall" and A.WindwallTotem:IsReady(player) then
+				return A.WindwallTotem:Show(icon)
+			elseif AirTotem == "GraceofAir" and A.GraceofAirTotem:IsReady(player) then
+				return A.GraceofAirTotem:Show(icon)	
+			elseif AirTotem == "TranquilAir" and A.TranquilAirTotem:IsReady(player) then
+				return A.TranquilAirTotem:Show(icon)	
+			elseif AirTotem == "WrathofAir" and A.WrathofAirTotem:IsReady(player) then
+				return A.WrathofAirTotem:Show(icon)						
 			end
+		end		
 
-			if (AirTotemTimeRemaining <= A.GetGCD() * 4 and not WeaveWF) or (WeaveWF and WindfuryActive[ActiveAirTotem] and (Player:ManaPercentage() >= StopTwistingManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD())) then
-				if AirTotem == "Grounding" and A.GroundingTotem:IsReady(player) then
-					return A.GroundingTotem:Show(icon)
-				elseif AirTotem == "NatureResistance" and A.NatureResistanceTotem:IsReady(player) then
-					return A.NatureResistanceTotem:Show(icon)
-				elseif AirTotem == "Windfury" and A.WindfuryTotem:IsReady(player) then
-					return A.WindfuryTotem:Show(icon)					
-				elseif AirTotem == "Windwall" and A.WindwallTotem:IsReady(player) then
-					return A.WindwallTotem:Show(icon)
-				elseif AirTotem == "GraceofAir" and A.GraceofAirTotem:IsReady(player) then
-					return A.GraceofAirTotem:Show(icon)	
-				elseif AirTotem == "TranquilAir" and A.TranquilAirTotem:IsReady(player) then
-					return A.TranquilAirTotem:Show(icon)	
-				elseif AirTotem == "WrathofAir" and A.WrathofAirTotem:IsReady(player) then
-					return A.WrathofAirTotem:Show(icon)						
-				end
-			end		
-
-			if WaterTotemTimeRemaining <= A.GetGCD() * 4 then
-				if WaterTotem == "HealingStream" and A.HealingStreamTotem:IsReady(player) then
-					return A.HealingStreamTotem:Show(icon)
-				elseif WaterTotem == "PoisonCleansing" and A.PoisonCleansingTotem:IsReady(player) then
-					return A.PoisonCleansingTotem:Show(icon)
-				elseif WaterTotem == "ManaSpring" and A.ManaSpringTotem:IsReady(player) then
-					return A.ManaSpringTotem:Show(icon)					
-				elseif WaterTotem == "DiseaseCleansing" and A.DiseaseCleansingTotem:IsReady(player) then
-					return A.DiseaseCleansingTotem:Show(icon)
-				elseif WaterTotem == "FireResistance" and A.FireResistanceTotem:IsReady(player) then
-					return A.FireResistanceTotem:Show(icon)							
-				end
-			end					
+		if WaterTotemTimeRemaining <= A.GetGCD() * 4 then
+			if WaterTotem == "HealingStream" and A.HealingStreamTotem:IsReady(player) then
+				return A.HealingStreamTotem:Show(icon)
+			elseif WaterTotem == "PoisonCleansing" and A.PoisonCleansingTotem:IsReady(player) then
+				return A.PoisonCleansingTotem:Show(icon)
+			elseif WaterTotem == "ManaSpring" and A.ManaSpringTotem:IsReady(player) then
+				return A.ManaSpringTotem:Show(icon)					
+			elseif WaterTotem == "DiseaseCleansing" and A.DiseaseCleansingTotem:IsReady(player) then
+				return A.DiseaseCleansingTotem:Show(icon)
+			elseif WaterTotem == "FireResistance" and A.FireResistanceTotem:IsReady(player) then
+				return A.FireResistanceTotem:Show(icon)							
+			end
+		end					
 			
 	end
 	
@@ -699,68 +838,12 @@ A[3] = function(icon, isMulti)
 	
 	local function HealingRotation(unit)
 
-		--HEALING SPELLS TO CONSIDER
-			--CHAIN HEAL R5 (BASIC)
-			--CHAIN HEAL R3/4 (BASIC)
-			--CHAIN HEAL R1 (BASIC)
-
-			--HEALING WAVE R12 (BASIC)
-			--HEALING WAVE R10 (BASIC)
-			--HEALING WAVE R7/8 (BASIC)
-			--HEALING WAVE R1 (BASIC)
-
-			--LESSER HEALING WAVE R7 (BASIC)
-			--LESSER HEALING WAVE R5 (BASIC)
-
-			--WATER SHIELD (DONE)
-			--EARTH SHIELD (DONE)
-
-			--MANA POTION (DONE)
-			--DARK/DEMONIC RUNE (DONE)
-
-			--NATURE'S SWIFTNESS (DONE)
-			--REMOVE POISON/DISEASE (DONE)
-			--PURGE (BASIC)
-			--EARTH SHOCK R1 (DONE)
-			--TRINKET1 (DONE)
-			--TRINKET2 (DONE)
-			--RACIAL (DONE)
-
-			--MANA SPRING TOTEM (DONE)
-			--MANA TIDE TOTEM (DONE)
-			--POISON CLEANSING TOTEM
-			--FIRE RESISTANCE TOTEM
-			--HEALING STREAM TOTEM
-			--DISEASE CLEANSING TOTEM
-
-			--FROST RESISTANCE TOTEM
-			--SEARING TOTEM (DONE)
-			--FIRE NOVA TOTEM (DONE)
-			--MAGMA TOTEM (DONE)
-			--FIRE ELEMENTAL TOTEM (WILL NOT DO)
-
-			--STRENGTH OF EARTH TOTEM (DONE)
-			--TREMOR TOTEM (BASIC)
-			--EARTHBIND TOTEM 
-			--STONECLAW TOTEM 
-			--EARTH ELEMENTAL TOTEM (WILL NOT DO)
-
-			--WINDFURY TOTEM (BASIC)
-			--WRATH OF AIR TOTEM (BASIC)
-			--TRANQUIL AIR TOTEM (BASIC)
-			--NATURE RESISTANCE TOTEM
-			--GRACE OF AIR TOTEM
-			--GROUNDING TOTEM
-
-			--LIGHTNING SHIELD (DONE)
-			--FROST SHOCK (R1)
-			--TOTEMIC RECALL (DONE)
-
 		if SpecOverride == "Restoration" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 264) then
 
 		local isManaSave = HealingEngine.IsManaSave(unit)
-		local isEmergency = Unit(unit):HealthPercent() > 0 and Unit(unit):HealthPercent() <= 30	
-
+		local isEmergency = Unit(unit):HealthPercent() > 0 and Unit(unit):HealthPercent() <= 30	and A.HealingWave:IsInRange(unit) 
+		local unitGUID                                     = UnitGUID(unit)
+		
 	        if CanStopCastingOverHeal(unit) then 
 	            return A:Show(icon, ACTION_CONST_STOPCAST)
 	        end 
@@ -768,7 +851,7 @@ A[3] = function(icon, isMulti)
 			--Emergency
 			-- Nature's Swiftness + Healing Wave R12 for burst
 
-			if A.Trinket1:IsReady(player) then 
+			if A.Trinket1:IsReady(player) and inCombat then 
 				if Trinket1Choice == "Health" and Unit(unit):HealthPercent() <= Trinket1Value then 
 					return A.Trinket1:Show(icon)
 				elseif Trinket1Choice == "Mana" and Player:ManaPercentage() <= Trinket1Value then 
@@ -776,7 +859,7 @@ A[3] = function(icon, isMulti)
 				end
 			end
 
-			if A.Trinket2:IsReady(player) then 
+			if A.Trinket2:IsReady(player) and inCombat then 
 				if Trinket2Choice == "Health" and Unit(unit):HealthPercent() <= Trinket2Value then 
 					return A.Trinket2:Show(icon)
 				elseif Trinket2Choice == "Mana" and Player:ManaPercentage() <= Trinket2Value then 
@@ -791,6 +874,10 @@ A[3] = function(icon, isMulti)
                     return A.NaturesSwiftness:Show(icon)
                 end 
 
+				if A.HealingWave:IsReady(unit) and Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) > 0 then
+					return A.HealingWave:Show(icon)
+				end
+
 				if A.NaturesSwiftness:GetCooldown() > A.GetGCD() and Unit(player):HasBuffs(A.NaturesSwiftness.ID) == 0 and A.GetToggle(1, "Racial") then
 					if A.BloodFury:IsReady(player) then
 						return A.BloodFury:Show(icon)
@@ -802,7 +889,7 @@ A[3] = function(icon, isMulti)
 				end
 
 				if A.LesserHealingWave:IsReady(unit) and Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) == 0 then 
-					return LesserHealingWave:Show(icon)
+					return A.LesserHealingWave:Show(icon)
 				end
 
 	        end  
@@ -827,10 +914,14 @@ A[3] = function(icon, isMulti)
 	            end    
 	        end]]
 
-			if A.EarthShield:IsReady(unit) and Unit(unit):HasBuffs(A.EarthShield.ID) == 0 and Unit(unit):IsTank() then
+			if A.EarthShield:IsReady(focus) and Unit(focus):IsExists() and Unit(focus):HasBuffs(A.EarthShield.ID) == 0 then 
 				return A.EarthShield:Show(icon)
 			end
 
+			if A.EarthShield:IsReady(unit) and HealingEngine.GetBuffsCount(A.EarthShield.ID, nil, true) == 0 and Unit(unit):IsTank() then
+				return A.EarthShield:Show(icon)
+			end
+			
 			-- Maintain best totems
 			if TotemHandler() then
 				return true
@@ -926,7 +1017,6 @@ A[3] = function(icon, isMulti)
 				end											
 			end 
 
-
 			-- Healing Wave ST
 			if A.HealingWave:IsReady(unit) and not isMoving then 
 				if Unit(unit):HealthPercent() <= HealingWaveMax and not isManaSave then
@@ -940,8 +1030,21 @@ A[3] = function(icon, isMulti)
 				end
 			end
 
+			--Keep Healing Way active
+			if A.IsTalentLearned(29206) then -- Healing Way
+				local HealingWay = A.GetToggle(2, "HealingWay")
+				local HealingWayFocus = A.GetToggle(2, "HealingWayFocus")
+				if A.HealingWave:IsReady(focus) and HealingWayFocus and Unit(focus):IsExists() and Unit(focus):HasBuffs(A.HealingWay.ID) <= 2 then 
+					return A.HealingWave1:Show(icon)
+				end
+				
+				if HealingWave:IsReady(unit) and HealingWay and Unit(unit):IsTank() and Unit(unit):HasBuffs(A.HealingWay.ID) <= 2 then
+					return A.HealingWave1:Show(icon)
+				end
+			end
+
 			-- Lesser Healing Wave
-			if A.LesserHealingWave:IsReady(unit) and not isMoving then 
+			if A.LesserHealingWave:IsReady(unit) and not isMoving then --and LesserHealingWaveDyn:PredictHeal(unit) then 
 				if Unit(unit):HealthPercent() <= LesserHealingWaveMax and not isManaSave then 
 					return A.LesserHealingWave:Show(icon)
 				elseif Unit(unit):HealthPercent() <= LesserHealingWave5 then 
@@ -1113,12 +1216,12 @@ A[3] = function(icon, isMulti)
 			end
 			
 			--Trinket 1
-			if A.Trinket1:IsReady(player) and BurstIsON(unit) then
+			if A.Trinket1:IsReady(player) and BurstIsON(unit) and SpecOverride == "Elemental" then
 				return A.Trinket1:Show(icon)    
 			end
 			
 			--Trinket 2
-			if A.Trinket2:IsReady(player) and BurstIsON(unit) then
+			if A.Trinket2:IsReady(player) and BurstIsON(unit) and SpecOverride == "Elemental" then
 				return A.Trinket2:Show(icon)    
 			end				
 		
@@ -1163,10 +1266,10 @@ A[3] = function(icon, isMulti)
 		if RecoveryItems() then
 			return true
 		end
-		if Interrupt() then
+		if Interrupt(unit) then
 			return true
 		end
-		if Purge() then
+		if Purge(unit) then
 			return true
 		end
 	end

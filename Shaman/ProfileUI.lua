@@ -24,7 +24,7 @@ local select, setmetatable							= select, setmetatable
 
 A.Data.ProfileEnabled[Action.CurrentProfile] = true
 A.Data.ProfileUI = {    
-    DateTime = "v0.9 (30 June 2021)",
+    DateTime = "v0.9.1 (1 July 2021)",
     -- Class settings
     [2] = {        
             { -- GENERAL HEADER
@@ -243,13 +243,13 @@ A.Data.ProfileUI = {
 			{
 				{ -- ReactionTotem
                     E = "Checkbox", 
-                    DB = "ReactionTotem",
+                    DB = "RecommendationTotem",
                     DBV = true,
                     L = { 
-                        ANY = "Use Reaction Totems", 
+                        ANY = "Use Recommended Totems", 
                     }, 
                     TT = { 
-                        ANY = "Use reaction totems such as Poison Cleansing and Disease Cleansing (CURRENTLY IN DEVELOPMENT).", 
+                        ANY = "Uses recommended totems based on your current encounter (not yet implemented).", 
                     }, 
                     M = {},
                 },
@@ -540,7 +540,7 @@ A.Data.ProfileUI = {
                     E = "Slider",                                                     
                     MIN = 0, 
                     MAX = 100,                            
-                    DB = "LesserHealingWaveMax",
+                    DB = "LesserHealingWave7",
                     DBV = 80, -- Set healthpercentage @30% life. 
                     ONOFF = false,
                     L = { 
@@ -610,7 +610,7 @@ A.Data.ProfileUI = {
                     E = "Slider",                                                     
                     MIN = 0, 
                     MAX = 100,                            
-                    DB = "HealingWaveMax",
+                    DB = "HealingWave12",
                     DBV = 60, -- Set healthpercentage @30% life. 
                     ONOFF = false,
                     L = { 
@@ -620,7 +620,33 @@ A.Data.ProfileUI = {
                         ANY = "Value (%) to use Healing Wave Max Rank.", 
                     },                     
                     M = {},
-                },                                                                  			
+                },
+			},
+			{
+                { -- Healing Way
+                    E = "Checkbox", 
+                    DB = "HealingWay",
+                    DBV = true,
+                    L = { 
+                        ANY = "R1 Spam Healing Way", 
+                    }, 
+                    TT = { 
+                        ANY = "Spam R1 Healing Wave on tank until Healing Way buff is active.", 
+                    }, 
+                    M = {},
+                }, 	
+                { -- Healing Way focus
+                    E = "Checkbox", 
+                    DB = "HealingWayFocus",
+                    DBV = true,
+                    L = { 
+                        ANY = "Healing Way Focus Target", 
+                    }, 
+                    TT = { 
+                        ANY = "Spam R1 Healing Wave on focus target until Healing Way buff is active.", 
+                    }, 
+                    M = {},
+                }, 				
 			},
             { -- PVE HEADER
                 {
@@ -665,7 +691,7 @@ A.Data.ProfileUI = {
                     E = "Slider",                                                     
                     MIN = 0, 
                     MAX = 100,                            
-                    DB = "ChainHealMax",
+                    DB = "ChainHeal5",
                     DBV = 70, -- Set healthpercentage @30% life. 
                     ONOFF = false,
                     L = { 
