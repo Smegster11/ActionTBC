@@ -187,14 +187,16 @@ Action[Action.PlayerClass]                     = {
     ChainHeal4								= Create({ Type = "Spell", ID = 25422, isRank = 4	}),	
     ChainHeal								= Create({ Type = "Spell", ID = 25423, useMaxRank = true, Desc = "Max Rank"		}),
     ManaTideTotem							= Create({ Type = "Spell", ID = 16190	}),
-    EarthShield								= Create({ Type = "Spell", ID = 974		}),	
-    WaterShield								= Create({ Type = "Spell", ID = 24398, useMaxRank = true	}),	
+    EarthShield1							= Create({ Type = "Spell", ID = 974	, isRank = 1 	}),	
+    EarthShield2							= Create({ Type = "Spell", ID = 32593	, isRank = 2 	}),	
+    EarthShield3							= Create({ Type = "Spell", ID = 32594	, isRank = 3 	}),		
+    WaterShield								= Create({ Type = "Spell", ID = 24398	}),	
     NaturesSwiftness						= Create({ Type = "Spell", ID = 16188	}),	
 	
 	--Misc
 	SuperHealingPotion						= Create({ Type = "Potion", ID = 22829, QueueForbidden = true }),
 	DualWield								= Create({ Type = "Spell", ID = 30798, Hidden = true }),
-	HealingWay								= Create({ Type = "Spell", ID = 29206, Hidden = true }),
+	HealingWay								= Create({ Type = "Spell", ID = 29203, Hidden = true }),
 }
 
 local A                                     = setmetatable(Action[Action.PlayerClass], { __index = Action })
@@ -556,7 +558,6 @@ local function DoWeaponSync()
 	end
 end
 
-	
 
 --- ======= ACTION LISTS =======
 -- [3] Single Rotation
@@ -743,6 +744,13 @@ A[3] = function(icon, isMulti)
 		if A.LightningShield:IsReady(player) and ShieldType == "Lightning" and Unit(player):HasBuffs(A.LightningShield.ID) == 0 and not ImmuneNature[npcID] then
 			return A.LightningShield:Show(icon)
 		end	
+
+		local EarthShieldActive = HealingEngine.GetBuffsCount(A.EarthShield1.ID, nil, player) >= 1 or HealingEngine.GetBuffsCount(A.EarthShield2.ID, nil, player) >= 1 or HealingEngine.GetBuffsCount(A.EarthShield3.ID, nil, player) >= 1
+
+		if A.EarthShield1:IsReady(focus) and Unit(focus):IsExists() and not EarthShieldActive then 
+			return A.EarthShield1:Show(icon)
+		end
+
 	end
 	
 	--##############
@@ -914,13 +922,6 @@ A[3] = function(icon, isMulti)
 	            end    
 	        end]]
 
-			if A.EarthShield:IsReady(focus) and Unit(focus):IsExists() and Unit(focus):HasBuffs(A.EarthShield.ID) == 0 then 
-				return A.EarthShield:Show(icon)
-			end
-
-			if A.EarthShield:IsReady(unit) and HealingEngine.GetBuffsCount(A.EarthShield.ID, nil, true) == 0 and Unit(unit):IsTank() then
-				return A.EarthShield:Show(icon)
-			end
 			
 			-- Maintain best totems
 			if TotemHandler() then
@@ -1034,11 +1035,11 @@ A[3] = function(icon, isMulti)
 			if A.IsTalentLearned(29206) then -- Healing Way
 				local HealingWay = A.GetToggle(2, "HealingWay")
 				local HealingWayFocus = A.GetToggle(2, "HealingWayFocus")
-				if A.HealingWave:IsReady(focus) and HealingWayFocus and Unit(focus):IsExists() and Unit(focus):HasBuffs(A.HealingWay.ID) <= 2 then 
+				if A.HealingWave:IsReady(focus) and HealingWayFocus and Unit(focus):IsExists() and IsUnitFriendly(focus) and (Unit(focus):HasBuffs(A.HealingWay.ID) <= 2 or Unit(focus):HasBuffsStacks(A.HealingWay.ID) < 3) then 
 					return A.HealingWave1:Show(icon)
 				end
 				
-				if HealingWave:IsReady(unit) and HealingWay and Unit(unit):IsTank() and Unit(unit):HasBuffs(A.HealingWay.ID) <= 2 then
+				if A.HealingWave:IsReady(unit) and HealingWay and Unit(unit):IsTank() and Unit(unit):HasBuffs(A.HealingWay.ID) <= 2 and Unit(unit):HasBuffsStacks(A.HealingWay.ID) < 3  then
 					return A.HealingWave1:Show(icon)
 				end
 			end
