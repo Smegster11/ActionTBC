@@ -24,7 +24,7 @@ local select, setmetatable							= select, setmetatable
 
 A.Data.ProfileEnabled[Action.CurrentProfile] = true
 A.Data.ProfileUI = {    
-    DateTime = "v0.9.2 (3 July 2021)",
+    DateTime = "v0.9.3 (4 July 2021)",
     -- Class settings
     [2] = {        
             { -- GENERAL HEADER
@@ -191,7 +191,7 @@ A.Data.ProfileUI = {
                         ANY = "Mana (%) for Demonic Rune",
                     },
                     TT = { 
-                        ANY = "Mana (%) for Demonic Rune (THIS HAS BEEN TEMPORARILY FROZEN TO AUTO DUE TO CODING REASONS. THIS WILL BE USED AT 20% MANA).", 
+                        ANY = "Mana (%) for Demonic Rune (CURRENTLY DISABLED DUE TO ROTATION-BREAKING BUG).", 
                     },                     
                     M = {},
                 },					

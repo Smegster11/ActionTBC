@@ -279,6 +279,8 @@ local ImmuneFire = {
 [6073] = true, -- Searing Infernal
 [2760] = true, -- Burning Exile
 [5850] = true, -- Blazing Elemental
+[16491] = true, -- Mana Feeder
+[6520] = true, -- Scorching Elemental
 }
 
 local ImmuneNature = {
@@ -292,6 +294,7 @@ local ImmuneNature = {
 [9396] = true, -- Ground Pounder
 [5855] = true, -- Magma Elemental
 [8278] = true, -- Smoulder (Rarespawn)
+[16491] = true, -- Mana Feeder
 }		
 
 local EarthbindRecommendation = {
@@ -299,7 +302,7 @@ local EarthbindRecommendation = {
 }
 
 local StoneclawRecommendation = {
-
+[17225] = true, -- Nightbane, Karazhan - Rain of Bones (spellID 37098)
 }
 
 local FireResistanceRecommendation = {
@@ -315,7 +318,7 @@ local GraceofAirRecommendation = {
 }
 
 local GroundingRecommendation = {
-[18835] = true -- Kiggler the Crazed in High King fight, block Lightning Bolt (spellID 36152)
+[18835] = true, -- Kiggler the Crazed in High King fight, block Lightning Bolt (spellID 36152)
 }
 
 local NatureResistanceRecommendation = {
@@ -343,7 +346,9 @@ local PoisonCleansingRecommendation = {
 }
 
 local TremorRecommendation = {
-[18831] = true -- High King Maulgar when below 50% HP.
+[18831] = true, -- High King Maulgar when below 50% HP.
+[21350] = true, -- Gronn-Priest, Gruul's Lair trash mob
+[17225] = true, -- Nightbane, Karazhan - Bellowing Roar (spellID 36922)
 }
 
 local FireElementalRecommendation = {
@@ -652,20 +657,20 @@ A[3] = function(icon, isMulti)
 			end	
 		end	
 
-		if CanUseManaRune(icon) then
+		--[[if CanUseManaRune(icon) then
 			return true
-		end
+		end]]
 	end
 
 	--#########################
 	--### INTERRUPT / PURGE ###
 	--#########################
 	local function Interrupt()
-		useKick, useCC, useRacial, notInterruptable, castRemainsTime, castDoneTime = InterruptIsValid(target, "Main", true, nil) 
+		useKick, useCC, useRacial, notInterruptable, castRemainsTime, castDoneTime = InterruptIsValid(unit, "Main", true, nil) 
 		
-		local isEmergency = Unit(target):HealthPercent() > 0 and Unit(target):HealthPercent() <= 30	
+		local isEmergency = Unit(target):HealthPercent() > 0 and Unit(target):HealthPercent() <= 30	and IsUnitFriendly(target)
 		
-		if A.EarthShock:IsReady(unit) and (IsUnitEnemy(unit) or (IsUnitEnemy(targettarget) and InterruptTargetTarget)) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() and not ImmuneNature[npcID] then 
+		if A.EarthShock:IsReady(unit) and IsUnitEnemy(unit) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() and not ImmuneNature[npcID] then 
 			if SpecOverride == "Enhancement" or SpecOverride == "Elemental" or (SpecOverride == "Restoration" and not isEmergency) then
 				return A.EarthShock:Show(icon)  
 			end  
@@ -673,7 +678,7 @@ A[3] = function(icon, isMulti)
 	end
 
 	local function Purge()
-	    if A.Purge:IsReady(unit) and inCombat and (IsUnitEnemy(unit) or (IsUnitEnemy(targettarget) and InterruptTargetTarget)) and AuraIsValid(unit, "UsePurge", "PurgeHigh") then 
+	    if A.Purge:IsReady(unit) and inCombat and IsUnitEnemy(unit) and AuraIsValid(unit, "UsePurge", "PurgeHigh")  then 
 			if SpecOverride == "Enhancement" or SpecOverride == "Elemental" or (SpecOverride == "Restoration" and not isEmergency) then    	
 	        	return A.Purge:Show(icon)
 	        end
@@ -902,6 +907,18 @@ A[3] = function(icon, isMulti)
 
 	        end  
 
+			--TT Interrupt
+			
+			useKick, useCC, useRacial, notInterruptable, castRemainsTime, castDoneTime = InterruptIsValid(targettarget, "Main", true, nil)	
+			
+			if A.EarthShock:IsReady(targettarget) and InterruptTargetTarget and IsUnitEnemy(targettarget) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() and not ImmuneNature[npcID] and not isEmergency then 
+				return A.EarthShock:Show(icon)
+			end
+			
+			if A.Purge:IsReady(targettarget) and InterruptTargetTarget and inCombat and IsUnitEnemy(targettarget) and AuraIsValid(targettarget, "UsePurge", "PurgeHigh") then 
+				return A.Purge:Show(icon)
+			end
+
 			--Just consume Nature's Swiftness buff if someone else snipes heal first.
 			if Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) > 0 and Unit(unit):HealthPercent() <= 60 then
 				return A.HealingWave:Show(icon)
@@ -1082,7 +1099,7 @@ A[3] = function(icon, isMulti)
 					return A.FireNovaTotem:Show(icon)
 				end
 				if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] and not A.FireNovaTotem:IsSpellLastCastOrGCD() then
-					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 then
+					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 and not ImmuneFire[npcID] then
 						return A.MagmaTotem:Show(icon)
 					end
 					if A.TotemofWrath:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
@@ -1094,7 +1111,11 @@ A[3] = function(icon, isMulti)
 				end
 				if ActiveFireTotem == A.MagmaTotem:Info() then
 					if A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE then
-						return A.SearingTotem:Show(icon)
+						if A.TotemofWrath:IsReady(player) then
+							return A.TotemofWrath:Show(icon)
+						elseif A.SearingTotem:IsReady(player) and not A.TotemofWrath:IsReady(player) then
+							return A.SearingTotem:Show(icon)
+						end
 					end
 				end
 			end			
@@ -1166,7 +1187,7 @@ A[3] = function(icon, isMulti)
 				return true
 			end		
 
-			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() then -- FlameShock same range as SearingTotem
+			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() and not ImmuneFire[npcID] then -- FlameShock same range as SearingTotem
 				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 then
 					return A.FireNovaTotem:Show(icon)
 				end
@@ -1174,7 +1195,7 @@ A[3] = function(icon, isMulti)
 					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 then
 						return A.MagmaTotem:Show(icon)
 					end
-					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) and not ImmuneFire[npcID] then
+					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
 						return A.SearingTotem:Show(icon)
 					end
 				end
@@ -1217,12 +1238,12 @@ A[3] = function(icon, isMulti)
 			end
 			
 			--Trinket 1
-			if A.Trinket1:IsReady(player) and BurstIsON(unit) and SpecOverride == "Elemental" then
+			if A.Trinket1:IsReady(player) and BurstIsON(unit) then
 				return A.Trinket1:Show(icon)    
 			end
 			
 			--Trinket 2
-			if A.Trinket2:IsReady(player) and BurstIsON(unit) and SpecOverride == "Elemental" then
+			if A.Trinket2:IsReady(player) and BurstIsON(unit) then
 				return A.Trinket2:Show(icon)    
 			end				
 		
@@ -1269,6 +1290,7 @@ A[3] = function(icon, isMulti)
 		end
 		if Interrupt(unit) then
 			return true
+		end 
 		end
 		if Purge(unit) then
 			return true
@@ -1294,6 +1316,7 @@ A[3] = function(icon, isMulti)
             return true 
         end             
     end 
+	
 	
     -- DPS Mouseover 
     if IsUnitEnemy(mouseover) then 
