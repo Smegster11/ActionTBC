@@ -502,6 +502,10 @@ local function CanStopCastingOverHeal(unit, unitGUID)
     end 
 end 
 
+--######################
+--### MANATIDE CHECK ###
+--######################
+
 local function ManaTideCheck()
         
     local current_party_mana = 0;
@@ -540,6 +544,10 @@ local function ManaTideCheck()
     return ShouldManaTide
 end
 
+--###################
+--### WEAPON SYNC ###
+--###################
+
 local function DoWeaponSync()
 	local MHSwing = Player:GetSwing(1)
 	local OHSwing = Player:GetSwing(2)
@@ -561,6 +569,29 @@ local function DoWeaponSync()
 			end
 		end
 	end
+end
+
+--#########################
+--### INTERRUPT / PURGE ###
+--#########################
+local function Interrupt(unit)
+	useKick, useCC, useRacial, notInterruptable, castRemainsTime, castDoneTime = InterruptIsValid(unit, "Main", true, nil) 
+	
+	local isEmergency = Unit(target):HealthPercent() > 0 and Unit(target):HealthPercent() <= 30	and IsUnitFriendly(target)
+	
+	if A.EarthShock:IsReady(unit) and IsUnitEnemy(unit) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() and not ImmuneNature[npcID] then 
+		if SpecOverride == "Enhancement" or SpecOverride == "Elemental" or (SpecOverride == "Restoration" and not isEmergency) then
+			return A.EarthShock 
+		end  
+	end 
+end
+
+local function Purge(unit)
+	if A.Purge:IsReady(unit) and inCombat and IsUnitEnemy(unit) and AuraIsValid(unit, "UsePurge", "PurgeHigh")  then 
+		if SpecOverride == "Enhancement" or SpecOverride == "Elemental" or (SpecOverride == "Restoration" and not isEmergency) then    	
+			return A.Purge
+		end
+	end  
 end
 
 
@@ -662,29 +693,6 @@ A[3] = function(icon, isMulti)
 		end]]
 	end
 
-	--#########################
-	--### INTERRUPT / PURGE ###
-	--#########################
-	local function Interrupt()
-		useKick, useCC, useRacial, notInterruptable, castRemainsTime, castDoneTime = InterruptIsValid(unit, "Main", true, nil) 
-		
-		local isEmergency = Unit(target):HealthPercent() > 0 and Unit(target):HealthPercent() <= 30	and IsUnitFriendly(target)
-		
-		if A.EarthShock:IsReady(unit) and IsUnitEnemy(unit) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() and not ImmuneNature[npcID] then 
-			if SpecOverride == "Enhancement" or SpecOverride == "Elemental" or (SpecOverride == "Restoration" and not isEmergency) then
-				return A.EarthShock:Show(icon)  
-			end  
-		end 
-	end
-
-	local function Purge()
-	    if A.Purge:IsReady(unit) and inCombat and IsUnitEnemy(unit) and AuraIsValid(unit, "UsePurge", "PurgeHigh")  then 
-			if SpecOverride == "Enhancement" or SpecOverride == "Elemental" or (SpecOverride == "Restoration" and not isEmergency) then    	
-	        	return A.Purge:Show(icon)
-	        end
-	    end  
-	end
-
 	--################
 	--### ENCHANTS ###
 	--################	
@@ -746,6 +754,7 @@ A[3] = function(icon, isMulti)
 		if A.WaterShield:IsReady(player) and ShieldType == "Water" and Unit(player):HasBuffs(A.WaterShield.ID) == 0 then
 			return A.WaterShield:Show(icon)
 		end
+		
 		if A.LightningShield:IsReady(player) and ShieldType == "Lightning" and Unit(player):HasBuffs(A.LightningShield.ID) == 0 and not ImmuneNature[npcID] then
 			return A.LightningShield:Show(icon)
 		end	
@@ -768,8 +777,15 @@ A[3] = function(icon, isMulti)
 		end
 	end	
 
-	if A.TremorTotem:IsReady(player) and FriendlyTeam():GetDeBuffs("Sleep", 30) > 0 or FriendlyTeam():GetDeBuffs("Fear", 30) > 0 and ActiveEarthTotem ~= A.TremorTotem:Info() then
-		return A.TremorTotem:Show(icon)
+	if A.TremorTotem:IsReady(player) and ActiveEarthTotem ~= A.TremorTotem:Info() then
+		if FriendlyTeam():GetDeBuffs("Sleep", 30) > 0 or FriendlyTeam():GetDeBuffs("Fear", 30) > 0 then 
+			return A.TremorTotem:Show(icon)
+		end
+		
+		if A.MultiUnits:GetByRangeCasting(40, 1, nil, {"Fear", "Terror", "Bellowing Roar"}) >= 1 then
+			return A.TremorTotem:Show(icon)
+		end
+		
 	end   
 
 	
@@ -853,9 +869,9 @@ A[3] = function(icon, isMulti)
 
 		if SpecOverride == "Restoration" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 264) then
 
-		local isManaSave = HealingEngine.IsManaSave(unit)
-		local isEmergency = Unit(unit):HealthPercent() > 0 and Unit(unit):HealthPercent() <= 30	and A.HealingWave:IsInRange(unit) 
-		local unitGUID                                     = UnitGUID(unit)
+			local isManaSave = HealingEngine.IsManaSave(unit)
+			local isEmergency = Unit(unit):HealthPercent() > 0 and Unit(unit):HealthPercent() <= 30	and A.HealingWave:IsInRange(unit) 
+			local unitGUID                                     = UnitGUID(unit)
 		
 	        if CanStopCastingOverHeal(unit) then 
 	            return A:Show(icon, ACTION_CONST_STOPCAST)
@@ -909,10 +925,14 @@ A[3] = function(icon, isMulti)
 
 			--TT Interrupt
 			
-			useKick, useCC, useRacial, notInterruptable, castRemainsTime, castDoneTime = InterruptIsValid(targettarget, "Main", true, nil)	
+			local useKick, useCC, useRacial, notInterruptable, castRemainsTime, castDoneTime = InterruptIsValid(targettarget, "Main", true, nil)	
+
+			local secondsLeft, percentLeft, spellID, spellName, notInterruptable, isChannel = Unit(player):IsCastingRemains()				
 			
-			if A.EarthShock:IsReady(targettarget) and InterruptTargetTarget and IsUnitEnemy(targettarget) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() and not ImmuneNature[npcID] and not isEmergency then 
-				return A.EarthShock:Show(icon)
+			if A.EarthShock:IsReady(targettarget, nil, nil, true) and InterruptTargetTarget and IsUnitEnemy(targettarget) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() and not ImmuneNature[npcID] and not isEmergency then 
+				if castRemainsTime < secondsLeft then
+					return A.EarthShock:Show(icon)
+				end
 			end
 			
 			if A.Purge:IsReady(targettarget) and InterruptTargetTarget and inCombat and IsUnitEnemy(targettarget) and AuraIsValid(targettarget, "UsePurge", "PurgeHigh") then 
@@ -1080,6 +1100,16 @@ A[3] = function(icon, isMulti)
 	
 	local function DamageRotation(unit) 	
 	
+		local Interrupts = Interrupt(unit)
+		if Interrupts then
+			return Interrupts:Show(icon)
+		end
+		
+		local Purges = Purge(unit)
+		if Purges then
+			return Purges:Show(icon)
+		end	
+	
 		--#####################	
 		--##### ELEMENTAL #####
 		--#####################
@@ -1147,6 +1177,10 @@ A[3] = function(icon, isMulti)
 				return A.Trinket2:Show(icon)    
 			end					
 		
+			if A.FrostShock:IsReady(unit) and Unit(target):IsMelee() and UnitIsUnit(targettarget, player) and Unit(unit):HasBuffs("AllCC") == 0 then
+				return A.FrostShock:Show(icon)
+			end
+		
 		-- Use Elemental Mastery with Chain Lightning
 			if A.ChainLightning:IsReady(unit) and Unit(player):HasBuffs(A.ElementalMastery.ID, true) > 0 and not ImmuneNature[npcID] then 
 				return A.ChainLightning:Show(icon)
@@ -1156,7 +1190,9 @@ A[3] = function(icon, isMulti)
 			end
 		-- Chain Lightning
 			if A.ChainLightning:IsReady(unit) and UseAoE and not isMoving and not ImmuneNature[npcID] then
-				return A.ChainLightning:Show(icon)
+				if (Unit(unit):IsBoss() and Unit(unit):HealthPercent() <= (Player:ManaPercentage() + 10)) or not Unit(unit):IsBoss() then
+					return A.ChainLightning:Show(icon)
+				end
 			end
 		-- Flame Shock while moving
 			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 and Player:ManaPercentage() >= StopShocksManaEle and not ShockInterrupt and not ImmuneFire[npcID] then
@@ -1286,13 +1322,6 @@ A[3] = function(icon, isMulti)
 
 	if inCombat then 
 		if RecoveryItems() then
-			return true
-		end
-		if Interrupt(unit) then
-			return true
-		end 
-		end
-		if Purge(unit) then
 			return true
 		end
 	end
