@@ -314,15 +314,14 @@ A[3] = function(icon, isMulti)
 
 		local HoTRolling = Unit(unit):HasBuffs({A.Rejuvenation.ID, A.Regrowth1.ID, A.Regrowth2.ID, A.Regrowth3.ID, A.Regrowth4.ID, A.Regrowth5.ID, A.Regrowth6.ID, A.Regrowth7.ID, A.Regrowth8.ID, A.Regrowth9.ID, A.Regrowth10.ID}, true) > 0
 
+		-- Mapping menu options from ProfileUI to simplier forms:
 		local Trinket1Choice = A.GetToggle(2, "Trinket1Choice")
 		local Trinket2Choice = A.GetToggle(2, "Trinket2Choice")
 		local Trinket1Value = A.GetToggle(2, "Trinket1Value")
 		local Trinket2Value = A.GetToggle(2, "Trinket2Value")
 		
-		
-		--Emergency
-		-- Nature's Swiftness + Healing Wave R12 for burst
 
+		-- Use Trinkets
 		if A.Trinket1:IsReady(player) and inCombat then 
 			if Trinket1Choice == "Health" and Unit(unit):HealthPercent() <= Trinket1Value then 
 				return A.Trinket1:Show(icon)
@@ -339,6 +338,7 @@ A[3] = function(icon, isMulti)
 			end
 		end			
 
+		--Check if there is emergency healing to be done (we've mapped isEmergency above).
 		if isEmergency and inCombat then
 
 			-- Nature's Swiftness 
@@ -346,11 +346,14 @@ A[3] = function(icon, isMulti)
 				return A.NaturesSwiftness:Show(icon)
 			end 
 
-			if A.HealingTouch:IsReady(unit) and Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) > 0 then
-				return A.HealingTouch:Show(icon)
+			-- Use Max Rank Regrowth if the Nature's Swiftness buff is greater than 0 seconds long.
+			if A.Regrowth:IsReady(unit) and Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) > 0 then
+				return A.Regrowth:Show(icon)
 			end
-
+			
+			-- If we don't have Nature's Swiftness buff
 			if A.SwiftMend:IsReady(unit) and Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) == 0 then 
+				-- and if the target has a HoT on it (HoTRolling is mapped as above) then use Swiftmend.
 				if HoTRolling then
 					return A.SwiftMend:Show(icon)
 				end
@@ -358,64 +361,76 @@ A[3] = function(icon, isMulti)
 
 		end  
 		
+		-- Use Tree of Life if we don't have Tree of Life buff
 		if A.TreeofLife:IsReady(player) and Unit(player):HasBuffs(A.TreeofLife.ID, true) == 0 then
 			return A.TreeofLife:Show(icon)
 		end
 
 		--Just consume Nature's Swiftness buff if someone else snipes heal first.
 		if Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) > 0 and Unit(unit):HealthPercent() <= 60 then
-			return A.HealingTouch:Show(icon)
+			return A.Regrowth:Show(icon)
 		end
 
-		--Cleanse
+		--Scan through all party/raid members and check if they have a poison that's listed in our dispel list.
 		local getmembersAll = HealingEngine.Data.SortedUnitIDs			
 		if A.AbolishPoison:IsReady(unit) then
 			for i = 1, #getmembersAll do 
 				if Unit(getmembersAll[i].Unit):GetRange() <= 40 and AuraIsValid(getmembersAll[i].Unit, "UseDispel", "Dispel poisons") then  
+					--Check that the poisoned target isn't already our current target.
 					if UnitGUID(getmembersAll[i].Unit) ~= currGUID then
-					  HealingEngine.SetTarget(getmembersAll[i].Unit) 
-					  break
+						--Select the poisoned target.
+						HealingEngine.SetTarget(getmembersAll[i].Unit) 
+						break
 					end 					                									
 				end				
 			end
 		end
-		
+
+		--Scan through all party/raid members and check if they have a curse that's listed in our dispel list.		
 		if A.RemoveCurse:IsReady(unit) then
 			for i = 1, #getmembersAll do 
 				if Unit(getmembersAll[i].Unit):GetRange() <= 40 and AuraIsValid(getmembersAll[i].Unit, "UseDispel", "Dispel curses") then  
+					--Check that the cursed target isn't already our current target.				
 					if UnitGUID(getmembersAll[i].Unit) ~= currGUID then
-					  HealingEngine.SetTarget(getmembersAll[i].Unit) 
-					  break
+						--Select the cursed target.					
+						HealingEngine.SetTarget(getmembersAll[i].Unit) 
+						break
 					end 					                									
 				end				
 			end
 		end			
 
+		-- Cleanse poison if in dispel list
 		if A.AbolishPoison:IsReady(unit) and AuraIsValid(unit, "UseDispel", "Dispel poisons") then
 			return A.AbolishPoison:Show(icon)
 		end
 
+		-- Cleanse curse if in dispel list
 		if A.RemoveCurse:IsReady(unit) and AuraIsValid(unit, "UseDispel", "Dispel curses") then
 			return A.RemoveCurse:Show(icon)
 		end
 		
-		--Lifebloom
+		--Lifebloom if target is tank and has less than 3 stacks of lifeblood
 		if A.Lifebloom:IsReady(unit) and Unit(unit):IsTank() and Unit(unit):HasBuffsStacks(A.Lifebloom.ID) < 3 then
 			return A.Lifebloom:Show(icon)
 		end
 		
-		--Rejuventation
+		--Map Rejuvenation HP from ProfileUI
 		local RejuvenationHP = A.GetToggle(2, "RejuvenationHP")
+		--Rejuventation if target's rejuvenation is about to expire and their health is below what we set on the slider in the menu.		
 		if A.Rejuvenation:IsReady(unit) and Unit(unit):HasBuffs(A.Rejuvenation.ID, true) <= A.GetGCD() and Unit(unit):HealthPercent() <= RejuvenationHP then
 			return A.Rejuvenation:Show(icon)
 		end
 
-		-- Regrowth
+		-- Map Regrowth HP sliders from ProfileUI
 		local RegrowthMax = A.GetToggle(2, "RegrowthMax")
 		local Regrowth9 = A.GetToggle(2, "Regrowth9")
 		local Regrowth7 = A.GetToggle(2, "Regrowth7")
-		local Regrowth4 = A.GetToggle(2, "Regrowth4")		
+		local Regrowth4 = A.GetToggle(2, "Regrowth4")
+		
+		-- Check that we're not moving since Regrowth has a cast time
 		if A.Regrowth:IsReady(unit) and not isMoving then 
+			--If unit's health is less than slider value and we're not saving mana (isManaSave mapped above)
 			if Unit(unit):HealthPercent() <= RegrowthMax and not isManaSave then
 				return A.Regrowth:Show(icon)
 			elseif Unit(unit):HealthPercent() <= Regrowth9 and not isManaSave then 
@@ -439,28 +454,30 @@ A[3] = function(icon, isMulti)
 	--##### BALANCE #####
 	--###################
 	
+		--If Moonkin Form is ready then player is likely Balance spec since it's a talent. Use Moonkin Form if player doesn't have Moonkin Form buff.
 		if A.MoonkinForm:IsReady(player) and Unit(player):HasBuffs(A.MoonkinForm.ID) == 0 then
 			return A.MoonkinForm:Show(icon)
 		end
 		
-		--Check if Moonkin
+		--If the player is in Moonkin Form then continue with balance rotation:
 		if Unit(player):HasBuffs(A.MoonkinForm.ID) > 0 then
 		
-			--Faeire Fire
+			--Faeire Fire if target doesn't have Faerie Fire debuff and they will live long enough for it to be worth using.
 			if A.FaerieFire:IsReady(unit) and Unit(unit):HasDeBuffs(A.FaerieFire.ID) == 0 and (Unit(unit):TimeToDie() >= 10 or Unit(unit):IsBoss()) then
 				return A.FaerieFire:Show(icon)
 			end
 
-			--Insect Swarm
+			--Insect Swarm if it's about to fall off.
 			if A.InsectSwarm:IsReady(unit) and Unit(unit):HasDeBuffs(A.InsectSwarm.ID, true) <= A.GetGCD() * 2 then
 				return A.InsectSwarm:Show(icon)
 			end
 			
-			--Moonfire
+			--Moonfire if it's about to fall off and they will live long enough for it to be worth using and if we have Moonfire on less than 3 targets in total.
 			if A.Moonfire:IsReady(unit) and Unit(unit):HasDeBuffs(A.Moonfire.ID, true) <= A.GetGCD() * 2 and (Unit(unit):TimeToDie() >= 10 or Unit(unit):IsBoss()) and Player:GetDeBuffsUnitCount(A.Moonfire.ID) < 3 then
 				return A.MoonFire:Show(icon)
 			end
 
+			--Use trinkets if we're using cooldowns.
 			if A.Trinket1:IsReady(player) and BurstIsON(unit) then
 				return A.Trinket1:Show(icon)    
 			end
@@ -469,7 +486,9 @@ A[3] = function(icon, isMulti)
 				return A.Trinket2:Show(icon)    
 			end			
 			
+			--Use Hurricane if we have the AoE toggle on and there are more than 5 enemies in combat with us within 30 yards and the time to die for all enemies within 30 yards is greater than 10 seconds.
 			if A.Hurricane:IsReady(unit) and UseAoE and MultiUnits:GetActiveUnitPlates(30) >= 5 and Player:AreaTTD(30) > 10 then 
+				-- Use Barkskin so we don't get interrupted right before using Hurricane
 				if A.Barkskin:IsReady(player) then
 					return A.Barkskin:Show(icon)
 				end
@@ -477,6 +496,7 @@ A[3] = function(icon, isMulti)
 				return A.Hurricane:Show(icon)
 			end	
 			
+			-- If nothing else to do, use Starfire.
 			if A.Starfire:IsReady(unit) then
 				return A.Starfire:Show(icon)
 			end
@@ -486,22 +506,25 @@ A[3] = function(icon, isMulti)
 	--##### BEAR #####
 	--################
 	
+		--Check if player has Bear Form buff, then continue with Bear rotation:
 		if Unit(player):HasBuffs(A.DireBearForm.ID) > 0 then
-			--Faerie Fire
+		
+			--Faeire Fire if target doesn't have Faerie Fire debuff and they will live long enough for it to be worth using.
 			if A.FaerieFire:IsReady(unit) and Unit(unit):HasDeBuffs(A.FaerieFire.ID) == 0 and (Unit(unit):TimeToDie() >= 10 or Unit(unit):IsBoss()) then
 				return A.FaerieFire:Show(icon)
 			end
 			
-			--DemoralizingRoar
+			--Demoralizing Roar if the enemy is in melee range and it doesn't already have Demoralizing Roar debuff.
 			if A.DemoralizingRoar:IsReady(player) and A.Mangle:IsInRange() and Unit(unit):HasDeBuffs(A.DemoralizingRoar.ID) == 0 then
 				return A.DemoralizingRoar:Show(icon)
 			end
 			
-			--Enrage
+			--Enrage if enemy is in melee range
 			if A.Enrage:IsReady(player) and A.Mangle:IsInRange() then
 				return A.Enrage:Show(icon)
 			end
 
+			--Use trinkets if we're using cooldowns.
 			if A.Trinket1:IsReady(player) and BurstIsON(unit) then
 				return A.Trinket1:Show(icon)    
 			end
@@ -510,22 +533,22 @@ A[3] = function(icon, isMulti)
 				return A.Trinket2:Show(icon)    
 			end	
 			
-			--Lacerate
+			--Lacerate if the target has less than 5 Lacerate stacks and there are 2 of less enemies in range OR we have AoE toggle off.
 			if A.Lacerate:IsReady(player) and Unit(unit):HasBuffsStacks(A.Lacerate.ID, true) < 5 and (MultiUnits:GetByRange(8) <= 2 or not UseAoE) then
 				return A.Lacerate:Show(icon)
 			end
 			
-			--Mangle
+			--Mangle whenever it's ready
 			if A.MangleBear:IsReady(unit) then
 				return A.MangleBear:Show(icon)
 			end
 			
-			--Swipe
+			--Swipe on cooldown as long as enemy is in range and AoE toggle is on.
 			if A.Swipe:IsReady(player) and A.Mangle:IsInRange() and UseAoE then
 				return A.Swipe:Show(icon)
 			end
 			
-			--Maul
+			--Maul if nothing else to do.
 			if A.Maul:IsReady(unit) then
 				return A.Maul:Show(icon)
 			end
@@ -535,13 +558,15 @@ A[3] = function(icon, isMulti)
 	--##### CAT #####
 	--###############	
 		
+		--Check if player has Cat Form buff, then do cat rotation:
 		if Unit(player):HasBuffs(A.CatForm.ID) > 0 then
 			
-			--Faerie Fire
+			--Faeire Fire if target doesn't have Faerie Fire debuff and they will live long enough for it to be worth using.
 			if A.FaerieFire:IsReady(unit) and Unit(unit):HasDeBuffs(A.FaerieFire.ID) == 0 and (Unit(unit):TimeToDie() >= 10 or Unit(unit):IsBoss()) then
 				return A.FaerieFire:Show(icon)
 			end
 
+			--Use trinkets if we're using cooldowns.
 			if A.Trinket1:IsReady(player) and BurstIsON(unit) then
 				return A.Trinket1:Show(icon)    
 			end
@@ -550,22 +575,27 @@ A[3] = function(icon, isMulti)
 				return A.Trinket2:Show(icon)    
 			end	
 			
+			--Use Mangle when it's ready
 			if A.MangleCat:IsReady(unit) then
 				return A.MangleCat:Show(icon)
 			end
 			
+			--Use Shred whenever we have Omen of Clarity buff.
 			if A.Shred:IsReady(unit) and Unit(player):HasBuffs(A.OmenofClarity.ID) > 0 then
 				return A.Shred:Show(icon)
 			end
 			
+			--Use Rip at 5 or more combo points and if energy is at 80 or higher
 			if A.Rip:IsReady(unit) and Player:ComboPoints() >= 5 and Player:Energy() >= 80 then
 				return A.Rip:Show(icon)
 			end
 			
+			--Use Rip at 4 or more combo points and 80 energy or higher if target doesn't have mangle debuff
 			if A.Rip:IsReady(unit) and Player:ComboPoints() >= 4 and Player:Energy() >= 80 and Unit(unit):HasDeBuffs(A.MangleCat.ID) == 0 and Unit(unit):HasDeBuffs(A.MangleBear.ID) == 0 then
 				return A.Rip:Show(icon)
 			end
 			
+			--Use shred if nothing else to do.
 			if A.Shred:IsReady(unit) then
 				return A.Shred:Show(icon)
 			end

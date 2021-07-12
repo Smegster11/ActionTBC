@@ -281,17 +281,20 @@ A[3] = function(icon, isMulti)
 	--##### ARCANE #####
 	--###################
 	
-		--Check if Arcane Spec
-		if A.MindMastery:IsTalentLearned() then
-		
+		--If Arcane Power is learned then spec is likely Arcane, so continue with Arcane rotation:
+		if A.ArcanePower:IsTalentLearned() then
+			
+			--If player doesn't have Mage Armor then use Mage Armor
 			if A.MageArmor:IsReady(player) and Unit(player):HasBuffs(A.MageArmor.ID, true) == 0 then
 				return A.MageArmor:Show(icon)
 			end
 			
+			-- Use Icy Veins if we're using cooldowns.
 			if A.IcyVeins:IsReady(player) and BurstIsON(unit) then
 				return A.IcyVeins:Show(icon)
 			end
 			
+			--Use trinkets if we're using cooldowns.
 			if A.Trinket1:IsReady(player) and BurstIsON(unit) then
 				return A.Trinket1:Show(icon)    
 			end
@@ -300,40 +303,50 @@ A[3] = function(icon, isMulti)
 				return A.Trinket2:Show(icon)    
 			end	
 		
+			-- Use Arcane Power if we're using cooldowns.
 			if A.ArcanePower:IsReady(player) and BurstIsON(unit) then
 				return A.ArcanePower:Show(icon)
 			end
 			
-			if A.ArcaneBlast:IsReadyByPassCastGCD(unit) and A.PresenceofMind:IsReady(unit) then
+			--Check that we can use Arcane Blast if we ignore the GCD and if we have Presence of Mind ready:
+			if A.ArcaneBlast:IsReadyByPassCastGCD(unit) and A.PresenceofMind:IsReady(player) then
+				-- If our Arcane Power buff is lasting less than the time it takes us to use Arcane Blast, then use Presence of Mind
 				if Unit(player):HasBuffs(A.ArcanePower.ID, true) <= A.ArcaneBlast:ExecuteTime() then
 					return A.PresenceofMind:Show(icon)
 				end
 			end
 			
-			if A.ArcaneBlast:IsReady(unit) and not isMoving and Unit(player):HasBuffs(A.PresenceofMind.ID, true) > 0 then
+			-- Consume Presence of Mind buff with Arcane Blast
+			if A.ArcaneBlast:IsReady(unit) and Unit(player):HasBuffs(A.PresenceofMind.ID, true) > 0 then
 				return A.ArcaneBlast:Show(icon)
 			end
 			
+			--If we're using cooldowns and we don't have Icy Veins buff and the Icy Veins cooldown is longer than 2 minutes then use Cold Snap to reset.
 			if A.ColdSnap:IsReady(player) and BurstIsON(unit) and Unit(player):HasBuffs(A.IcyVeins.ID, true) == 0 and A.IcyVeins:GetCooldown() > 120 then
 				return A.ColdSnap:Show(icon)
 			end
 			
+			-- if Arcane Explosion is ready and AoE toggle is on and there are 3 or more enemies within 10 yards range then use Arcane Explosion.
 			if A.ArcaneExplosion:IsReady(player) and UseAoE and MultiUnits:GetByRange(10) >= 3 then
 				return A.ArcaneExplosion:Show(icon)
 			end
 			
+			-- Use Arcane Blast if we're standing still OR if we have Presence of Mind buff.
 			if A.ArcaneBlast:IsReady(unit) and (not isMoving or Unit(player):HasBuffs(A.PresenceofMind.ID, true) > 0) then
 				return A.ArcaneBlast:Show(icon)
 			end
 		
+			-- Use Evocation if we're not moving and mana is below 10%
 			if A.Evocation:IsReady(player) and not isMoving and Player:ManaPercent() < 10 then
 				return A.Evocation:Show(icon)
 			end
 			
-			if A.Frostbolt:IsReady(unit) and not isMoving and Player:ManaPercent() < 20 and A.Evocation:GetCooldown() >= 30 then
+			-- Use Frostbolt if we're not moving, our mana is below 20%, and Evocation cooldown is at least 10 seconds left. 
+			if A.Frostbolt:IsReady(unit) and not isMoving and Player:ManaPercent() < 20 and A.Evocation:GetCooldown() >= 10 then
 				return A.Frostbolt:Show(icon)
 			end
 			
+			-- Use FireBlast if we're moving.
 			if A.FireBlast:IsReady(unit) and isMoving then
 				return A.FireBlast:Show(icon)
 			end
@@ -344,21 +357,25 @@ A[3] = function(icon, isMulti)
 	--##### FIRE #####
 	--################
 	
-		--Check if Fire Spec
+		--If Combusion talent is learned then player is likely Fire Spec, so continue with Fire rotation:
 		if A.Combustion:IsTalentLearned() then
 
+			-- Use Molten Armor if Molten Armor isn't active.
 			if A.MoltenArmor:IsReady(player) and Unit(player):HasBuffs(A.MoltenArmor.ID) == 0 then
 				return A.MoltenArmor:Show(icon)
 			end
 			
+			-- Use Scorch if target is a boss and has less than 5 Scorch stacks.
 			if A.Scorch:IsReady(unit) and Unit(unit):IsBoss() and Unit(unit):HasDeBuffs(A.Scorch.ID) < 5 then
 				return A.Scorch:Show(icon)
 			end
 			
+			-- Use Icy Veins if we're using cooldowns and enemy health is greater than 80% or less than 20%
 			if A.IcyVeins:IsReady(player) and BurstIsON(unit) and (Unit(unit):HealthPercent() > 80 or Unit(unit):HealthPercent() <= 20) then
 				return A.IcyVeins:Show(icon)
 			end
 			
+			-- Use trinkets if we're using cooldowns.
 			if A.Trinket1:IsReady(player) and BurstIsON(unit) then
 				return A.Trinket1:Show(icon)    
 			end
@@ -367,34 +384,42 @@ A[3] = function(icon, isMulti)
 				return A.Trinket2:Show(icon)    
 			end	
 		
+			-- Use Combustion if we're using cooldowns and enemy health is greater than 80% or less than 20%.
 			if A.Combustion:IsReady(player) and BurstIsON(unit) and (Unit(unit):HealthPercent() > 80 or Unit(unit):HealthPercent() <= 20) then
 				return A.Combustion:Show(icon)
 			end
 			
+			-- Use Dragon's Breath if AoE toggle is on and there are 3 or more enemies within 10 yards range.
 			if A.DragonsBreath:IsReady(player) and UseAoE and MultiUnits:GetByRange(10) >=3 then
 				return A.DragonsBreath:Show(icon)
 			end
 			
+			-- Use Blast Wave if AoE toggle is on and there are 3 or more enemies within 10 yards range.			
 			if A.BlastWave:IsReady(player) and UseAoE and MultiUnits:GetByRange(10) >=3 then
 				return A.BlastWave:Show(icon)
 			end		
 
+			-- Use Flamestrike if AoE toggle is on and there are 3 or more enemies within 10 yards range and we're not moving (we keep it 10 yards since we need to move in for other AoE abilities anyway and it's too hard to check for AoE at such long range).
 			if A.Flamestrike:IsReady(player) and UseAoE and not isMoving and  MultiUnits:GetByRange(10) >=3 then
 				return A.Flamestrike:Show(icon)
 			end
 			
+			-- Use Arcane Explosion if AoE toggle is on and there are 3 or more enemies within 10 yards range.
 			if A.ArcaneExplosion:IsReady(player) and UseAoE and MultiUnits:GetByRange(10) >=3 then
 				return A.ArcaneExplosion:Show(icon)
 			end
 			
+			-- Use Fireball if standing still and target's time to die is less than how long it takes to cast Fireball
 			if A.Fireball:IsReady(unit) and not isMoving and Unit(unit):TimeToDie() > A.Fireball:GetExecuteTime() then
 				return A.Fireball:Show(icon)
 			end
 			
+			-- Use Fire Blast if nothing else to do.
 			if A.FireBlast:IsReady(unit) then
 				return A.FireBlast:Show(icon)
 			end
 			
+			-- Use Evocation if not moving and Mana is less than 10%
 			if A.Evocation:IsReady(player) and not isMoving and Player:ManaPercent() < 10 then
 				return A.Evocation:Show(icon)
 			end			
@@ -406,23 +431,28 @@ A[3] = function(icon, isMulti)
 	--##### FROST #####
 	--#################	
 		
-		--Check if not Fire/Arcane (either Frost or leveling)
-		if not A.Combustion:IsTalentLearned() and not A.MindMastery:IsTalentLearned() then
+		--If Combustion and Arcane Power are both not learned, then player is likely Frost spec or leveling spec, so continue with Frost rotation:
+		if not A.Combustion:IsTalentLearned() and not A.ArcanePower:IsTalentLearned() then
 			
-			if Unit(unit):HasDeBuffs(A.WintersChill.ID) > 0 and BurstIsON(unit) then
-			
-				if A.IcyVeins:IsReady(player) and (Unit(unit):HealthPercent() > 80 or Unit(unit):HealthPercent() <= 20) then
+			-- Check that the target has max Winter's Chill debuff and cooldown toggle is on:
+			if Unit(unit):HasDeBuffsStacks(A.WintersChill.ID) >= 5 and BurstIsON(unit) then
+				
+				-- Use Icy Veins
+				if A.IcyVeins:IsReady(player) then
 					return A.IcyVeins:Show(icon)
 				end
 				
+				-- Summon Water Elemental
 				if A.SummonWaterElemental:IsReady(player) then
 					return A.SummonWaterElemental:Show(icon)
 				end
 
+				-- Use Cold Snap if player doesn't have Icy Veins buff, Icy Veins cooldown is longer than 2 minutes, and Water Elemental has expired.
 				if A.ColdSnap:IsReady(player) and BurstIsON(unit) and Unit(player):HasBuffs(A.IcyVeins.ID, true) == 0 and A.IcyVeins:GetCooldown() > 120 and A.SummonWaterElemental:GetSpellTimeSinceLastCast() > 45 then
 					return A.ColdSnap:Show(icon)
 				end
 				
+				--Use trinkets
 				if A.Trinket1:IsReady(player) then
 					return A.Trinket1:Show(icon)    
 				end
@@ -433,30 +463,37 @@ A[3] = function(icon, isMulti)
 			
 			end
 
+			-- Use Cone of Cold if AoE toggle is on and 3 or more targets in 10 yards
 			if A.ConeofCold:IsReady(player) and UseAoE and MultiUnits:GetByRange(10) >=3 then
 				return A.ConeofCold:Show(icon)
 			end
 			
+			-- Use Blizzard if AoE toggle is on, player is not moving, and 3 or more targets in 30 yards.
 			if A.Blizzard:IsReady(player) and UseAoE and not isMoving and MultiUnits:GetActiveEnemies(30) >=3 then
 				return A.Blizzard:Show(icon)
 			end	
 
+			-- Use Arcane Explosion if AoE toggle on and 3 or more targets in 10 yards.
 			if A.ArcaneExplosion:IsReady(player) and UseAoE and MultiUnits:GetByRange(10) >=3 then
 				return A.ArcaneExplosion:Show(icon)
 			end			
 			
+			-- Use Ice Lance if Winter's Chill debuff is about to fall off and we don't have time to cast anything else.
 			if A.IceLance:IsReady(unit) and Unit(unit):HasDeBuffs(A.WintersChill.ID) < A.GetGCD * 2 and Unit(unit):HasDeBuffs(A.WintersChill.ID) > 0 then
 				return A.IceLance:Show(icon)
 			end
 			
+			--Use Frostbolt if not moving.
 			if A.Frostbolt:IsReady(unit) and not isMoving then
 				return A.Frostbolt:Show(icon)
 			end
 			
+			--Use Ice Lance if nothign else to do.
 			if A.IceLance:IsReady(unit) then
 				return A.IceLance:Show(icon)
 			end
 			
+			--Use Evocation if not moving and less than 10% mana
 			if A.Evocation:IsReady(player) and not isMoving and Player:ManaPercent() < 10 then
 				return A.Evocation:Show(icon)
 			end			
