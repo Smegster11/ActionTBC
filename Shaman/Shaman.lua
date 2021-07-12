@@ -205,6 +205,7 @@ local player = "player"
 local target = "target"
 local pet = "pet"
 local targettarget = "targettarget"
+local focustarget = "focustarget"
 local focus = "focus"
 local mouseover = "mouseover"
 
@@ -281,6 +282,7 @@ local ImmuneFire = {
 [5850] = true, -- Blazing Elemental
 [16491] = true, -- Mana Feeder
 [6520] = true, -- Scorching Elemental
+[17307] = true, -- Nazan
 }
 
 local ImmuneNature = {
@@ -502,6 +504,27 @@ local function CanStopCastingOverHeal(unit, unitGUID)
     end 
 end 
 
+--########################
+--### NEARBY BREAKABLE ###
+--########################
+
+function NearbyBreakable(unit)
+	local nearbybreakable = 0
+	local NearbyIsBreakable = MultiUnits:GetActiveUnitPlates()
+	if NearbyIsBreakable then  
+		for NearbyIsBreakable_unit in pairs(NearbyIsBreakable) do             
+			if Unit(NearbyIsBreakable_unit):GetRange() <= 10 and Unit(NearbyIsBreakable_unit):HasDeBuffs("BreakAble") > 0 then 
+				nearbybreakable = 1
+			end         
+		end 
+	end
+    
+    if nearbybreakable == 1 then 
+		return true else 
+		return false 
+	end
+end 
+
 --######################
 --### MANATIDE CHECK ###
 --######################
@@ -575,11 +598,12 @@ end
 --### INTERRUPT / PURGE ###
 --#########################
 local function Interrupt(unit)
-	useKick, useCC, useRacial, notInterruptable, castRemainsTime, castDoneTime = InterruptIsValid(unit, "Main", true, nil) 
+	local useKick, useCC, useRacial, notInterruptable, castRemainsTime, castDoneTime = InterruptIsValid(unit, "Main", true, nil)
+	local secondsLeft, percentLeft, spellID, spellName, notInterruptable, isChannel = Unit(player):IsCastingRemains()			
 	
 	local isEmergency = Unit(target):HealthPercent() > 0 and Unit(target):HealthPercent() <= 30	and IsUnitFriendly(target)
 	
-	if A.EarthShock:IsReady(unit) and IsUnitEnemy(unit) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() and not ImmuneNature[npcID] then 
+	if A.EarthShock:IsReady(unit, nil, nil, true) and IsUnitEnemy(unit) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() and not ImmuneNature[npcID] then 
 		if SpecOverride == "Enhancement" or SpecOverride == "Elemental" or (SpecOverride == "Restoration" and not isEmergency) then
 			return A.EarthShock 
 		end  
@@ -611,6 +635,7 @@ A[3] = function(icon, isMulti)
 	local ShieldType = A.GetToggle(2, "ShieldType")
 	local ManaRune = A.GetToggle(2, "ManaRune")
 	local InterruptTargetTarget = A.GetToggle(2, "InterruptTargetTarget")
+	local NearbyBreakable = NearbyBreakable()
 
 	local Trinket1Choice = A.GetToggle(2, "Trinket1Choice")
 	local Trinket2Choice = A.GetToggle(2, "Trinket2Choice")
@@ -925,11 +950,11 @@ A[3] = function(icon, isMulti)
 
 			--TT Interrupt
 			
-			local useKick, useCC, useRacial, notInterruptable, castRemainsTime, castDoneTime = InterruptIsValid(targettarget, "Main", true, nil)	
+			local useKick, useCC, useRacial, notInterruptable, castRemainsTime, castDoneTime = InterruptIsValid(focustarget, "Main", true, nil)	
 
 			local secondsLeft, percentLeft, spellID, spellName, notInterruptable, isChannel = Unit(player):IsCastingRemains()				
 			
-			if A.EarthShock:IsReady(targettarget, nil, nil, true) and InterruptTargetTarget and IsUnitEnemy(targettarget) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() and not ImmuneNature[npcID] and not isEmergency then 
+			if A.EarthShock:IsReady(focustarget, nil, nil, true) and InterruptTargetTarget and IsUnitEnemy(focustarget) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() and not ImmuneNature[npcID] and not isEmergency then 
 				if castRemainsTime < secondsLeft then
 					return A.EarthShock:Show(icon)
 				end
@@ -966,11 +991,11 @@ A[3] = function(icon, isMulti)
 			end		
 
 			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() then -- FlameShock same range as SearingTotem
-				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 then
+				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 and not NearbyBreakable then
 					return A.FireNovaTotem:Show(icon)
 				end
 				if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] and not A.FireNovaTotem:IsSpellLastCastOrGCD() then
-					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 then
+					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 and not NearbyBreakable then
 						return A.MagmaTotem:Show(icon)
 					end
 					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) and not ImmuneFire[npcID] then
@@ -1116,20 +1141,17 @@ A[3] = function(icon, isMulti)
 	
 		if SpecOverride == "Elemental" or SpecOverride == "Restoration" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 262) then	
 	--Single Target
-			if A.LightningBolt:IsReady(unit) and not inCombat and not ImmuneNature[npcID] then
-				return A.LightningBolt:Show(icon)
-			end
 		-- Maintain Totem of Wrath, Mana Spring Totem, and Wrath of Air Totem
 			if TotemHandler() and not isMoving and A.FlameShock:IsInRange(unit) then
 				return true
 			end		
 
 			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() then -- FlameShock same range as SearingTotem
-				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 then
+				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 and not NearbyBreakable  then
 					return A.FireNovaTotem:Show(icon)
 				end
 				if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] and not A.FireNovaTotem:IsSpellLastCastOrGCD() then
-					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 and not ImmuneFire[npcID] then
+					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 and not ImmuneFire[npcID] and not NearbyBreakable then
 						return A.MagmaTotem:Show(icon)
 					end
 					if A.TotemofWrath:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
@@ -1155,6 +1177,12 @@ A[3] = function(icon, isMulti)
 					return A.ManaSpringTotem:Show(icon)
 				end
 			end
+			
+			if AirTotem == "AUTO" and AirTotemTimeRemaining <= A.GetGCD() * 4 and not isMoving and A.FlameShock:IsInRange(unit) then
+				if A.WrathofAirTotem:IsReady(player) then
+					return A.WrathofAirTotem:Show(icon)
+				end
+			end			
 			
 			-- Cast Fire Elemental Totem before Bloodlust
 			if RacialAllowed then
@@ -1185,12 +1213,12 @@ A[3] = function(icon, isMulti)
 			if A.ChainLightning:IsReady(unit) and Unit(player):HasBuffs(A.ElementalMastery.ID, true) > 0 and not ImmuneNature[npcID] then 
 				return A.ChainLightning:Show(icon)
 			end
-			if A.ElementalMastery:IsReady(player) and A.ChainLightning:GetCooldown() <= A.GetGCD() and BurstIsON(unit) and not ImmuneNature[npcID] then
+			if A.ElementalMastery:IsReady(player) and A.ChainLightning:GetCooldown() <= A.GetGCD() and Player:IsCasting() ~= A.ChainLightning:Info() and BurstIsON(unit) and not ImmuneNature[npcID] then
 				return A.ElementalMastery:Show(icon)
 			end
 		-- Chain Lightning
 			if A.ChainLightning:IsReady(unit) and UseAoE and not isMoving and not ImmuneNature[npcID] then
-				if (Unit(unit):IsBoss() and Unit(unit):HealthPercent() <= (Player:ManaPercentage() + 10)) or not Unit(unit):IsBoss() then
+				if (Unit(unit):IsBoss() and Unit(unit):HealthPercent() <= (Player:ManaPercentage() + 30)) or not Unit(unit):IsBoss() then
 					return A.ChainLightning:Show(icon)
 				end
 			end
@@ -1224,11 +1252,11 @@ A[3] = function(icon, isMulti)
 			end		
 
 			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() and not ImmuneFire[npcID] then -- FlameShock same range as SearingTotem
-				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 then
+				if UseAoE and A.FireNovaTotem:IsReady(player) and (A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 or not WeaveWF) and A.MultiUnits:GetByRangeAreaTTD(10) > 5 and not NearbyBreakable then
 					return A.FireNovaTotem:Show(icon)
 				end
 				if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] and not A.FireNovaTotem:IsSpellLastCastOrGCD() then
-					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 then
+					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 and not NearbyBreakable then
 						return A.MagmaTotem:Show(icon)
 					end
 					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
@@ -1263,7 +1291,7 @@ A[3] = function(icon, isMulti)
 			
 		
 			-- Cast Fire Elemental Totem before Bloodlust
-			if RacialAllowed then
+			if RacialAllowed and A.Stormstrike:IsInRange() then
 				if A.BloodFury:IsReady(player) and BurstIsON(unit) then
 					return A.BloodFury:Show(icon)
 				end
@@ -1290,7 +1318,7 @@ A[3] = function(icon, isMulti)
 			end
 		
 		-- Shamanistic Rage without capping mana
-			if A.ShamanisticRage:IsReady(player) and Player:ManaPercentage() <= ShamanisticRageMana and Unit(unit):TimeToDie() >= 15 then
+			if A.ShamanisticRage:IsReady(player) and A.Stormstrike:IsInRange() and Player:ManaPercentage() <= ShamanisticRageMana and Unit(unit):TimeToDie() >= 15 then
 				return A.ShamanisticRage:Show(icon)
 			end
 		
@@ -1303,7 +1331,7 @@ A[3] = function(icon, isMulti)
 			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 and (Player:ManaPercentage() >= StopShocksManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) and not ShockInterrupt and not ImmuneFire[npcID] then
 				return A.FlameShock:Show(icon)
 			end
-			if A.EarthShock:IsReady(unit) and (Unit(unit):HasDeBuffs(A.FlameShock.ID, true) >= 6 or Unit(unit):TimeToDie() <= 12) and (Player:ManaPercentage() >= StopShocksManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) and not ShockInterrupt and not ImmuneNature[npcID] then
+			if A.EarthShock:IsReady(unit) and (Player:ManaPercentage() >= StopShocksManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) and not ShockInterrupt and not ImmuneNature[npcID] then
 				return A.EarthShock:Show(icon)
 			end		
 		
