@@ -148,6 +148,7 @@ Action[Action.PlayerClass]                     = {
 	ColdSnap								= Create({ Type = "Spell", ID = 11958		}),	
 	IcyVeins								= Create({ Type = "Spell", ID = 12472		}),	
 	SummonWaterElemental					= Create({ Type = "Spell", ID = 31687		}),	
+	WintersChill							= Create({ Type = "Spell", ID = 12579		}),		
 
 }
 

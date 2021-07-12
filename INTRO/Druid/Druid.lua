@@ -174,11 +174,13 @@ Action[Action.PlayerClass]                     = {
 	RemoveCurse								= Create({ Type = "Spell", ID = 2782	}),	
 	CatForm									= Create({ Type = "Spell", ID = 768		}),
 	AquaticForm								= Create({ Type = "Spell", ID = 1066	}),	
-	Cyclone									= Create({ Type = "Spell", ID = 5185	}),	
+	Cyclone									= Create({ Type = "Spell", ID = 33786	}),	
 	CurePoison								= Create({ Type = "Spell", ID = 8946	}),
 	Enrage									= Create({ Type = "Spell", ID = 5229	}),
 	Growl									= Create({ Type = "Spell", ID = 6795	}),	
-
+	TreeofLife								= Create({ Type = "Spell", ID = 33891	}),
+	NaturesSwiftness						= Create({ Type = "Spell", ID = 17116	}),	
+	MoonkinForm								= Create({ Type = "Spell", ID = 24858	}),		
 }
 
 local A                                     = setmetatable(Action[Action.PlayerClass], { __index = Action })
@@ -312,7 +314,7 @@ A[3] = function(icon, isMulti)
 		local isEmergency = Unit(unit):HealthPercent() > 0 and Unit(unit):HealthPercent() <= 30	and A.HealingWave:IsInRange(unit) 
 		local unitGUID                                     = UnitGUID(unit)
 
-		local HoTRolling = Unit(unit):HasBuffs({A.Rejuvenation.ID, A.Regrowth1.ID, A.Regrowth2.ID, A.Regrowth3.ID, A.Regrowth4.ID, A.Regrowth5.ID, A.Regrowth6.ID, A.Regrowth7.ID, A.Regrowth8.ID, A.Regrowth9.ID, A.Regrowth10.ID}, true) > 0
+		local HoTRolling = Unit(unit):HasBuffs({A.Rejuvenation.ID, A.Regrowth1.ID, A.Regrowth2.ID, A.Regrowth3.ID, A.Regrowth4.ID, A.Regrowth5.ID, A.Regrowth6.ID, A.Regrowth7.ID, A.Regrowth8.ID, A.Regrowth9.ID, A.Regrowth.ID}, true) > 0
 
 		-- Mapping menu options from ProfileUI to simplier forms:
 		local Trinket1Choice = A.GetToggle(2, "Trinket1Choice")
@@ -601,8 +603,15 @@ A[3] = function(icon, isMulti)
 			end
 		
 		end
+	
+		--If no forms available then use Moonfire and Wrath
+		if A.Moonfire:IsReady(unit) and Unit(unit):HasDeBuffs(A.Moonfire.ID, true) <= A.GetGCD() * 2 and (Unit(unit):TimeToDie() >= 10 or Unit(unit):IsBoss()) and Player:GetDeBuffsUnitCount(A.Moonfire.ID) < 3 then
+			return A.MoonFire:Show(icon)
+		end
 		
-		
+		if A.Wrath:IsReady(unit) then
+			return A.Wrath:Show(icon)
+		end
 
 	end
 
