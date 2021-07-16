@@ -94,33 +94,34 @@ Action[Action.PlayerClass]                     = {
 	--General
     Throw									= Create({ Type = "Spell", ID = 2764,     QueueForbidden = true, BlockForbidden = true	}),	
 
-	Lacerate								= Create({ Type = "Spell", ID = 33745		}),	
+	Lacerate								= Create({ Type = "Spell", ID = 33745, useMaxRank = true		}),	
 	Lifebloom								= Create({ Type = "Spell", ID = 33763		}),
-	Maim									= Create({ Type = "Spell", ID = 22570		}),	
+	Maim									= Create({ Type = "Spell", ID = 22570, useMaxRank = true		}),	
 	GiftoftheWild							= Create({ Type = "Spell", ID = 21849		}),
-	MangleBear								= Create({ Type = "Spell", ID = 33878		}),
-	MangleCat								= Create({ Type = "Spell", ID = 33876		}),
+	MangleBear								= Create({ Type = "Spell", ID = 33878, useMaxRank = true		}),
+	MangleCat								= Create({ Type = "Spell", ID = 33876, useMaxRank = true		}),
 	Hurricane								= Create({ Type = "Spell", ID = 16914		}),	
-	FrenziedRegeneration					= Create({ Type = "Spell", ID = 22842		}),	
-	Pounce									= Create({ Type = "Spell", ID = 9005		}),
-	FerociousBite							= Create({ Type = "Spell", ID = 22568		}),	
-	Ravage									= Create({ Type = "Spell", ID = 6785		}),
+	FrenziedRegeneration					= Create({ Type = "Spell", ID = 22842, useMaxRank = true		}),	
+	Pounce									= Create({ Type = "Spell", ID = 9005, useMaxRank = true		}),
+	FerociousBite							= Create({ Type = "Spell", ID = 22568, useMaxRank = true		}),	
+	Ravage									= Create({ Type = "Spell", ID = 6785, useMaxRank = true		}),
 	Tranquility								= Create({ Type = "Spell", ID = 740			}),	
-	Cower									= Create({ Type = "Spell", ID = 8998		}),	
-	Dash									= Create({ Type = "Spell", ID = 1850		}),	
-	Rake									= Create({ Type = "Spell", ID = 1822		}),	
-	TigersFury								= Create({ Type = "Spell", ID = 5217		}),		
-	Shred									= Create({ Type = "Spell", ID = 5221		}),	
+	Cower									= Create({ Type = "Spell", ID = 8998, useMaxRank = true		}),	
+	Dash									= Create({ Type = "Spell", ID = 1850, useMaxRank = true		}),	
+	Rake									= Create({ Type = "Spell", ID = 1822, useMaxRank = true		}),	
+	TigersFury								= Create({ Type = "Spell", ID = 5217, useMaxRank = true		}),		
+	Shred									= Create({ Type = "Spell", ID = 5221, useMaxRank = true		}),	
 	SootheAnimal							= Create({ Type = "Spell", ID = 2908		}),
-	Claw									= Create({ Type = "Spell", ID = 1082		}),	
-	Prowl									= Create({ Type = "Spell", ID = 5215		}),
+	Claw									= Create({ Type = "Spell", ID = 1082, useMaxRank = true		}),	
+	Prowl									= Create({ Type = "Spell", ID = 5215, useMaxRank = true		}),
 	Rebirth									= Create({ Type = "Spell", ID = 20484		}),	
-	Rip										= Create({ Type = "Spell", ID = 1079		}),
+	Rip										= Create({ Type = "Spell", ID = 1079, useMaxRank = true		}),
 	Starfire								= Create({ Type = "Spell", ID = 2912		}),
-	FaerieFire								= Create({ Type = "Spell", ID = 770			}),		
+	FaerieFire								= Create({ Type = "Spell", ID = 770, useMaxRank = true		}),	
+	FaerieFireFeral							= Create({ Type = "Spell", ID = 16857, useMaxRank = true	}),		
 	Hibernate								= Create({ Type = "Spell", ID = 2637		}),
-	Swipe									= Create({ Type = "Spell", ID = 779			}),		
-	Bash									= Create({ Type = "Spell", ID = 5211		}),	
+	Swipe									= Create({ Type = "Spell", ID = 779, useMaxRank = true			}),		
+	Bash									= Create({ Type = "Spell", ID = 5211, useMaxRank = true		}),	
 	Regrowth1								= Create({ Type = "Spell", ID = 8936, isRank = 1	}),
 	Regrowth2								= Create({ Type = "Spell", ID = 8938, isRank = 2	}),	
 	Regrowth3								= Create({ Type = "Spell", ID = 8939, isRank = 3	}),	
@@ -131,8 +132,8 @@ Action[Action.PlayerClass]                     = {
 	Regrowth8								= Create({ Type = "Spell", ID = 9857, isRank = 8	}),	
 	Regrowth9								= Create({ Type = "Spell", ID = 9858, isRank = 9	}),	
 	Regrowth								= Create({ Type = "Spell", ID = 26980, useMaxRank = true	}),	
-	DemoralizingRoar						= Create({ Type = "Spell", ID = 99			}),
-	Maul									= Create({ Type = "Spell", ID = 6807		}),
+	DemoralizingRoar						= Create({ Type = "Spell", ID = 99, useMaxRank = true			}),
+	Maul									= Create({ Type = "Spell", ID = 6807, useMaxRank = true		}),
 	EntanglingRoots							= Create({ Type = "Spell", ID = 339			}),	
 	Thorns									= Create({ Type = "Spell", ID = 467			}),
 	Moonfire								= Create({ Type = "Spell", ID = 8921		}),	
@@ -180,7 +181,10 @@ Action[Action.PlayerClass]                     = {
 	Growl									= Create({ Type = "Spell", ID = 6795	}),	
 	TreeofLife								= Create({ Type = "Spell", ID = 33891	}),
 	NaturesSwiftness						= Create({ Type = "Spell", ID = 17116	}),	
-	MoonkinForm								= Create({ Type = "Spell", ID = 24858	}),		
+	MoonkinForm								= Create({ Type = "Spell", ID = 24858	}),
+	OmenofClarity							= Create({ Type = "Spell", ID = 16864	}),
+	InsectSwarm								= Create({ Type = "Spell", ID = 5570, useMaxRank = true 	}),	
+	Barkskin								= Create({ Type = "Spell", ID = 22812	}),	
 }
 
 local A                                     = setmetatable(Action[Action.PlayerClass], { __index = Action })
@@ -465,7 +469,7 @@ A[3] = function(icon, isMulti)
 		if Unit(player):HasBuffs(A.MoonkinForm.ID) > 0 then
 		
 			--Faeire Fire if target doesn't have Faerie Fire debuff and they will live long enough for it to be worth using.
-			if A.FaerieFire:IsReady(unit) and Unit(unit):HasDeBuffs(A.FaerieFire.ID) == 0 and (Unit(unit):TimeToDie() >= 10 or Unit(unit):IsBoss()) then
+			if A.FaerieFire:IsReady(unit) and Unit(unit):HasDeBuffs(A.FaerieFire.ID) <= A.GetGCD() and Unit(unit):HasDeBuffs(A.FaerieFireFeral.ID) <= A.GetGCD() and (Unit(unit):TimeToDie() >= 10 or Unit(unit):IsBoss()) then
 				return A.FaerieFire:Show(icon)
 			end
 
@@ -476,7 +480,7 @@ A[3] = function(icon, isMulti)
 			
 			--Moonfire if it's about to fall off and they will live long enough for it to be worth using and if we have Moonfire on less than 3 targets in total.
 			if A.Moonfire:IsReady(unit) and Unit(unit):HasDeBuffs(A.Moonfire.ID, true) <= A.GetGCD() * 2 and (Unit(unit):TimeToDie() >= 10 or Unit(unit):IsBoss()) and Player:GetDeBuffsUnitCount(A.Moonfire.ID) < 3 then
-				return A.MoonFire:Show(icon)
+				return A.Moonfire:Show(icon)
 			end
 
 			--Use trinkets if we're using cooldowns.
@@ -489,7 +493,7 @@ A[3] = function(icon, isMulti)
 			end			
 			
 			--Use Hurricane if we have the AoE toggle on and there are more than 5 enemies in combat with us within 30 yards and the time to die for all enemies within 30 yards is greater than 10 seconds.
-			if A.Hurricane:IsReady(unit) and UseAoE and MultiUnits:GetActiveUnitPlates(30) >= 5 and Player:AreaTTD(30) > 10 then 
+			if A.Hurricane:IsReady(player) and UseAoE and MultiUnits:GetActiveUnitPlates(30) >= 5 and Player:AreaTTD(30) > 10 then 
 				-- Use Barkskin so we don't get interrupted right before using Hurricane
 				if A.Barkskin:IsReady(player) then
 					return A.Barkskin:Show(icon)
@@ -512,7 +516,7 @@ A[3] = function(icon, isMulti)
 		if Unit(player):HasBuffs(A.DireBearForm.ID) > 0 then
 		
 			--Faeire Fire if target doesn't have Faerie Fire debuff and they will live long enough for it to be worth using.
-			if A.FaerieFire:IsReady(unit) and Unit(unit):HasDeBuffs(A.FaerieFire.ID) == 0 and (Unit(unit):TimeToDie() >= 10 or Unit(unit):IsBoss()) then
+			if A.FaerieFire:IsReady(unit) and Unit(unit):HasDeBuffs(A.FaerieFire.ID) <= A.GetGCD() and Unit(unit):HasDeBuffs(A.FaerieFireFeral.ID) <= A.GetGCD() and (Unit(unit):TimeToDie() >= 10 or Unit(unit):IsBoss()) then
 				return A.FaerieFire:Show(icon)
 			end
 			
@@ -560,11 +564,16 @@ A[3] = function(icon, isMulti)
 	--##### CAT #####
 	--###############	
 		
+		local PowerShifting = A.GetToggle(2, "PowerShifting")
+		if A.CatForm:IsReady(player) and PowerShifting and Unit(player):HasBuffs(A.CatForm.ID) == 0 then
+			return A.CatForm:Show(icon)
+		end
+		
 		--Check if player has Cat Form buff, then do cat rotation:
-		if Unit(player):HasBuffs(A.CatForm.ID) > 0 then
+		if Unit(player):HasBuffs(A.CatForm.ID) > 1 then
 			
 			--Faeire Fire if target doesn't have Faerie Fire debuff and they will live long enough for it to be worth using.
-			if A.FaerieFire:IsReady(unit) and Unit(unit):HasDeBuffs(A.FaerieFire.ID) == 0 and (Unit(unit):TimeToDie() >= 10 or Unit(unit):IsBoss()) then
+			if A.FaerieFire:IsReady(unit) and Unit(unit):HasDeBuffs(A.FaerieFire.ID) <= A.GetGCD() and Unit(unit):HasDeBuffs(A.FaerieFireFeral.ID) <= A.GetGCD() and (Unit(unit):TimeToDie() >= 10 or Unit(unit):IsBoss()) then
 				return A.FaerieFire:Show(icon)
 			end
 
@@ -577,40 +586,46 @@ A[3] = function(icon, isMulti)
 				return A.Trinket2:Show(icon)    
 			end	
 			
-			--Use Mangle when it's ready
-			if A.MangleCat:IsReady(unit) then
+			--If you have at least 4 Combo Points + 30 Energy and the  Rip debuff has expired, then cast  Rip.
+			if A.Rip:IsReady(unit) and Player:ComboPoints() >= 4 and Unit(unit):HasDeBuffs(A.Rip.ID, true) == 0 and Unit(unit):TimeToDie() >= 10 then
+				return A.Rip:Show(icon)
+			end
+			
+			--If enemy dies too quickly for Rip then FerociousBite
+			if A.FerociousBite:IsReady(unit) and Player:ComboPoints() >= 4 and Unit(unit):TimeToDie() < 10 then
+				return A.FerociousBite:Show(icon)
+			end
+			
+			--If you have at least 40 Energy and the  Mangle (Cat) debuff has expired, then cast  Mangle (Cat).
+			if A.MangleCat:IsReady(unit) and Unit(unit):HasDeBuffs(A.MangleCat.ID) == 0 and Unit(unit):HasDeBuffs(A.MangleBear.ID) == 0 then
 				return A.MangleCat:Show(icon)
 			end
 			
-			--Use Shred whenever we have Omen of Clarity buff.
-			if A.Shred:IsReady(unit) and Unit(player):HasBuffs(A.OmenofClarity.ID) > 0 then
+			--Use shred if nothing else to do and behind.
+			if A.Shred:IsReady(unit) and Player:IsBehind(GetGCD() * 2) then
 				return A.Shred:Show(icon)
 			end
 			
-			--Use Rip at 5 or more combo points and if energy is at 80 or higher
-			if A.Rip:IsReady(unit) and Player:ComboPoints() >= 5 and Player:Energy() >= 80 then
-				return A.Rip:Show(icon)
+			--Use Claw if nothing else to do and not behind.
+			if A.Claw:IsReady(unit) then
+				return A.Claw:Show(icon)
 			end
 			
-			--Use Rip at 4 or more combo points and 80 energy or higher if target doesn't have mangle debuff
-			if A.Rip:IsReady(unit) and Player:ComboPoints() >= 4 and Player:Energy() >= 80 and Unit(unit):HasDeBuffs(A.MangleCat.ID) == 0 and Unit(unit):HasDeBuffs(A.MangleBear.ID) == 0 then
-				return A.Rip:Show(icon)
-			end
-			
-			--Use shred if nothing else to do.
-			if A.Shred:IsReady(unit) then
-				return A.Shred:Show(icon)
+			if Player:Energy() <= 20 and PowerShifting then
+				return A.CatForm:Show(icon)
 			end
 		
 		end
 	
 		--If no forms available then use Moonfire and Wrath
-		if A.Moonfire:IsReady(unit) and Unit(unit):HasDeBuffs(A.Moonfire.ID, true) <= A.GetGCD() * 2 and (Unit(unit):TimeToDie() >= 10 or Unit(unit):IsBoss()) and Player:GetDeBuffsUnitCount(A.Moonfire.ID) < 3 then
-			return A.MoonFire:Show(icon)
-		end
-		
-		if A.Wrath:IsReady(unit) then
-			return A.Wrath:Show(icon)
+		if Unit(player):HasBuffs(A.CatForm.ID) == 0 and Unit(player):HasBuffs(A.DireBearForm.ID) == 0 and Unit(player):HasBuffs(A.TreeofLife.ID) == 0 then
+			if A.Moonfire:IsReady(unit) and Unit(unit):HasDeBuffs(A.Moonfire.ID, true) <= A.GetGCD() * 2 and (Unit(unit):TimeToDie() >= 10 or Unit(unit):IsBoss()) and Player:GetDeBuffsUnitCount(A.Moonfire.ID) < 3 then
+				return A.Moonfire:Show(icon)
+			end
+			
+			if A.Wrath:IsReady(unit) then
+				return A.Wrath:Show(icon)
+			end
 		end
 
 	end

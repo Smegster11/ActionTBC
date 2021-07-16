@@ -68,6 +68,18 @@ A.Data.ProfileUI = {
                     }, 
                     M = {},
                 },
+				{ -- AOE
+                    E = "Checkbox", 
+                    DB = "PowerShifting",
+                    DBV = false,
+                    L = { 
+                        ANY = "Powershift Cat", 
+                    }, 
+                    TT = { 
+						ANY = "Powershift for Feral DPS",
+                    }, 
+                    M = {},
+                },				
 			},
             { -- LAYOUT SPACE   
                 {
@@ -152,7 +164,7 @@ A.Data.ProfileUI = {
                 {
                     E = "LayoutSpace",                                                                         
                 },
-            },
+            }, 			
 			{
                 {
                     E = "Header",
