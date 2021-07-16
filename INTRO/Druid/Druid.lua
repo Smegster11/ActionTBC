@@ -564,7 +564,9 @@ A[3] = function(icon, isMulti)
 	--##### CAT #####
 	--###############	
 		
+		--Map Powershift Toggle
 		local PowerShifting = A.GetToggle(2, "PowerShifting")
+		--Swap to Cat Form if not in Cat Form and PowerShift toggle is on.
 		if A.CatForm:IsReady(player) and PowerShifting and Unit(player):HasBuffs(A.CatForm.ID) == 0 then
 			return A.CatForm:Show(icon)
 		end
@@ -611,6 +613,7 @@ A[3] = function(icon, isMulti)
 				return A.Claw:Show(icon)
 			end
 			
+			--Powershifting
 			if Player:Energy() <= 20 and PowerShifting then
 				return A.CatForm:Show(icon)
 			end
