@@ -116,7 +116,7 @@ Action[Action.PlayerClass]                     = {
 	Prowl									= Create({ Type = "Spell", ID = 5215, useMaxRank = true		}),
 	Rebirth									= Create({ Type = "Spell", ID = 20484		}),	
 	Rip										= Create({ Type = "Spell", ID = 1079, useMaxRank = true		}),
-	Starfire								= Create({ Type = "Spell", ID = 2912		}),
+	Starfire								= Create({ Type = "Spell", ID = 2912, useMaxRank = true		}),
 	FaerieFire								= Create({ Type = "Spell", ID = 770, useMaxRank = true		}),	
 	FaerieFireFeral							= Create({ Type = "Spell", ID = 16857, useMaxRank = true	}),		
 	Hibernate								= Create({ Type = "Spell", ID = 2637		}),
@@ -352,9 +352,9 @@ A[3] = function(icon, isMulti)
 				return A.NaturesSwiftness:Show(icon)
 			end 
 
-			-- Use Max Rank Regrowth if the Nature's Swiftness buff is greater than 0 seconds long.
-			if A.Regrowth:IsReady(unit) and Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) > 0 then
-				return A.Regrowth:Show(icon)
+			-- Use Max Rank Healing Touch if the Nature's Swiftness buff is greater than 0 seconds long.
+			if A.HealingTouch:IsReady(unit) and Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) > 0 then
+				return A.HealingTouch:Show(icon)
 			end
 			
 			-- If we don't have Nature's Swiftness buff
@@ -374,7 +374,7 @@ A[3] = function(icon, isMulti)
 
 		--Just consume Nature's Swiftness buff if someone else snipes heal first.
 		if Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) > 0 and Unit(unit):HealthPercent() <= 60 then
-			return A.Regrowth:Show(icon)
+			return A.HealingTouch:Show(icon)
 		end
 
 		--Scan through all party/raid members and check if they have a poison that's listed in our dispel list.
@@ -493,7 +493,7 @@ A[3] = function(icon, isMulti)
 			end			
 			
 			--Use Hurricane if we have the AoE toggle on and there are more than 5 enemies in combat with us within 30 yards and the time to die for all enemies within 30 yards is greater than 10 seconds.
-			if A.Hurricane:IsReady(player) and UseAoE and MultiUnits:GetActiveUnitPlates(30) >= 5 and Player:AreaTTD(30) > 10 then 
+			if A.Hurricane:IsReady(player) and UseAoE and MultiUnits:GetByRange(30) >= 5 and Player:AreaTTD(30) > 10 and not isMoving then 
 				-- Use Barkskin so we don't get interrupted right before using Hurricane
 				if A.Barkskin:IsReady(player) then
 					return A.Barkskin:Show(icon)
@@ -503,7 +503,7 @@ A[3] = function(icon, isMulti)
 			end	
 			
 			-- If nothing else to do, use Starfire.
-			if A.Starfire:IsReady(unit) then
+			if A.Starfire:IsReady(unit) and not isMoving then
 				return A.Starfire:Show(icon)
 			end
 		end
