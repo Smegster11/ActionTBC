@@ -258,24 +258,6 @@ local Temp = {
 	TotemsRecalled							= true,
 }
 
-local WindfuryActive = {
-["Windfury Totem"] = true,
-["Windfury Totem II"] = true,
-["Windfury Totem III"] = true,
-["Windfury Totem VI"] = true,
-["Windfury Totem V"] = true,
-}
-
-local FireNovaActive = {
-["Fire Nova Totem"] = true,
-["Fire Nova Totem II"] = true,
-["Fire Nova Totem III"] = true,
-["Fire Nova Totem IV"] = true,
-["Fire Nova Totem V"] = true,
-["Fire Nova Totem VI"] = true,
-["Fire Nova Totem VII"] = true,
-} 
-
 local ImmuneFire = {
 [6073] = true, -- Searing Infernal
 [2760] = true, -- Burning Exile
@@ -298,68 +280,6 @@ local ImmuneNature = {
 [8278] = true, -- Smoulder (Rarespawn)
 [16491] = true, -- Mana Feeder
 }		
-
-local EarthbindRecommendation = {
-
-}
-
-local StoneclawRecommendation = {
-[17225] = true, -- Nightbane, Karazhan - Rain of Bones (spellID 37098)
-}
-
-local FireResistanceRecommendation = {
-
-}
-
-local FrostResistanceRecommendation = {
-
-}
-
-local GraceofAirRecommendation = {
-
-}
-
-local GroundingRecommendation = {
-[18835] = true, -- Kiggler the Crazed in High King fight, block Lightning Bolt (spellID 36152)
-}
-
-local NatureResistanceRecommendation = {
-
-}
-
-local StoneskinRecommendation = {
-
-}
-
-local WindwallRecommendation = {
-
-}
-
-local DiseaseCleansingRecommendation = {
-
-}
-
-local HealingStreamRecommendation = {
-
-}
-
-local PoisonCleansingRecommendation = {
-
-}
-
-local TremorRecommendation = {
-[18831] = true, -- High King Maulgar when below 50% HP.
-[21350] = true, -- Gronn-Priest, Gruul's Lair trash mob
-[17225] = true, -- Nightbane, Karazhan - Bellowing Roar (spellID 36922)
-}
-
-local FireElementalRecommendation = {
-
-}
-
-local EarthElementalRecommendation = {
-
-}
 
 local function TotemBuffInRange()
 	
@@ -817,6 +737,52 @@ A[3] = function(icon, isMulti)
 	local function TotemHandler()
 		
 		local RecommendationTotem = A.GetToggle(2, "RecommendationTotem")
+		if RecommendationTotem then
+			for npc in pairs(ActiveUnitPlates) do 
+			local npcIDAoE = select(6, Unit(npc):InfoGUID())
+			local name, text, texture, startTimeMS, endTimeMS, isTradeSkill, castID, spellId                   = UnitCastingInfo(npc)
+				if A.EarthbindTotem:IsReady(player) and EarthbindRecommendation[npcIDAoE] and ActiveEarthTotem ~= A.EarthbindTotem:Info() then
+					return A.EarthbindTotem:Show(icon)
+				end
+				if A.StoneclawTotem:IsReady(player) and StoneclawRecommendation[npcIDAoE] and not StoneclawActive[ActiveEarthTotem] then
+					return A.StoneclawTotem:Show(icon)
+				end
+				if A.FireResistanceTotem:IsReady(player) and FireResistanceRecommendation[npcIDAoE] and not FireResistanceActive[ActiveWaterTotem] then
+					return A.FireResistanceTotem:Show(icon)
+				end
+				if A.FrostResistanceTotem:IsReady(player) and FrostResistanceRecommendation[npcIDAoE] and not FrostResistanceActive[ActiveFireTotem] then
+					return A.FrostResistanceTotem:Show(icon)
+				end
+				if A.GroundingTotem:IsReady(player) and GroundingRecommendation[spellId] and ActiveAirTotem ~= A.GroundingTotem:Info() then
+					return A.GroundingTotem:Show(icon)
+				end
+				if A.NatureResistanceTotem:IsReady(player) and NatureResistanceRecommendation[npcIDAoE] and not NatureResistanceActive[ActiveAirTotem] then
+					return A.NatureResistanceTotem:Show(icon)
+				end
+				if A.StoneskinTotem:IsReady(player) and StoneskinRecommendation[npcIDAoE] and not StoneskinActive[ActiveEarthTotem] then
+					return A.StoneskinTotem:Show(icon)
+				end
+				if A.WindwallTotem:IsReady(player) and WindwallRecommendation[npcIDAoE] and not WindwallActive[ActiveAirTotem] then
+					return A.WindwallTotem:Show(icon)
+				end
+				if A.DiseaseCleansingTotem:IsReady(player) and DiseaseCleansingRecommendation[npcIDAoE] and ActiveWaterTotem ~= A.DiseaseCleansingTotem:Info() then
+					return A.DiseaseCleansingTotem:Show(icon)
+				end
+				if A.PoisonCleansingTotem:IsReady(player) and PoisonCleansingRecommendation[npcIDAoE] and ActiveWaterTotem ~= A.PoisonCleansingTotem:Info() then
+					return A.PoisonCleansingTotem:Show(icon)
+				end
+				if A.TremorTotem:IsReady(player) and TremorRecommendation[npcIDAoE] and ActiveEarthTotem ~= A.TremorTotem:Info() then
+					return A.TremorTotem:Show(icon)
+				end
+				if A.FireElementalTotem:IsReady(player) and FireElementalRecommendation[npcIDAoE] and ActiveFireTotem ~= A.FireElementalTotem:Info() then
+					return A.FireElementalTotem:Show(icon)
+				end
+				if A.EarthElementalTotem:IsReady(player) and EarthElementalRecommendation[npcIDAoE] and ActiveEarthTotem ~= A.EarthElementalTotem:Info() then
+					return A.EarthElementalTotem:Show(icon)
+				end
+			end
+		
+		end
 	
 		if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] and ActiveFireTotem ~= A.FireElementalTotem:Info() then
 			if FireTotem == "Searing" and A.SearingTotem:IsReady(player) then
@@ -990,7 +956,7 @@ A[3] = function(icon, isMulti)
 				return true
 			end		
 
-			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() then -- FlameShock same range as SearingTotem
+			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() and not FrostResistanceActive[ActiveFireTotem] then -- FlameShock same range as SearingTotem
 				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 and not NearbyBreakable then
 					return A.FireNovaTotem:Show(icon)
 				end
@@ -1070,11 +1036,11 @@ A[3] = function(icon, isMulti)
 						return A.ChainHeal1:Show(icon)
 					end	
 				elseif numGroupMembers >= 6 and RaidChainHealMeleeOnly then
-					if Unit(unit):HealthPercent() <= ChainHealMax and A.HealingEngine.HealingByRange(40, nil, nil, true) and not isManaSave then
+					if Unit(unit):HealthPercent() <= ChainHealMax and A.HealingEngine.HealingByRange(40, A.ChainHeal, true, true) and not isManaSave then
 						return A.ChainHeal:Show(icon)
-					elseif Unit(unit):HealthPercent() <= ChainHeal3 and A.HealingEngine.HealingByRange(40, nil, nil, true) >= 2 and not isManaSave then
+					elseif Unit(unit):HealthPercent() <= ChainHeal3 and A.HealingEngine.HealingByRange(40, A.ChainHeal, true, true) >= 2 and not isManaSave then
 						return A.ChainHeal3:Show(icon)
-					elseif Unit(unit):HealthPercent() <= ChainHeal1 and A.HealingEngine.HealingByRange(40, nil, nil, true) >= 2 then
+					elseif Unit(unit):HealthPercent() <= ChainHeal1 and A.HealingEngine.HealingByRange(40, A.ChainHeal, true, true) >= 2 then
 						return A.ChainHeal1:Show(icon)
 					end	
 				end											
@@ -1146,7 +1112,7 @@ A[3] = function(icon, isMulti)
 				return true
 			end		
 
-			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() then -- FlameShock same range as SearingTotem
+			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() and not FrostResistanceActive[ActiveFireTotem] then -- FlameShock same range as SearingTotem
 				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 and not NearbyBreakable  then
 					return A.FireNovaTotem:Show(icon)
 				end
@@ -1251,7 +1217,7 @@ A[3] = function(icon, isMulti)
 				return true
 			end		
 
-			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() and not ImmuneFire[npcID] then -- FlameShock same range as SearingTotem
+			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() and (not ImmuneFire[npcID] or not FrostResistanceActive[ActiveFireTotem]) then -- FlameShock same range as SearingTotem
 				if UseAoE and A.FireNovaTotem:IsReady(player) and (A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 or not WeaveWF) and A.MultiUnits:GetByRangeAreaTTD(10) > 5 and not NearbyBreakable then
 					return A.FireNovaTotem:Show(icon)
 				end
