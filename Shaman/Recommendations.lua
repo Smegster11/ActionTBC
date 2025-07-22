@@ -1,5 +1,5 @@
 --#############################################
---##### TRIP'S TBC SHAMAN RECOMMENDATIONS #####
+--##### SMEG'S TBC SHAMAN RECOMMENDATIONS #####
 --#############################################
 
 local _G, select, setmetatable                            = _G, select, setmetatable

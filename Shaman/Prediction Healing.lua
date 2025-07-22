@@ -1,3 +1,7 @@
+--############################
+--##### SMEG'S PREDICTION HEALING #####
+--############################
+
 local _G, math, type, pairs            = _G, math, type, pairs
 local math_max                        = math.max
 
@@ -135,5 +139,5 @@ function A.DebugPredictHeal(unitID)
             end 
         end 
     end 
-end 
+end
 

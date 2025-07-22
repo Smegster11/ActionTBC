@@ -1,5 +1,5 @@
 --#############################
---##### TRIP'S MoP SHAMAN #####
+--##### SMEG'S MoP SHAMAN #####
 --#############################
 
 local _G, setmetatable, pairs, ipairs, select, error, math = 
@@ -169,13 +169,13 @@ local function bool(val)
 end
 
 --Register Toaster
-Toaster:Register("TripToast", function(toast, ...)
+Toaster:Register("SmegToast", function(toast, ...)
     local title, message, spellID = ...
     toast:SetTitle(title or "nil")
     toast:SetText(message or "nil")
     if spellID then 
         if type(spellID) ~= "number" then 
-            error(tostring(spellID) .. " (spellID) is not a number for TripToast!")
+            error(tostring(spellID) .. " (spellID) is not a number for SmegToast!")
             toast:SetIconTexture("Interface\\FriendsFrame\\Battlenet-WoWicon")
         else 
             toast:SetIconTexture((GetSpellTexture(spellID)))
