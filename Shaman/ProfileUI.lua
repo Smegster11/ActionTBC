@@ -30,7 +30,7 @@ local ACTION_CONST_SHAMAN_ELEMENTAL = "SHAMAN_ELEMENTAL"
 local ACTION_CONST_SHAMAN_ENHANCEMENT = "SHAMAN_ENHANCEMENT"
 local ACTION_CONST_SHAMAN_RESTO = "SHAMAN_RESTO"
 
--- Localized Strings - adapted from Bill's template
+-- Localized Strings -
 local L = {
     SeparatorGeneral = { enUS = " -----[ GENERAL ]----- " },
     SeparatorTotemController = { enUS = " -----[ TOTEM CONTROLLER ]----- " },
@@ -117,7 +117,7 @@ local SliderMarginOptions = { margin = { top = 10 } } -- Not used directly in la
 
 A.Data.ProfileEnabled[A.CurrentProfile] = true
 
--- Initialize ProfileUI based on Bill's template
+-- Initialize ProfileUI --
 A.Data.ProfileUI = {
     DateTime = "Smeg's Shaman v1.0",
     [2] = { -- This is the 'Shaman' tab itself
@@ -128,7 +128,7 @@ A.Data.ProfileUI = {
     },
 }
 
--- Point ProfileUI to the specific Shaman section (similar to Bill's WARLOCK key)
+-- Point ProfileUI to the specific Shaman section
 -- This is where all the content for the Shaman tab will be added sequentially.
 local ProfileUI_ShamanTabContent = A.Data.ProfileUI[2]["SHAMAN"]
 
@@ -310,11 +310,7 @@ uiCounter = uiCounter + 1
 ----------------------------------------------------------------------
 ------------------ S P E C I A L I Z A T I O N S -------------------
 ----------------------------------------------------------------------
--- This is where it gets tricky. Bill's template doesn't show how to
--- dynamically load different content based on a dropdown like your SpecOverride.
--- We'll add these as hidden sections that `Sio` *might* implicitly handle,
--- or that would require additional logic (not present in the ProfileUI).
--- The `SpecOverride` dropdown in the General section should ideally control their visibility.
+
 
 -- Enhancement Shaman Specific Settings
 ProfileUI_ShamanTabContent[uiCounter] = {
