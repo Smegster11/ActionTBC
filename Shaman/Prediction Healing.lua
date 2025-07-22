@@ -25,7 +25,6 @@ local UnitGUID                        = _G.UnitGUID
 
 local PL                             = A[A.PlayerClass]
 local GetHealingTypeByName            = {
-    [PL.LesserHealingWave:Info()]            = {"CAST",         "LesserHealingWave"        },
     [PL.HealingWave:Info()]        = {"CAST",         "HealingWave"    },
     [PL.ChainHeal:Info()]            = {"CAST",    "ChainHeal"        },
     [PL.Riptide:Info()]            = {"HOT",        "Riptide"        },

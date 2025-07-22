@@ -200,7 +200,7 @@ local Temp = {
 	TotalAndMagKick                         = {"TotalImun", "DamageMagicImun", "KickImun"},
     DisablePhys                             = {"TotalImun", "DamagePhysImun", "Freedom", "CCTotalImun"},
     DisableMag                              = {"TotalImun", "DamageMagicImun", "Freedom", "CCTotalImun"},
-    IsSpellIsCast                           = {[A.LesserHealingWave:Info()] = "LesserHealingWave", [A.HealingWave:Info()] = "HealingWave", [A.ChainHeal:Info()] = "ChainHeal"}, 
+    IsSpellIsCast                           = {[A.HealingWave:Info()] = "HealingWave", [A.ChainHeal:Info()] = "ChainHeal"}, 
     LastPrimaryUnitGUID     				= nil, 
     LastPrimaryUnitID        				= nil, 
     LastPrimarySpellName     				= nil, 
