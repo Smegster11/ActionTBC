@@ -42,13 +42,9 @@ A.Data.ProfileUI = {
                 DBV = true,
                 L = { 
                     enUS = "Use @mouseover", 
-                    ruRU = "Использовать @mouseover", 
-                    frFR = "Utiliser les fonctions @mouseover",
                 }, 
                 TT = { 
                     enUS = "Will unlock use actions for @mouseover units\nExample: Resuscitate, Healing", 
-                    ruRU = "Разблокирует использование действий для @mouseover юнитов\nНапример: Воскрешение, Хилинг", 
-                    frFR = "Activera les actions via @mouseover\n Exemple: Ressusciter, Soigner",
                 }, 
                 M = {},
             },
@@ -70,13 +66,9 @@ A.Data.ProfileUI = {
                 DBV = true,
                 L = { 
                     enUS = "Use AoE", 
-                    ruRU = "Использовать AoE", 
-                    frFR = "Utiliser l'AoE",
                 }, 
                 TT = { 
                     enUS = "Enable multiunits actions", 
-                    ruRU = "Включает действия для нескольких целей", 
-                    frFR = "Activer les actions multi-unités",
                 }, 
                 M = {},
             },                
