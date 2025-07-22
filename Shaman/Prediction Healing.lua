@@ -24,6 +24,7 @@ local GetHealingTypeByName            = {
     [PL.LesserHealingWave:Info()]            = {"CAST",         "LesserHealingWave"        },
     [PL.HealingWave:Info()]        = {"CAST",         "HealingWave"    },
     [PL.ChainHeal:Info()]            = {"CAST",    "ChainHeal"        },
+    [PL.Riptide:Info()]            = {"HOT",        "Riptide"        },
 }
 
 function A:PredictHeal(unitID, variation, unitGUID)     
