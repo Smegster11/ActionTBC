@@ -1,8 +1,8 @@
 --#############################
---##### TRIP'S TBC SHAMAN #####
+--##### TRIP'S MoP SHAMAN #####
 --#############################
 
-local _G, setmet5atable, pairs, ipairs, select, error, math = 
+local _G, setmetatable, pairs, ipairs, select, error, math = 
 _G, setmetatable, pairs, ipairs, select, error, math 
 
 local wipe                                     = _G.wipe     
@@ -26,9 +26,6 @@ local UnitCooldown                            = Action.UnitCooldown
 local Unit                                    = Action.Unit 
 local IsUnitEnemy                               = Action.IsUnitEnemy
 local IsUnitFriendly                            = Action.IsUnitFriendly
-local Totem                                    = LibStub("LibTotemInfo-1.0")
-local HealComm                                 = LibStub("LibHealComm-4.0")
-
 
 local SetToggle                                = Action.SetToggle
 local GetToggle                                = Action.GetToggle
@@ -39,7 +36,6 @@ local GetLatency                            = Action.GetLatency
 local GetSpellInfo                            = Action.GetSpellInfo
 local BurstIsON                                = Action.BurstIsON
 local InterruptIsValid                        = Action.InterruptIsValid
-local IsUnitEnemy                            = Action.IsUnitEnemy
 local DetermineUsableObject                    = Action.DetermineUsableObject
 local DetermineHealObject                    = Action.DetermineHealObject 
 local DetermineIsCurrentObject                = Action.DetermineIsCurrentObject 
@@ -79,8 +75,8 @@ _G.UnitGUID, _G.UnitIsUnit, _G.UnitCreatureType, _G.UnitAttackPower
 local Toaster									= _G.Toaster
 local GetSpellTexture 							= _G.TMW.GetSpellTexture
 
-Action[Action.PlayerClass]                     = {
-	--Racial
+Action[Action.PlayerClass] = {
+    --Racial
     Shadowmeld								= Create({ Type = "Spell", ID = 20580		}),  
     Perception								= Create({ Type = "Spell", ID = 20600, FixedTexture = CONST.HUMAN	}), 
     BloodFury								= Create({ Type = "Spell", ID = 20572		}), 
@@ -88,118 +84,73 @@ Action[Action.PlayerClass]                     = {
     Stoneform								= Create({ Type = "Spell", ID = 20594		}), 
     WilloftheForsaken						= Create({ Type = "Spell", ID = 7744		}), 
     EscapeArtist							= Create({ Type = "Spell", ID = 20589		}),	
-	ArcaneTorrent							= Create({ Type = "Spell", ID = 28730		}),
-	GiftoftheNaaru							= Create({ Type = "Spell", ID = 28880		}),	
+    ArcaneTorrent							= Create({ Type = "Spell", ID = 28730		}),
+    GiftoftheNaaru							= Create({ Type = "Spell", ID = 28880		}),	
 
-	--General
+    --General
     Throw									= Create({ Type = "Spell", ID = 2764,     QueueForbidden = true, BlockForbidden = true	}),	
 
-	--Weapon Enchants
-	FlametongueWeapon						= Create({ Type = "Spell", ID = 8024	}),
-	FrostbrandWeapon						= Create({ Type = "Spell", ID = 8033	}),	
-	WindfuryWeapon							= Create({ Type = "Spell", ID = 8232	}),	
-	RockbiterWeapon							= Create({ Type = "Spell", ID = 8017	}),
+    --Weapon Enchants
+    FlametongueWeapon						= Create({ Type = "Spell", ID = 8024	}),
+    FrostbrandWeapon						= Create({ Type = "Spell", ID = 8033	}),	
+    WindfuryWeapon							= Create({ Type = "Spell", ID = 8232	}),	
+    RockbiterWeapon							= Create({ Type = "Spell", ID = 8017	}),
 
-	--Elemental
-	LightningBolt							= Create({ Type = "Spell", ID = 403, useMaxRank = true		}),
-	EarthShock								= Create({ Type = "Spell", ID = 8042, useMaxRank = true		}),
-	EarthbindTotem							= Create({ Type = "Spell", ID = 2484, useMaxRank = true		}),	
-	StoneclawTotem							= Create({ Type = "Spell", ID = 5730, useMaxRank = true		}),	
-	FlameShock								= Create({ Type = "Spell", ID = 8050, useMaxRank = true		}),	
-	SearingTotem							= Create({ Type = "Spell", ID = 3599, useMaxRank = true		}),	
-	Purge									= Create({ Type = "Spell", ID = 370		}),	
-	FireNovaTotem							= Create({ Type = "Spell", ID = 1535, useMaxRank = true		}),
---	FireNovaTotem2							= Create({ Type = "Spell", ID = 8498, isRank = 2	}),
---	FireNovaTotem3							= Create({ Type = "Spell", ID = 8499, isRank = 3	}),
---	FireNovaTotem4							= Create({ Type = "Spell", ID = 11314, isRank = 4	}),
---	FireNovaTotem5							= Create({ Type = "Spell", ID = 11315, isRank = 5	}),
---	FireNovaTotem6							= Create({ Type = "Spell", ID = 25546, isRank = 6	}),
---	FireNovaTotem7							= Create({ Type = "Spell", ID = 25547, isRank = 7	}),
-	FrostShock								= Create({ Type = "Spell", ID = 8056, useMaxRank = true		}),
-	MagmaTotem								= Create({ Type = "Spell", ID = 8190, useMaxRank = true		}),	
-	ChainLightning							= Create({ Type = "Spell", ID = 421, useMaxRank = true		}),	
-	TotemofWrath							= Create({ Type = "Spell", ID = 30706	}),
-	ElementalMastery						= Create({ Type = "Spell", ID = 16166	}),
-	TranquilAirTotem						= Create({ Type = "Spell", ID = 25908	}),		
+    --Elemental
+    LightningBolt							= Create({ Type = "Spell", ID = 403		}),
+    EarthShock								= Create({ Type = "Spell", ID = 8042		}),
+    FlameShock								= Create({ Type = "Spell", ID = 8050		}),
+    ChainLightning							= Create({ Type = "Spell", ID = 421		}),
+    EarthbindTotem							= Create({ Type = "Spell", ID = 2484	}),
+    StoneclawTotem							= Create({ Type = "Spell", ID = 5730	}),
+    SearingTotem							= Create({ Type = "Spell", ID = 3599	}),
+    Purge									= Create({ Type = "Spell", ID = 370		}),
+    FireNovaTotem							= Create({ Type = "Spell", ID = 1535	}),
+    FrostShock								= Create({ Type = "Spell", ID = 8056	}),
+    MagmaTotem								= Create({ Type = "Spell", ID = 8190	}),
+    TotemofWrath							= Create({ Type = "Spell", ID = 30706	}),
+    ElementalMastery						= Create({ Type = "Spell", ID = 16166	}),
+    TranquilAirTotem						= Create({ Type = "Spell", ID = 25908	}),		
 
-	--Enhancement
-	ShamanisticFocus						= Create({ Type = "Spell", ID = 43338	}),	
-	StoneskinTotem							= Create({ Type = "Spell", ID = 8071, useMaxRank = true		}),	
-	LightningShield							= Create({ Type = "Spell", ID = 324, useMaxRank = true		}),	
-	StrengthofEarthTotem					= Create({ Type = "Spell", ID = 8075, useMaxRank = true		}),	
-	GhostWolf								= Create({ Type = "Spell", ID = 2645	}),	
-	WaterBreathing							= Create({ Type = "Spell", ID = 131		}),	
-	FrostResistanceTotem					= Create({ Type = "Spell", ID = 8181	}),	
-	FarSight								= Create({ Type = "Spell", ID = 6196	}),
-	FlametongueTotem						= Create({ Type = "Spell", ID = 8227	}),	
-	FireResistanceTotem						= Create({ Type = "Spell", ID = 8184	}),
-	WaterWalking							= Create({ Type = "Spell", ID = 546		}),		
-	GroundingTotem							= Create({ Type = "Spell", ID = 8177	}),	
-	NatureResistanceTotem					= Create({ Type = "Spell", ID = 10595	}),	
-	WindfuryTotem							= Create({ Type = "Spell", ID = 8512, useMaxRank = true	}),	
-	WindfuryTotem2							= Create({ Type = "Spell", ID = 10613	}),	
-	WindfuryTotem3							= Create({ Type = "Spell", ID = 10614	}),
-	WindfuryTotem4							= Create({ Type = "Spell", ID = 25585	}),
-	WindfuryTotem5							= Create({ Type = "Spell", ID = 25587	}),		
-	SentryTotem								= Create({ Type = "Spell", ID = 6495	}),
-	WindwallTotem							= Create({ Type = "Spell", ID = 15107	}),
-	Stormstrike								= Create({ Type = "Spell", ID = 17364	}),
-	GraceofAirTotem							= Create({ Type = "Spell", ID = 8835	}),	
-	ShamanisticRage							= Create({ Type = "Spell", ID = 30823	}),
-	WrathofAirTotem							= Create({ Type = "Spell", ID = 3738	}),	
-	EarthElementalTotem						= Create({ Type = "Spell", ID = 2062	}),
-	FireElementalTotem						= Create({ Type = "Spell", ID = 2894	}),		
+    --Enhancement
+    ShamanisticFocus						= Create({ Type = "Spell", ID = 43338	}),	
+    StoneskinTotem							= Create({ Type = "Spell", ID = 8071	}),
+    LightningShield							= Create({ Type = "Spell", ID = 324		}),
+    StrengthofEarthTotem					= Create({ Type = "Spell", ID = 8075	}),
+    GhostWolf								= Create({ Type = "Spell", ID = 2645	}),
+    WaterBreathing							= Create({ Type = "Spell", ID = 131		}),
+    FrostResistanceTotem					= Create({ Type = "Spell", ID = 8181	}),
+    FarSight								= Create({ Type = "Spell", ID = 6196	}),
+    FlametongueTotem						= Create({ Type = "Spell", ID = 8227	}),
+    FireResistanceTotem						= Create({ Type = "Spell", ID = 8184	}),
+    WaterWalking							= Create({ Type = "Spell", ID = 546		}),
+    GroundingTotem							= Create({ Type = "Spell", ID = 8177	}),
+    NatureResistanceTotem					= Create({ Type = "Spell", ID = 10595	}),
+    WindfuryTotem							= Create({ Type = "Spell", ID = 8512	}),
+    SentryTotem								= Create({ Type = "Spell", ID = 6495	}),
+    WindwallTotem							= Create({ Type = "Spell", ID = 15107	}),
+    Stormstrike								= Create({ Type = "Spell", ID = 17364	}),
+    GraceofAirTotem							= Create({ Type = "Spell", ID = 8835	}),
+    ShamanisticRage							= Create({ Type = "Spell", ID = 30823	}),
+    WrathofAirTotem							= Create({ Type = "Spell", ID = 3738	}),
+    EarthElementalTotem						= Create({ Type = "Spell", ID = 2062	}),
+    FireElementalTotem						= Create({ Type = "Spell", ID = 2894	}),
     Bloodlust								= Create({ Type = "Spell", ID = 2825	}),
     Heroism									= Create({ Type = "Spell", ID = 32182	}),	
 
-	--Restoration
-    HealingWave1							= Create({ Type = "Spell", ID = 331, isRank = 1		}),	
-    HealingWave2							= Create({ Type = "Spell", ID = 332, isRank = 2		}),
-    HealingWave3							= Create({ Type = "Spell", ID = 547, isRank = 3		}),
-    HealingWave4							= Create({ Type = "Spell", ID = 913, isRank = 4		}),
-    HealingWave5							= Create({ Type = "Spell", ID = 939, isRank = 5		}),
-    HealingWave6							= Create({ Type = "Spell", ID = 959, isRank = 6		}),
-    HealingWave7							= Create({ Type = "Spell", ID = 8005, isRank = 7	}),
-    HealingWave8							= Create({ Type = "Spell", ID = 10395, isRank = 8	}),
-    HealingWave9							= Create({ Type = "Spell", ID = 10395, isRank = 9	}),
-    HealingWave10							= Create({ Type = "Spell", ID = 25357, isRank = 10	}),
-    HealingWave11							= Create({ Type = "Spell", ID = 25391, isRank = 11	}),	
-    HealingWave								= Create({ Type = "Spell", ID = 25396, useMaxRank = true, Desc = "Max Rank"		}),
-    AncestralSpirit							= Create({ Type = "Spell", ID = 2008	}),	
-    CurePoison								= Create({ Type = "Spell", ID = 526		}),	
-    TremorTotem								= Create({ Type = "Spell", ID = 8143	}),
-    LesserHealingWave1						= Create({ Type = "Spell", ID = 8004, isRank = 1	}),	
-    LesserHealingWave2						= Create({ Type = "Spell", ID = 8008, isRank = 2	}),	
-    LesserHealingWave3						= Create({ Type = "Spell", ID = 8010, isRank = 3	}),	
-    LesserHealingWave4						= Create({ Type = "Spell", ID = 10466, isRank = 4	}),	
-    LesserHealingWave5						= Create({ Type = "Spell", ID = 10467, isRank = 5	}),	
-    LesserHealingWave6						= Create({ Type = "Spell", ID = 10468, isRank = 6	}),	
-    LesserHealingWave						= Create({ Type = "Spell", ID = 25420, useMaxRank = true, Desc = "Max Rank"		}),
-    HealingStreamTotem						= Create({ Type = "Spell", ID = 5394	}),	
-    PoisonCleansingTotem					= Create({ Type = "Spell", ID = 8166	}),
-    CureDisease								= Create({ Type = "Spell", ID = 2870	}),	
-    ManaSpringTotem							= Create({ Type = "Spell", ID = 5675	}),	
-    TotemicCall								= Create({ Type = "Spell", ID = 36936	}),		
-    DiseaseCleansingTotem					= Create({ Type = "Spell", ID = 8170	}),
-    ChainHeal1								= Create({ Type = "Spell", ID = 1064, isRank = 1	}),	
-    ChainHeal2								= Create({ Type = "Spell", ID = 10622, isRank = 2	}),	
-    ChainHeal3								= Create({ Type = "Spell", ID = 10623, isRank = 3	}),	
-    ChainHeal4								= Create({ Type = "Spell", ID = 25422, isRank = 4	}),	
-    ChainHeal								= Create({ Type = "Spell", ID = 25423, useMaxRank = true, Desc = "Max Rank"		}),
+    --Restoration (MoP spells only, no ranks)
+    HealingSurge							= Create({ Type = "Spell", ID = 8004	}),
+    HealingWave								= Create({ Type = "Spell", ID = 77472	}),
+    ChainHeal								= Create({ Type = "Spell", ID = 1064	}),
+    Riptide									= Create({ Type = "Spell", ID = 61295	}),
+    HealingRain								= Create({ Type = "Spell", ID = 73920	}),
+    EarthShield								= Create({ Type = "Spell", ID = 974	}),
     ManaTideTotem							= Create({ Type = "Spell", ID = 16190	}),
-    EarthShield1							= Create({ Type = "Spell", ID = 974	, isRank = 1 	}),	
-    EarthShield2							= Create({ Type = "Spell", ID = 32593	, isRank = 2 	}),	
-    EarthShield3							= Create({ Type = "Spell", ID = 32594	, isRank = 3 	}),		
-    WaterShield								= Create({ Type = "Spell", ID = 24398	}),	
-    NaturesSwiftness						= Create({ Type = "Spell", ID = 16188	}),	
-	
-	--Misc
-	SuperHealingPotion						= Create({ Type = "Potion", ID = 22829, QueueForbidden = true }),
-	DualWield								= Create({ Type = "Spell", ID = 30798, Hidden = true }),
-	HealingWay								= Create({ Type = "Spell", ID = 29203, Hidden = true }),
+    WaterShield								= Create({ Type = "Spell", ID = 52127	}),
+    NaturesSwiftness						= Create({ Type = "Spell", ID = 16188	}),
 }
 
-local A                                     = setmetatable(Action[Action.PlayerClass], { __index = Action })
+local A = setmetatable(Action[Action.PlayerClass], { __index = Action })
 
 local player = "player"
 local target = "target"
@@ -219,20 +170,20 @@ end
 
 --Register Toaster
 Toaster:Register("TripToast", function(toast, ...)
-	local title, message, spellID = ...
-	toast:SetTitle(title or "nil")
-	toast:SetText(message or "nil")
-	if spellID then 
-		if type(spellID) ~= "number" then 
-			error(tostring(spellID) .. " (spellID) is not a number for TripToast!")
-			toast:SetIconTexture("Interface\FriendsFrame\Battlenet-WoWicon")
-		else 
-			toast:SetIconTexture((GetSpellTexture(spellID)))
-		end 
-	else 
-		toast:SetIconTexture("Interface\FriendsFrame\Battlenet-WoWicon")
-	end 
-	toast:SetUrgencyLevel("normal") 
+    local title, message, spellID = ...
+    toast:SetTitle(title or "nil")
+    toast:SetText(message or "nil")
+    if spellID then 
+        if type(spellID) ~= "number" then 
+            error(tostring(spellID) .. " (spellID) is not a number for TripToast!")
+            toast:SetIconTexture("Interface\\FriendsFrame\\Battlenet-WoWicon")
+        else 
+            toast:SetIconTexture((GetSpellTexture(spellID)))
+        end 
+    else 
+        toast:SetIconTexture("Interface\\FriendsFrame\\Battlenet-WoWicon")
+    end 
+    toast:SetUrgencyLevel("normal") 
 end)
 
 ------------------------------------------
@@ -495,7 +446,7 @@ local function DoWeaponSync()
 	local MHSwing = Player:GetSwing(1)
 	local OHSwing = Player:GetSwing(2)
 	local MHSwingMax = Player:GetSwingMax(1)
-	local WeaponSync = A.GetToggle(2, "WeaponSync")	
+	local WeaponSync = A.GetToggle(2, "WeaponSync")
 
 
 	if MHSwing > MHSwingMax - 0.5 then 
@@ -549,57 +500,45 @@ A[3] = function(icon, isMulti)
     local isMoving = A.Player:IsMoving()
     local inCombat = Unit(player):CombatTime() > 0
     local RacialAllowed = A.GetToggle(1, "Racial")
-	local combatTime = Unit(player):CombatTime()
-	local UseAoE = A.GetToggle(2, "AoE")
-	local SpecOverride = A.GetToggle(2, "SpecOverride")
-	local ShieldType = A.GetToggle(2, "ShieldType")
-	local ManaRune = A.GetToggle(2, "ManaRune")
-	local InterruptTargetTarget = A.GetToggle(2, "InterruptTargetTarget")
-	local NearbyBreakable = NearbyBreakable()
+    local combatTime = Unit(player):CombatTime()
+    local UseAoE = A.GetToggle(2, "AoE")
+    local SpecOverride = A.GetToggle(2, "SpecOverride")
+    local ShieldType = A.GetToggle(2, "ShieldType")
+    local ManaRune = A.GetToggle(2, "ManaRune")
+    local InterruptTargetTarget = A.GetToggle(2, "InterruptTargetTarget")
+    local NearbyBreakable = NearbyBreakable()
 
-	local Trinket1Choice = A.GetToggle(2, "Trinket1Choice")
-	local Trinket2Choice = A.GetToggle(2, "Trinket2Choice")
-	local Trinket1Value = A.GetToggle(2, "Trinket1Value")
-	local Trinket2Value = A.GetToggle(2, "Trinket2Value")
-	
-	local MainHandEnchant = A.GetToggle(2, "MainHandEnchant")
-	local OffhandEnchant = A.GetToggle(2, "OffhandEnchant")
-	
-	local FireTotem = A.GetToggle(2, "FireTotem")
-	local EarthTotem = A.GetToggle(2, "EarthTotem")
-	local AirTotem = A.GetToggle(2, "AirTotem")	
-	local WaterTotem = A.GetToggle(2, "WaterTotem")
+    local Trinket1Choice = A.GetToggle(2, "Trinket1Choice")
+    local Trinket2Choice = A.GetToggle(2, "Trinket2Choice")
+    local Trinket1Value = A.GetToggle(2, "Trinket1Value")
+    local Trinket2Value = A.GetToggle(2, "Trinket2Value")
+    
+    local MainHandEnchant = A.GetToggle(2, "MainHandEnchant")
+    local OffhandEnchant = A.GetToggle(2, "OffhandEnchant")
+    
+    local FireTotem = A.GetToggle(2, "FireTotem")
+    local EarthTotem = A.GetToggle(2, "EarthTotem")
+    local AirTotem = A.GetToggle(2, "AirTotem")	
+    local WaterTotem = A.GetToggle(2, "WaterTotem")
 
-	local FireTotemTimeRemaining = Player:GetTotemTimeLeft(1)
-	local EarthTotemTimeRemaining = Player:GetTotemTimeLeft(2)
-	local WaterTotemTimeRemaining = Player:GetTotemTimeLeft(3)
-	local AirTotemTimeRemaining = Player:GetTotemTimeLeft(4)
-	
-	local ActiveFireTotem = select(2, Player:GetTotemInfo(1))
-	local ActiveEarthTotem = select(2, Player:GetTotemInfo(2))
-	local ActiveWaterTotem = select(2, Player:GetTotemInfo(3))
-	local ActiveAirTotem = select(2, Player:GetTotemInfo(4))
-	--Usage ActiveFireTotem == A.FireNovaTotem:Info()
-	
-	local WeaveWF = A.GetToggle(2, "WeaveWF")
-	local ShockInterrupt = A.GetToggle(2, "ShockInterrupt")
-	
-	local ChainHeal1 = A.GetToggle(2, "ChainHeal1")
-	local ChainHeal3 = A.GetToggle(2, "ChainHeal3")
-	local ChainHealMax = A.GetToggle(2, "ChainHeal5")
-	local HealingWaveMax = A.GetToggle(2, "HealingWave12")
-	local HealingWave10 = A.GetToggle(2, "HealingWave10")
-	local HealingWave7 = A.GetToggle(2, "HealingWave7")
-	local HealingWave1 = A.GetToggle(2, "HealingWave1")
-	local LesserHealingWave5 = A.GetToggle(2, "LesserHealingWave5")
-	local LesserHealingWaveMax = A.GetToggle(2, "LesserHealingWave7")					
-	
-	local ShamanisticRageMana = A.GetToggle(2, "ShamanisticRageMana")  
-	local StopTwistingManaEnh = A.GetToggle(2, "StopTwistingManaEnh")
-	local StopShocksManaEnh = A.GetToggle(2, "StopShocksManaEnh")
-	local StopShocksManaEle = A.GetToggle(2, "StopShocksManaEle")	
+    local FireTotemTimeRemaining = Player:GetTotemTimeLeft(1)
+    local EarthTotemTimeRemaining = Player:GetTotemTimeLeft(2)
+    local WaterTotemTimeRemaining = Player:GetTotemTimeLeft(3)
+    local AirTotemTimeRemaining = Player:GetTotemTimeLeft(4)
+    
+    local ActiveFireTotem = select(2, Player:GetTotemInfo(1))
+    local ActiveEarthTotem = select(2, Player:GetTotemInfo(2))
+    local ActiveWaterTotem = select(2, Player:GetTotemInfo(3))
+    local ActiveAirTotem = select(2, Player:GetTotemInfo(4))
+    
+    local WeaveWF = A.GetToggle(2, "WeaveWF")
+    local ShockInterrupt = A.GetToggle(2, "ShockInterrupt")
+    local ShamanisticRageMana = A.GetToggle(2, "ShamanisticRageMana")  
+    local StopTwistingManaEnh = A.GetToggle(2, "StopTwistingManaEnh")
+    local StopShocksManaEnh = A.GetToggle(2, "StopShocksManaEnh")
+    local StopShocksManaEle = A.GetToggle(2, "StopShocksManaEle")	
 
-	local npcID = select(6, Unit(target):InfoGUID())
+    local npcID = select(6, Unit(target):InfoGUID())
 
     --###############################
 	--##### POTIONS/HEALTHSTONE #####
@@ -857,505 +796,242 @@ A[3] = function(icon, isMulti)
 	--########################
 	
 	local function HealingRotation(unit)
+    if SpecOverride == "Restoration" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 264) then
+        local isManaSave = HealingEngine.IsManaSave(unit)
+        local isEmergency = Unit(unit):HealthPercent() > 0 and Unit(unit):HealthPercent() <= 30 and A.HealingSurge:IsInRange(unit)
+        local unitGUID = UnitGUID(unit)
 
-		if SpecOverride == "Restoration" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 264) then
+        if CanStopCastingOverHeal(unit) then
+            return A:Show(icon, ACTION_CONST_STOPCAST)
+        end
 
-			local isManaSave = HealingEngine.IsManaSave(unit)
-			local isEmergency = Unit(unit):HealthPercent() > 0 and Unit(unit):HealthPercent() <= 30	and A.HealingWave:IsInRange(unit) 
-			local unitGUID                                     = UnitGUID(unit)
-		
-	        if CanStopCastingOverHeal(unit) then 
-	            return A:Show(icon, ACTION_CONST_STOPCAST)
-	        end 
+        -- Trinket usage
+        if A.Trinket1:IsReady(player) and inCombat then
+            if Trinket1Choice == "Health" and Unit(unit):HealthPercent() <= Trinket1Value then
+                return A.Trinket1:Show(icon)
+            elseif Trinket1Choice == "Mana" and Player:ManaPercentage() <= Trinket1Value then
+                return A.Trinket1:Show(icon)
+            end
+        end
 
-			--Emergency
-			-- Nature's Swiftness + Healing Wave R12 for burst
+        if A.Trinket2:IsReady(player) and inCombat then
+            if Trinket2Choice == "Health" and Unit(unit):HealthPercent() <= Trinket2Value then
+                return A.Trinket2:Show(icon)
+            elseif Trinket2Choice == "Mana" and Player:ManaPercentage() <= Trinket2Value then
+                return A.Trinket2:Show(icon)
+            end
+        end
 
-			if A.Trinket1:IsReady(player) and inCombat then 
-				if Trinket1Choice == "Health" and Unit(unit):HealthPercent() <= Trinket1Value then 
-					return A.Trinket1:Show(icon)
-				elseif Trinket1Choice == "Mana" and Player:ManaPercentage() <= Trinket1Value then 
-					return A.Trinket1:Show(icon)
-				end
-			end
+        -- Emergency: Healing Surge
+        if isEmergency and inCombat then
+            if A.NaturesSwiftness:IsReady(player) then
+                return A.NaturesSwiftness:Show(icon)
+            end
+            if A.HealingSurge:IsReady(unit) and Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) > 0 then
+                return A.HealingSurge:Show(icon)
+            end
+            if A.HealingSurge:IsReady(unit) and Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) == 0 then
+                return A.HealingSurge:Show(icon)
+            end
+        end
 
-			if A.Trinket2:IsReady(player) and inCombat then 
-				if Trinket2Choice == "Health" and Unit(unit):HealthPercent() <= Trinket2Value then 
-					return A.Trinket2:Show(icon)
-				elseif Trinket2Choice == "Mana" and Player:ManaPercentage() <= Trinket2Value then 
-					return A.Trinket2:Show(icon)
-				end
-			end			
+        -- Just consume Nature's Swiftness buff if someone else snipes heal first.
+        if Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) > 0 and Unit(unit):HealthPercent() <= 60 then
+            return A.HealingSurge:Show(icon)
+        end
 
-			if isEmergency and inCombat then
+        -- Maintain Earth Shield on tank
+        if A.EarthShield:IsReady(unit) and Unit(unit):IsTank() and Unit(unit):HasBuffs(A.EarthShield.ID) == 0 then
+            return A.EarthShield:Show(icon)
+        end
 
-                -- Nature's Swiftness 
-                if A.NaturesSwiftness:IsReady(player) then 
-                    return A.NaturesSwiftness:Show(icon)
-                end 
+        -- Maintain best totems
+        if TotemHandler() then
+            return true
+        end
 
-				if A.HealingWave:IsReady(unit) and Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) > 0 then
-					return A.HealingWave:Show(icon)
-				end
+        -- Mana Tide Totem when group benefits
+        local ManaTideCheck = ManaTideCheck()
+        if A.ManaTideTotem:IsReady(player) and ManaTideCheck and inCombat and HealingEngine.GetBossHealthPercent() > 1 then
+            return A.ManaTideTotem:Show(icon)
+        end
 
-				if A.NaturesSwiftness:GetCooldown() > A.GetGCD() and Unit(player):HasBuffs(A.NaturesSwiftness.ID) == 0 and A.GetToggle(1, "Racial") then
-					if A.BloodFury:IsReady(player) then
-						return A.BloodFury:Show(icon)
-					end
-					
-					if A.Berserking:IsReady(player) then
-						return A.Berserking:Show(icon)
-					end
-				end
+        -- Riptide
+        if A.Riptide:IsReady(unit) and Unit(unit):HealthPercent() <= 80 then
+            return A.Riptide:Show(icon)
+        end
 
-				if A.LesserHealingWave:IsReady(unit) and Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) == 0 then 
-					return A.LesserHealingWave:Show(icon)
-				end
+        -- Chain Heal
+        local ChainHealValue = A.GetToggle(2, "ChainHeal")
+        if A.ChainHeal:IsReady(unit) and not isMoving then
+            if Unit(unit):HealthPercent() <= ChainHealValue and A.HealingEngine.GetBelowHealthPercentUnits(ChainHealValue, 40) >= 2 and not isManaSave then
+                return A.ChainHeal:Show(icon)
+            end
+        end
 
-	        end  
+        -- Healing Wave
+        local HealingWaveValue = A.GetToggle(2, "HealingWave")
+        if A.HealingWave:IsReady(unit) and not isMoving then
+            if Unit(unit):HealthPercent() <= HealingWaveValue and not isManaSave then
+                return A.HealingWave:Show(icon)
+            end
+        end
 
-			--TT Interrupt
-			
-			local useKick, useCC, useRacial, notInterruptable, castRemainsTime, castDoneTime = InterruptIsValid(focustarget, "Main", true, nil)	
+        -- Healing Rain (AoE)
+        if A.HealingRain:IsReady(unit) and UseAoE and A.HealingEngine.GetBelowHealthPercentUnits(80, 10) >= 3 then
+            return A.HealingRain:Show(icon)
+        end
 
-			local secondsLeft, percentLeft, spellID, spellName, notInterruptable, isChannel = Unit(player):IsCastingRemains()				
-			
-			if A.EarthShock:IsReady(focustarget, nil, nil, true) and InterruptTargetTarget and IsUnitEnemy(focustarget) and useKick and not notInterruptable and castRemainsTime >= A.GetLatency() and not ImmuneNature[npcID] and not isEmergency then 
-				if castRemainsTime < secondsLeft then
-					return A.EarthShock:Show(icon)
-				end
-			end
-			
-			if A.Purge:IsReady(targettarget) and InterruptTargetTarget and inCombat and IsUnitEnemy(targettarget) and AuraIsValid(targettarget, "UsePurge", "PurgeHigh") then 
-				return A.Purge:Show(icon)
-			end
+        -- Gift of the Naaru
+        if A.GiftoftheNaaru:IsReady(unit) and RacialAllowed and Unit(unit):HealthPercent() <= 50 then
+            return A.GiftoftheNaaru:Show(icon)
+        end
 
-			--Just consume Nature's Swiftness buff if someone else snipes heal first.
-			if Unit(player):HasBuffs(A.NaturesSwiftness.ID, true) > 0 and Unit(unit):HealthPercent() <= 60 then
-				return A.HealingWave:Show(icon)
-			end
-					
-			-- Maintain Earth Shield on tank
-			--[[local CurrentTanks = A.HealingEngine.GetMembersByMode("TANK")
-	        if A.EarthShield:IsReady() and A.LastPlayerCastID ~= A.EarthShield.ID and ActiveEarthShield() == 0 then
-	            for i = 1, #CurrentTanks do 
-	                if Unit(CurrentTanks[i].Unit):GetRange() <= 40 then 
-                      	if Unit(CurrentTanks[i].Unit):IsPlayer() and Unit(CurrentTanks[i].Unit):HasBuffs(A.EarthShield.ID, true) == 0 then 
-							if UnitGUID(getmembersAll[i].Unit) ~= currGUID then
-								HealingEngine.SetTarget(CurrentTanks[i].Unit)  
-								break
-							end 	                                                                    
-	                    end                    
-	                end                
-	            end    
-	        end]]
+        -- Dispel logic (unchanged)
+        local getmembersAll = HealingEngine.Data.SortedUnitIDs
+        if A.CurePoison:IsReady(unit) then
+            for i = 1, #getmembersAll do
+                if Unit(getmembersAll[i].Unit):GetRange() <= 40 and AuraIsValid(getmembersAll[i].Unit, "UseDispel", "Dispel poisons") then
+                    if UnitGUID(getmembersAll[i].Unit) ~= currGUID then
+                        HealingEngine.SetTarget(getmembersAll[i].Unit)
+                        break
+                    end
+                end
+            end
+        end
 
-			
-			-- Maintain best totems
-			if TotemHandler() then
-				return true
-			end		
+        if A.CureDisease:IsReady(unit) then
+            for i = 1, #getmembersAll do
+                if Unit(getmembersAll[i].Unit):GetRange() <= 40 and AuraIsValid(getmembersAll[i].Unit, "UseDispel", "Dispel diseases") then
+                    if UnitGUID(getmembersAll[i].Unit) ~= currGUID then
+                        HealingEngine.SetTarget(getmembersAll[i].Unit)
+                        break
+                    end
+                end
+            end
+        end
 
-			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() and not FrostResistanceActive[ActiveFireTotem] then -- FlameShock same range as SearingTotem
-				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 and not NearbyBreakable then
-					return A.FireNovaTotem:Show(icon)
-				end
-				if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] and not A.FireNovaTotem:IsSpellLastCastOrGCD() then
-					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 and not NearbyBreakable then
-						return A.MagmaTotem:Show(icon)
-					end
-					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) and not ImmuneFire[npcID] then
-						return A.SearingTotem:Show(icon)
-					end
-				end
-				if ActiveFireTotem == A.MagmaTotem:Info() then
-					if A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE then
-						return A.SearingTotem:Show(icon)
-					end
-				end
-			end			
-			
-			if WaterTotem == "AUTO" and inCombat and WaterTotemTimeRemaining <= A.GetGCD() * 4 then
-				if A.ManaSpringTotem:IsReady(player) then
-					return A.ManaSpringTotem:Show(icon)
-				end
-			end
-			
-			-- Mana Tide Totem when group benefits
-			local ManaTideCheck = ManaTideCheck()
-			if A.ManaTideTotem:IsReady(player) and ManaTideCheck and inCombat and HealingEngine.GetBossHealthPercent() > 1 then
-				return A.ManaTideTotem:Show(icon)
-			end
+        if A.CurePoison:IsReady(unit) and AuraIsValid(unit, "UseDispel", "Dispel poisons") then
+            return A.CurePoison:Show(icon)
+        end
 
-			--Cleanse
-			local getmembersAll = HealingEngine.Data.SortedUnitIDs			
-			if A.CurePoison:IsReady(unit) then
-				for i = 1, #getmembersAll do 
-					if Unit(getmembersAll[i].Unit):GetRange() <= 40 and AuraIsValid(getmembersAll[i].Unit, "UseDispel", "Dispel poisons") then  
-                        if UnitGUID(getmembersAll[i].Unit) ~= currGUID then
-                          HealingEngine.SetTarget(getmembersAll[i].Unit) 
-                          break
-                        end 					                									
-					end				
-				end
-			end
-			
-			if A.CureDisease:IsReady(unit) then
-				for i = 1, #getmembersAll do 
-					if Unit(getmembersAll[i].Unit):GetRange() <= 40 and AuraIsValid(getmembersAll[i].Unit, "UseDispel", "Dispel diseases") then  
-                        if UnitGUID(getmembersAll[i].Unit) ~= currGUID then
-                          HealingEngine.SetTarget(getmembersAll[i].Unit) 
-                          break
-                        end 					                									
-					end				
-				end
-			end			
+        if A.CureDisease:IsReady(unit) and AuraIsValid(unit, "UseDispel", "Dispel diseases") then
+            return A.CureDisease:Show(icon)
+        end
+    end
+end
 
-			if A.CurePoison:IsReady(unit) and AuraIsValid(unit, "UseDispel", "Dispel poisons") then
-				return A.CurePoison:Show(icon)
-			end
-
-			if A.CureDisease:IsReady(unit) and AuraIsValid(unit, "UseDispel", "Dispel diseases") then
-				return A.CureDisease:Show(icon)
-			end
-			
-			if A.GiftoftheNaaru:IsReady(unit) and RacialAllowed and Unit(unit):HealthPercent() <= 50 then 
-				return A.GiftoftheNaaru:Show(icon)
-			end
-			
-			--Chain Heal
-			local numGroupMembers = GetNumGroupMembers()
-			local RaidChainHealMeleeOnly = A.GetToggle(2, "RaidChainHealMeleeOnly")
-			if A.ChainHeal:IsReady(unit) and not isMoving then 
-				if (numGroupMembers > 1 and numGroupMembers <= 5) or (numGroupMembers >= 6 and not RaidChainHealMeleeOnly) then	
-					if Unit(unit):HealthPercent() <= ChainHealMax and A.HealingEngine.GetBelowHealthPercentUnits(ChainHealMax, 40) >= 2 and not isManaSave then
-						return A.ChainHeal:Show(icon)
-					elseif Unit(unit):HealthPercent() <= ChainHeal3 and A.HealingEngine.GetBelowHealthPercentUnits(ChainHeal3, 40) >= 2 and not isManaSave then
-						return A.ChainHeal3:Show(icon)
-					elseif Unit(unit):HealthPercent() <= ChainHeal1 and A.HealingEngine.GetBelowHealthPercentUnits(ChainHeal1, 40) >= 2 then
-						return A.ChainHeal1:Show(icon)
-					end	
-				elseif numGroupMembers >= 6 and RaidChainHealMeleeOnly then
-					if Unit(unit):HealthPercent() <= ChainHealMax and A.HealingEngine.HealingByRange(40, A.ChainHeal, true, true) and not isManaSave then
-						return A.ChainHeal:Show(icon)
-					elseif Unit(unit):HealthPercent() <= ChainHeal3 and A.HealingEngine.HealingByRange(40, A.ChainHeal, true, true) >= 2 and not isManaSave then
-						return A.ChainHeal3:Show(icon)
-					elseif Unit(unit):HealthPercent() <= ChainHeal1 and A.HealingEngine.HealingByRange(40, A.ChainHeal, true, true) >= 2 then
-						return A.ChainHeal1:Show(icon)
-					end	
-				end											
-			end 
-
-			-- Healing Wave ST
-			if A.HealingWave:IsReady(unit) and not isMoving then 
-				if Unit(unit):HealthPercent() <= HealingWaveMax and not isManaSave then
-					return A.HealingWave:Show(icon)
-				elseif Unit(unit):HealthPercent() <= HealingWave10 and not isManaSave then 
-					return A.HealingWave10:Show(icon)
-				elseif Unit(unit):HealthPercent() <= HealingWave7 then 
-					return A.HealingWave7:Show(icon)
-				elseif Unit(unit):HealthPercent() <= HealingWave1 then 
-					return A.HealingWave1:Show(icon)
-				end
-			end
-
-			--Keep Healing Way active
-			if A.IsTalentLearned(29206) then -- Healing Way
-				local HealingWay = A.GetToggle(2, "HealingWay")
-				local HealingWayFocus = A.GetToggle(2, "HealingWayFocus")
-				if A.HealingWave:IsReady(focus) and HealingWayFocus and Unit(focus):IsExists() and IsUnitFriendly(focus) and (Unit(focus):HasBuffs(A.HealingWay.ID) <= 2 or Unit(focus):HasBuffsStacks(A.HealingWay.ID) < 3) then 
-					return A.HealingWave1:Show(icon)
-				end
-				
-				if A.HealingWave:IsReady(unit) and HealingWay and Unit(unit):IsTank() and Unit(unit):HasBuffs(A.HealingWay.ID) <= 2 and Unit(unit):HasBuffsStacks(A.HealingWay.ID) < 3  then
-					return A.HealingWave1:Show(icon)
-				end
-			end
-
-			-- Lesser Healing Wave
-			if A.LesserHealingWave:IsReady(unit) and not isMoving then --and LesserHealingWaveDyn:PredictHeal(unit) then 
-				if Unit(unit):HealthPercent() <= LesserHealingWaveMax and not isManaSave then 
-					return A.LesserHealingWave:Show(icon)
-				elseif Unit(unit):HealthPercent() <= LesserHealingWave5 then 
-					return A.LesserHealingWave5:Show(icon)
-				end
-			end
-			
-		end
-		
-	end
-	
-	--#######################
+--#######################
 	--### DAMAGE ROTATION ###
 	--#######################
 	
 	local function DamageRotation(unit) 	
-	
-		local Interrupts = Interrupt(unit)
-		if Interrupts then
-			return Interrupts:Show(icon)
-		end
-		
-		local Purges = Purge(unit)
-		if Purges then
-			return Purges:Show(icon)
-		end	
-	
-		--#####################	
-		--##### ELEMENTAL #####
-		--#####################
-	
-		if SpecOverride == "Elemental" or SpecOverride == "Restoration" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 262) then	
-	--Single Target
-		-- Maintain Totem of Wrath, Mana Spring Totem, and Wrath of Air Totem
-			if TotemHandler() and not isMoving and A.FlameShock:IsInRange(unit) then
-				return true
-			end		
+    local Interrupts = Interrupt(unit)
+    if Interrupts then
+        return Interrupts:Show(icon)
+    end
+    
+    local Purges = Purge(unit)
+    if Purges then
+        return Purges:Show(icon)
+    end	
 
-			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() and not FrostResistanceActive[ActiveFireTotem] then -- FlameShock same range as SearingTotem
-				if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 and not NearbyBreakable  then
-					return A.FireNovaTotem:Show(icon)
-				end
-				if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] and not A.FireNovaTotem:IsSpellLastCastOrGCD() then
-					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 and not ImmuneFire[npcID] and not NearbyBreakable then
-						return A.MagmaTotem:Show(icon)
-					end
-					if A.TotemofWrath:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
-						return A.TotemofWrath:Show(icon)
-					end					
-					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) and not ImmuneFire[npcID] then
-						return A.SearingTotem:Show(icon)
-					end
-				end
-				if ActiveFireTotem == A.MagmaTotem:Info() then
-					if A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE then
-						if A.TotemofWrath:IsReady(player) then
-							return A.TotemofWrath:Show(icon)
-						elseif A.SearingTotem:IsReady(player) and not A.TotemofWrath:IsReady(player) then
-							return A.SearingTotem:Show(icon)
-						end
-					end
-				end
-			end			
-			
-			if WaterTotem == "AUTO" and WaterTotemTimeRemaining <= A.GetGCD() * 4 and not isMoving and A.FlameShock:IsInRange(unit) then
-				if A.ManaSpringTotem:IsReady(player) then
-					return A.ManaSpringTotem:Show(icon)
-				end
-			end
-			
-			if AirTotem == "AUTO" and AirTotemTimeRemaining <= A.GetGCD() * 4 and not isMoving and A.FlameShock:IsInRange(unit) then
-				if A.WrathofAirTotem:IsReady(player) then
-					return A.WrathofAirTotem:Show(icon)
-				end
-			end			
-			
-			-- Cast Fire Elemental Totem before Bloodlust
-			if RacialAllowed then
-				if A.BloodFury:IsReady(player) and BurstIsON(unit) then
-					return A.BloodFury:Show(icon)
-				end
-				
-				if A.Berserking:IsReady(player) and BurstIsON(unit) then
-					return A.Berserking:Show(icon)
-				end
-			end
+    --#####################	
+    --##### ELEMENTAL #####
+    --#####################
+    if SpecOverride == "Elemental" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 262) then	
+        -- Maintain Totem of Wrath, Mana Spring Totem, and Wrath of Air Totem
+        if TotemHandler() and not isMoving and A.FlameShock:IsInRange(unit) then
+            return true
+        end		
 
-			--Trinket 1
-			if A.Trinket1:IsReady(player) and BurstIsON(unit) and SpecOverride ~= "Restoration" then
-				return A.Trinket1:Show(icon)    
-			end
-			
-			--Trinket 2
-			if A.Trinket2:IsReady(player) and BurstIsON(unit) and SpecOverride ~= "Restoration" then
-				return A.Trinket2:Show(icon)    
-			end					
-		
-			if A.FrostShock:IsReady(unit) and Unit(target):IsMelee() and UnitIsUnit(targettarget, player) and Unit(unit):HasBuffs("AllCC") == 0 then
-				return A.FrostShock:Show(icon)
-			end
-		
-		-- Use Elemental Mastery with Chain Lightning
-			if A.ChainLightning:IsReady(unit) and Unit(player):HasBuffs(A.ElementalMastery.ID, true) > 0 and not ImmuneNature[npcID] then 
-				return A.ChainLightning:Show(icon)
-			end
-			if A.ElementalMastery:IsReady(player) and A.ChainLightning:GetCooldown() <= A.GetGCD() and Player:IsCasting() ~= A.ChainLightning:Info() and BurstIsON(unit) and not ImmuneNature[npcID] then
-				return A.ElementalMastery:Show(icon)
-			end
-		-- Chain Lightning
-			if A.ChainLightning:IsReady(unit) and UseAoE and not isMoving and not ImmuneNature[npcID] then
-				if (Unit(unit):IsBoss() and Unit(unit):HealthPercent() <= (Player:ManaPercentage() + 30)) or not Unit(unit):IsBoss() then
-					return A.ChainLightning:Show(icon)
-				end
-			end
-		-- Flame Shock while moving
-			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 and Player:ManaPercentage() >= StopShocksManaEle and not ShockInterrupt and not ImmuneFire[npcID] then
-				return A.FlameShock:Show(icon)
-			end
-			if A.EarthShock:IsReady(unit) and Player:ManaPercentage() >= StopShocksManaEle and not ShockInterrupt and not ImmuneNature[npcID] then
-				return A.EarthShock:Show(icon)
-			end
-			
-		-- Lightning Bolt
-			if A.LightningBolt:IsReady(unit) and not isMoving and not ImmuneNature[npcID] then
-				return A.LightningBolt:Show(icon)
-			end
-	
-		end
-		
-		--#######################	
-		--##### ENHANCEMENT #####
-		--#######################
-	
-		if SpecOverride == "Enhancement" or (SpecOverride == "AUTO" and A.GetCurrentSpecialization() == 263) then		
-		
-		-- Windfury Weapon on both weapons
-		
-		
-		-- Maintain Strength of Earth Totem, Mana Spring Totem, Searing Totem
-			if TotemHandler() and A.FlameShock:IsInRange(unit) then
-				return true
-			end		
-
-			if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() and (not ImmuneFire[npcID] or not FrostResistanceActive[ActiveFireTotem]) then -- FlameShock same range as SearingTotem
-				if UseAoE and A.FireNovaTotem:IsReady(player) and (A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 or not WeaveWF) and A.MultiUnits:GetByRangeAreaTTD(10) > 5 and not NearbyBreakable then
-					return A.FireNovaTotem:Show(icon)
-				end
-				if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] and not A.FireNovaTotem:IsSpellLastCastOrGCD() then
-					if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 and not NearbyBreakable then
-						return A.MagmaTotem:Show(icon)
-					end
-					if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
-						return A.SearingTotem:Show(icon)
-					end
-				end
-				if ActiveFireTotem == A.MagmaTotem:Info() then
-					if A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE then
-						return A.SearingTotem:Show(icon)
-					end
-				end
-			end			
-			
-			if WaterTotem == "AUTO" and A.FlameShock:IsInRange(unit) and WaterTotemTimeRemaining <= A.GetGCD() * 4 then
-				if A.ManaSpringTotem:IsReady(player) then
-					return A.ManaSpringTotem:Show(icon)
-				end
-			end
-			
-			if EarthTotem == "AUTO" and A.FlameShock:IsInRange(unit) and EarthTotemTimeRemaining <= A.GetGCD() * 4 then
-				if A.StrengthofEarthTotem:IsReady(player) then
-					return A.StrengthofEarthTotem:Show(icon)
-				end
-			end
-		
-		-- If TotemicFocus talent then Totem Twist with Windfury and Grace of Air, otherwise just Grace of Air totem
-			if AirTotem == "AUTO" and A.FlameShock:IsInRange(unit) and AirTotemTimeRemaining <= A.GetGCD() * 4 then
-				if A.GraceofAirTotem:IsReady(player) then
-					return A.GraceofAirTotem:Show(icon)
-				end
-			end
-			
-		
-			-- Cast Fire Elemental Totem before Bloodlust
-			if RacialAllowed and A.Stormstrike:IsInRange() then
-				if A.BloodFury:IsReady(player) and BurstIsON(unit) then
-					return A.BloodFury:Show(icon)
-				end
-				
-				if A.Berserking:IsReady(player) and BurstIsON(unit) then
-					return A.Berserking:Show(icon)
-				end
-			end
-			
-			--Trinket 1
-			if A.Trinket1:IsReady(player) and BurstIsON(unit) then
-				return A.Trinket1:Show(icon)    
-			end
-			
-			--Trinket 2
-			if A.Trinket2:IsReady(player) and BurstIsON(unit) then
-				return A.Trinket2:Show(icon)    
-			end				
-		
-		-- Weapon sync ??? Jesus Christ...
-			local DoWeaponSync = DoWeaponSync()
-			if DoWeaponSync then 
-				return DoWeaponSync:Show(icon)
-			end
-		
-		-- Shamanistic Rage without capping mana
-			if A.ShamanisticRage:IsReady(player) and A.Stormstrike:IsInRange() and Player:ManaPercentage() <= ShamanisticRageMana and Unit(unit):TimeToDie() >= 15 then
-				return A.ShamanisticRage:Show(icon)
-			end
-		
-		-- Stormstrike
-			if A.Stormstrike:IsReady(unit) then
-				return A.Stormstrike:Show(icon)
-			end
-			
-		-- Flame Shock / Earth Shock if target already has Flame Shock dot
-			if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 and (Player:ManaPercentage() >= StopShocksManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) and not ShockInterrupt and not ImmuneFire[npcID] then
-				return A.FlameShock:Show(icon)
-			end
-			if A.EarthShock:IsReady(unit) and (Player:ManaPercentage() >= StopShocksManaEnh or Unit(player):HasBuffs(A.ShamanisticRage.ID, true) > 0 or A.ShamanisticRage:IsReadyByPassCastGCD()) and not ShockInterrupt and not ImmuneNature[npcID] then
-				return A.EarthShock:Show(icon)
-			end		
-		
-		-- If not totem twisting, use Fire Nova Totem, then recast Searing Totem when Fire Nova explodes.
-	
-		end 
-	end
-
-	if ImbueWeapon() then 
-		return true 
-	end
-
-	if ElementalShield() then 
-		return true 
-	end
-
-	if inCombat then 
-		if RecoveryItems() then
-			return true
-		end
-	end
-
-
-    -- End on EnemyRotation()
-    -- Heal Target 
-    if IsUnitFriendly(target) then 
-        unit = target 
+        if FireTotem == "AUTO" and A.FlameShock:IsInRange(unit) and ActiveFireTotem ~= A.FireElementalTotem:Info() and not FrostResistanceActive[ActiveFireTotem] then
+            if UseAoE and A.FireNovaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(10, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 and not NearbyBreakable  then
+                return A.FireNovaTotem:Show(icon)
+            end
+            if FireTotemTimeRemaining <= A.GetGCD() * 4 and not FireNovaActive[ActiveFireTotem] and not A.FireNovaTotem:IsSpellLastCastOrGCD() then
+                if UseAoE and A.MagmaTotem:IsReady(player) and A.MultiUnits:GetByRangeInCombat(8, 2) >= 2 and A.MultiUnits:GetByRangeAreaTTD(10) > 5 and not NearbyBreakable then
+                    return A.MagmaTotem:Show(icon)
+                end
+                if A.TotemofWrath:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) then
+                    return A.TotemofWrath:Show(icon)
+                end					
+                if A.SearingTotem:IsReady(player) and inCombat and (A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE or not A.MagmaTotem:IsReady(player)) and not ImmuneFire[npcID] then
+                    return A.SearingTotem:Show(icon)
+                end
+            end
+            if ActiveFireTotem == A.MagmaTotem:Info() then
+                if A.MultiUnits:GetByRangeInCombat(10, 2) < 2 or not UseAoE then
+                    return A.SearingTotem:Show(icon)
+                end
+            end
+        end			
         
-        if HealingRotation(unit) then 
-            return true 
-        end 
-    end  
-	    
-    -- Heal Mouseover
-    if IsUnitFriendly(mouseover) then 
-        unit = mouseover  
+        if WaterTotem == "AUTO" and inCombat and WaterTotemTimeRemaining <= A.GetGCD() * 4 then
+            if A.ManaSpringTotem:IsReady(player) then
+                return A.ManaSpringTotem:Show(icon)
+            end
+        end
         
-        if HealingRotation(unit) then 
-            return true 
-        end             
-    end 
+        if AirTotem == "AUTO" and AirTotemTimeRemaining <= A.GetGCD() * 4 and not isMoving and A.FlameShock:IsInRange(unit) then
+            if A.WrathofAirTotem:IsReady(player) then
+                return A.WrathofAirTotem:Show(icon)
+            end
+        end			
+        
+        -- Cast Fire Elemental Totem before Bloodlust
+        if RacialAllowed then
+            if A.BloodFury:IsReady(player) and BurstIsON(unit) then
+                return A.BloodFury:Show(icon)
+            end
+            
+            if A.Berserking:IsReady(player) and BurstIsON(unit) then
+                return A.Berserking:Show(icon)
+            end
+        end
+
+        -- Trinket 1
+        if A.Trinket1:IsReady(player) and BurstIsON(unit) then
+            return A.Trinket1:Show(icon)    
+        end
+        
+        -- Trinket 2
+        if A.Trinket2:IsReady(player) and BurstIsON(unit) then
+            return A.Trinket2:Show(icon)    
+        end					
+    
+        if A.FrostShock:IsReady(unit) and Unit(target):IsMelee() and UnitIsUnit(targettarget, player) and Unit(unit):HasBuffs("AllCC") == 0 then
+            return A.FrostShock:Show(icon)
+        end
+    
+        -- Use Elemental Mastery with Chain Lightning
+        if A.ChainLightning:IsReady(unit) and Unit(player):HasBuffs(A.ElementalMastery.ID, true) > 0 and not ImmuneNature[npcID] then 
+            return A.ChainLightning:Show(icon)
+        end
+        if A.ElementalMastery:IsReady(player) and A.ChainLightning:GetCooldown() <= A.GetGCD() and Player:IsCasting() ~= A.ChainLightning:Info() and BurstIsON(unit) and not ImmuneNature[npcID] then
+            return A.ElementalMastery:Show(icon)
+        end
+        -- Chain Lightning
+        if A.ChainLightning:IsReady(unit) and UseAoE and not isMoving and not ImmuneNature[npcID] then
+            if (Unit(unit):IsBoss() and Unit(unit):HealthPercent() <= (Player:ManaPercentage() + 30)) or not Unit(unit):IsBoss() then
+                return A.ChainLightning:Show(icon)
+            end
+        end
+        -- Flame Shock while moving
+        if A.FlameShock:IsReady(unit) and Unit(unit):HasDeBuffs(A.FlameShock.ID, true) <= A.GetGCD() and Unit(player):HasBuffs(A.ElementalMastery.ID, true) == 0 and Unit(unit):TimeToDie() >= 12 and Player:ManaPercentage() >= StopShocksManaEle and not ShockInterrupt and not ImmuneFire[npcID] then
+            return A.FlameShock:Show(icon)
+        end
+        if A.EarthShock:IsReady(unit) and Player:ManaPercentage() >= StopShocksManaEle and not ShockInterrupt and not ImmuneNature[npcID] then
+            return A.EarthShock:Show(icon)
+        end
+        
+        -- Lightning Bolt
+        if A.LightningBolt:IsReady(unit) and not isMoving and not ImmuneNature[npcID] then
+            return A.LightningBolt:Show(icon)
+        end
+    end
 	
 	
-    -- DPS Mouseover 
-    if IsUnitEnemy(mouseover) then 
-        unit = mouseover    
-        
-        if DamageRotation(unit) then 
-            return true 
-        end 
-    end 
-	
-    -- DPS Target     
-    if IsUnitEnemy(target) then 
-        unit = target
-        
-        if DamageRotation(unit) then 
-            return true 
         end 
     end
 
