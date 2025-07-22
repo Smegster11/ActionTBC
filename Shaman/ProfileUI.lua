@@ -1,19 +1,19 @@
 --[[
 -------------------------------------------------------------------------------
--- Introduction 
+-- Introduction
 -------------------------------------------------------------------------------
 If you plan to build profile without use lua then you can skip this guide
 Important to create mouseover, focus, focustarget, targettarget toggles as Checkbox as on their state will relly many things in API
 
 
 -------------------------------------------------------------------------------
--- №1: Create snippet 
+-- 1: Create snippet
 -------------------------------------------------------------------------------
 Write in chat "/tmw options" > LUA Snippets > Profile (left side) > "+" > Write name "ProfileUI" in title of the snippet
 
 
 -------------------------------------------------------------------------------
--- №2: Set profile defaults 
+-- 2: Set profile defaults
 -------------------------------------------------------------------------------
 Constances (written in Constans.lua)
 --]]
@@ -39,11 +39,11 @@ local ACTION_CONST_SHAMAN_ELEMENTAL    = "SHAMAN_ELEMENTAL"
 local ACTION_CONST_SHAMAN_ENHANCEMENT  = "SHAMAN_ENHANCEMENT"
 local ACTION_CONST_SHAMAN_RESTO        = "SHAMAN_RESTO"
 
--- This indicates to use 'The Action's all components and make it initializated for current profile 
-A.Data.ProfileEnabled[A.CurrentProfile] = true 
+-- This indicates to use 'The Action's all components and make it initializated for current profile
+A.Data.ProfileEnabled[A.CurrentProfile] = true
 
 -------------------------------------------------------------------------------
--- №3: Create UI on 'The Action' for current profile 
+-- 3: Create UI on 'The Action' for current profile
 -------------------------------------------------------------------------------
 A.Data.ProfileUI = {
     DateTime = "v1.0 (22.07.2025)", -- Corrected date format to match template
